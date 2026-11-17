@@ -1,0 +1,107 @@
+import type { Project } from "@/lib/research/types";
+import { coingecko, fact, hyp, source, view } from "../helpers";
+
+export const render: Project = {
+  slug: "render",
+  name: "Render",
+  ticker: "RENDER",
+  oneLiner: "Decentralised GPU network for 3D rendering and AI compute, settled on Solana.",
+  sector: "depin",
+  tags: ["GPU compute", "Rendering", "Burn-and-mint"],
+  chains: ["solana"],
+  launched: "2020-04-27",
+  maturity: "growth",
+  riskLevel: "elevated",
+  logo: "/logos/render.png",
+  accent: "#E5332A",
+  links: {
+    website: "https://rendernetwork.com",
+    docs: "https://know.rendernetwork.com",
+    github: "https://github.com/rendernetwork",
+    governance: "https://github.com/rendernetwork/RNPs",
+  },
+  data: { coingeckoId: "render-token", coinpaprikaId: "rndr-render-token" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  dossier: {
+    overview: {
+      summary:
+        "Render Network connects creators who need GPU rendering with node operators who have idle GPUs. Originally built by OTOY around its OctaneRender software, the network migrated its token to Solana and adopted a burn-and-mint equilibrium model; it is expanding from rendering into AI compute workloads.",
+      problem: [view("High-end GPU capacity is expensive and concentrated in a few cloud providers; many GPUs sit idle.")],
+      valueProposition: [fact("Users pay for rendering jobs; under the burn-and-mint model, tokens equivalent to job value are burned while node operators receive newly minted emissions.", "rnp-001"), view("Integration with OctaneRender gives a native user base in 3D and motion graphics.")],
+      positioning: [view("One of the most established DePIN compute networks; competes with other decentralised GPU marketplaces and with centralised clouds.")],
+      team: [fact("Created by OTOY (founder Jules Urbach); governance by the Render Network Foundation through Render Network Proposals (RNPs).", "rnps")],
+    },
+    technology: {
+      blocks: [
+        { topic: "architecture", claims: [view("Off-chain job orchestration matched to GPU node operators; token payments and emissions settled on Solana.")] },
+        { topic: "scalability", claims: [view("Capacity scales with the number of node operators joining the network.")] },
+        { topic: "interoperability", claims: [fact("The token migrated from Ethereum (RNDR) to Solana (RENDER) following RNP-002.", "rnp-002")] },
+        { topic: "security", claims: [view("Verifying correctness of rendering/AI output is mostly handled off-chain with reputation and review mechanisms.")] },
+      ],
+      limitations: [view("Work verification is not trustless; the network depends on the orchestration layer and OTOY ecosystem."), view("Competing with hyperscalers on reliability and enterprise requirements is difficult.")],
+    },
+    tokenomics: {
+      supplyModel: "capped-emissions",
+      supplyModelNote: "Burn-and-mint equilibrium (BME): tokens are burned when users pay for work and minted to node operators on a declining emissions schedule, within a published maximum supply.",
+      maxSupply: 644_168_762,
+      distributionNote: "No distribution chart: allocation data from the 2017 token sale and subsequent migration is pending verification.",
+      distributionSources: ["rnp-001"],
+      utility: [fact("RENDER is the payment and reward token of the network; work is priced in fiat terms and settled via token burns.", "rnp-001")],
+      emissions: [fact("Emissions to node operators, liquidity and ecosystem follow the schedule defined in RNP-001.", "rnp-001")],
+      vesting: [view("No major insider vesting schedules remain material relative to emissions.")],
+      valueAccrual: [view("Net supply falls only if the value of work burned exceeds emissions, the key metric for the BME model.")],
+    },
+    adoption: {
+      claims: [view("Demand comes primarily from 3D artists and studios using OctaneRender; AI workloads are an emerging, less proven demand source."), view("Paid usage (burns) remains small relative to market capitalisation.")],
+      metricsToWatch: ["Tokens burned per epoch", "Emissions vs burns", "Active node operators", "AI compute jobs"],
+    },
+    financials: {
+      model: "compute-network",
+      relevantMetrics: [{ label: "Burn value", why: "Fiat value of work paid by users, real demand." }, { label: "Emissions", why: "Supply-side subsidy to node operators." }],
+      claims: [view("Open, standardised revenue data is limited; Render publishes burn statistics, which should be compared to emissions over time.")],
+    },
+    onchain: { claims: [view("Burns and emissions are visible on Solana and in Render's dashboards.")], dataAvailability: "Burn/emission dashboard integration planned in Phase 2 (no DefiLlama fee coverage)." },
+    competitors: {
+      columns: [
+        { name: "Render", slug: "render", technology: "GPU marketplace, BME on Solana", adoption: "OctaneRender creators", tokenomics: "BME, capped", economics: "Burns small vs mcap", strengths: "Established DePIN, OTOY integration", weaknesses: "Trusted verification", positioning: "Creative + AI GPU network" },
+        { name: "Akash", technology: "Cosmos-based compute marketplace", adoption: "Developer workloads", tokenomics: "AKT inflation", economics: "Lease fees", strengths: "General-purpose compute", weaknesses: "Smaller GPU fleet", positioning: "Decentralised cloud" },
+        { name: "Centralised clouds", technology: "Hyperscaler GPUs", adoption: "Dominant", tokenomics: "n/a", economics: "Large revenue", strengths: "Reliability, enterprise SLAs", weaknesses: "Cost, access constraints", positioning: "Default compute supply" },
+      ],
+    },
+    risks: [
+      { category: "technology", level: "moderate", claims: [view("Off-chain orchestration and verification.")] },
+      { category: "economic", level: "elevated", claims: [view("Demand may not grow fast enough to offset emissions.")] },
+      { category: "regulatory", level: "moderate", claims: [view("Token classification and data/compute regulations.")] },
+      { category: "governance", level: "moderate", claims: [view("Foundation and OTOY have strong influence.")] },
+      { category: "liquidity", level: "moderate", claims: [fact("Mid-cap token with exchange liquidity.", "coingecko")] },
+      { category: "centralization", level: "elevated", claims: [view("Dependence on OTOY software and job orchestration.")] },
+      { category: "competition", level: "elevated", claims: [view("Many DePIN compute projects and hyperscalers compete.")] },
+    ],
+    thesis: {
+      bull: [hyp("AI demand for GPUs drives sustained paid usage, making burns exceed emissions.")],
+      neutral: [view("Render remains a niche creative-compute network.")],
+      bear: [view("Paid demand stays small; token supported mainly by AI narrative.")],
+      catalysts: [hyp("Production AI workloads on the network.")],
+      assumptions: [hyp("Decentralised GPUs can meet quality and reliability requirements.")],
+      monitor: ["Burn vs emission ratio", "AI job volume", "Node operator count"],
+      invalidation: ["Burns flat or declining for several quarters while emissions continue"],
+    },
+    framework: [
+      { pillar: "technology", rating: 3, confidence: "medium", summary: "Working network; trusted verification.", dataUsed: ["RNPs", "Docs"], limitations: "Limited technical disclosure.", sources: ["rnp-001"] },
+      { pillar: "tokenomics", rating: 3, confidence: "medium", summary: "BME links usage to supply.", dataUsed: ["RNP-001"], limitations: "Allocation pending verification.", sources: ["rnp-001"] },
+      { pillar: "adoption", rating: 2, confidence: "low", summary: "Usage small relative to valuation.", dataUsed: ["Render statistics"], limitations: "Limited standardised data.", sources: ["docs"] },
+      { pillar: "financials", rating: null, confidence: "low", summary: "Insufficient open revenue data.", dataUsed: [], limitations: "No DefiLlama coverage.", sources: [] },
+      { pillar: "governance", rating: 3, confidence: "medium", summary: "Public RNP process.", dataUsed: ["RNP repository"], limitations: "Foundation influence.", sources: ["rnps"] },
+      { pillar: "competition", rating: 3, confidence: "medium", summary: "Established DePIN brand.", dataUsed: ["Market review"], limitations: "Qualitative.", sources: ["docs"] },
+      { pillar: "risk", rating: 2, confidence: "medium", summary: "Economic and competitive risks.", dataUsed: ["Risk review"], limitations: "Qualitative.", sources: ["docs"] },
+    ],
+    concepts: ["depin", "burn-mechanisms", "protocol-revenue"],
+    sources: [
+      source("docs", "Render Network knowledge base", "Render Network Foundation", "https://know.rendernetwork.com", "documentation", "Network overview and usage."),
+      source("rnps", "Render Network Proposals", "Render Network (GitHub)", "https://github.com/rendernetwork/RNPs", "governance", "Governance process."),
+      source("rnp-001", "RNP-001: Burn-and-mint equilibrium", "Render Network (GitHub)", "https://github.com/rendernetwork/RNPs", "governance", "BME model and emissions.", { published: "2023", limitations: "Links to the RNP repository; open RNP-001 in the Final RNPs folder." }),
+      source("rnp-002", "RNP-002: Migration to Solana", "Render Network (GitHub)", "https://github.com/rendernetwork/RNPs", "governance", "Token migration to Solana.", { published: "2023", limitations: "Links to the RNP repository; open RNP-002 in the Final RNPs folder." }),
+      coingecko("render-token", "Render"),
+    ],
+  },
+};

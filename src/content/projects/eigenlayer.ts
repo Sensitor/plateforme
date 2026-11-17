@@ -1,0 +1,123 @@
+import type { Project } from "@/lib/research/types";
+import { coingecko, defillamaProtocol, fact, hyp, source, view } from "../helpers";
+
+export const eigenlayer: Project = {
+  slug: "eigenlayer",
+  name: "EigenLayer",
+  ticker: "EIGEN",
+  oneLiner: "Restaking protocol that lets staked ETH secure additional services (AVSs); now branded EigenCloud.",
+  sector: "restaking",
+  tags: ["Restaking", "Shared security", "AVS"],
+  chains: ["ethereum"],
+  launched: "2023-06-14",
+  maturity: "growth",
+  riskLevel: "elevated",
+  logo: "/logos/eigenlayer.jpg",
+  accent: "#1A0C6D",
+  links: {
+    website: "https://www.eigencloud.xyz",
+    whitepaper: "https://docs.eigenlayer.xyz/assets/files/EigenLayer_WhitePaper-88c47923ca0319870c611decd6e562ad.pdf",
+    docs: "https://docs.eigencloud.xyz",
+    github: "https://github.com/Layr-Labs",
+  },
+  data: { coingeckoId: "eigenlayer", coinpaprikaId: "eigen-eigenlayer", llamaProtocol: "eigenlayer", llamaFees: "eigenlayer" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  dossier: {
+    overview: {
+      summary:
+        "EigenLayer lets ETH stakers and LST holders 'restake' their assets to secure Actively Validated Services (AVSs), data-availability layers, oracles, bridges and other middleware, in exchange for extra rewards and additional slashing conditions. In 2025 the project repositioned under the EigenCloud brand as a platform for verifiable off-chain computation.",
+      problem: [fact("The whitepaper argues that new protocols must bootstrap their own trust network, fragmenting security; restaking lets them rent Ethereum's economic security instead.", "whitepaper")],
+      valueProposition: [view("Shared security lowers the cost of launching middleware that needs a validator set."), fact("EigenDA, a data-availability service, is the flagship AVS built by Eigen Labs.", "docs-eigenda")],
+      positioning: [view("Pioneer and largest restaking protocol by deposits; competes with Symbiotic, Karak and BTC-staking protocols like Babylon.")],
+      team: [fact("Founded by Sreeram Kannan (formerly University of Washington) and built by Eigen Labs; the Eigen Foundation manages the EIGEN token.", "whitepaper")],
+    },
+    technology: {
+      blocks: [
+        { topic: "architecture", claims: [fact("Restakers delegate to operators, who opt into AVSs; AVSs define their own tasks, rewards and slashing conditions.", "docs")] },
+        { topic: "security", claims: [fact("Slashing was activated on mainnet in 2025 with operator sets and unique stake allocation, so each AVS can only slash stake allocated to it.", "docs-slashing"), view("Risk compounds when the same stake backs many AVSs; slashing logic per AVS must be audited carefully.")] },
+        { topic: "innovation", claims: [fact("EIGEN introduces 'intersubjective' slashing: faults agreed by observers but not provable on-chain can be punished via a token fork mechanism (bEIGEN).", "token-paper")] },
+        { topic: "decentralization", claims: [view("Operator concentration and reliance on a few large LRT protocols for deposits.")] },
+      ],
+      limitations: [view("AVS rewards have often been paid in tokens rather than fees, so real economic security demand is still emerging."), view("Complexity makes risk assessment hard for end users.")],
+    },
+    tokenomics: {
+      supplyModel: "fixed-genesis-plus-inflation",
+      supplyModelNote: "Initial supply of ~1.67 billion EIGEN with programmatic annual inflation (~4%) used for staking incentives.",
+      maxSupply: null,
+      distribution: [
+        { label: "Stakedrops", pct: 15 },
+        { label: "Community initiatives", pct: 15 },
+        { label: "Ecosystem development", pct: 15 },
+        { label: "Investors", pct: 29.5 },
+        { label: "Early contributors", pct: 25.5 },
+      ],
+      distributionNote: "Initial allocation as published by the Eigen Foundation (community 45%).",
+      distributionSources: ["token-overview"],
+      utility: [fact("EIGEN is designed as a 'universal intersubjective work token' used to secure tasks whose faults are not provable on-chain.", "token-paper"), fact("EIGEN can be restaked to AVSs alongside ETH.", "docs")],
+      emissions: [fact("Programmatic incentives inflate supply annually to reward stakers and operators.", "token-overview")],
+      vesting: [view("Investor and early-contributor allocations unlock over multiple years after an initial lockup; check the official schedule for remaining unlocks.")],
+      valueAccrual: [hyp("Accrual depends on AVSs paying fees for security in a way that creates demand for EIGEN; this link is not yet proven.")],
+    },
+    adoption: {
+      claims: [fact("EigenLayer holds billions of dollars of restaked assets (see live TVL).", "defillama"), view("Deposits were heavily driven by points programmes and liquid restaking tokens; retention after incentives is key.")],
+      metricsToWatch: ["Fees paid by AVSs", "Slashing events", "Restaked TVL trend", "EigenDA usage"],
+    },
+    financials: {
+      model: "middleware",
+      relevantMetrics: [
+        { label: "AVS fees", why: "Real demand for shared security." },
+        { label: "Rewards paid in emissions vs fees", why: "Sustainability of yields." },
+      ],
+      claims: [view("Fees recorded by DefiLlama are small relative to TVL; most restaking yield to date has been incentive-driven.")],
+    },
+    onchain: {
+      claims: [view("Operator delegations and AVS registrations are on-chain; concentration of restaked ETH via LRT protocols is visible.")],
+      dataAvailability: "AVS-level reward and slashing analytics are planned in Phase 2.",
+    },
+    competitors: {
+      columns: [
+        { name: "EigenLayer", slug: "eigenlayer", technology: "ETH restaking, operator sets, intersubjective slashing", adoption: "Largest restaking TVL", tokenomics: "Inflationary EIGEN", economics: "Low fees vs TVL", strengths: "First mover, EigenDA", weaknesses: "Unproven fee demand", positioning: "Verifiable cloud / shared security" },
+        { name: "Symbiotic", technology: "Permissionless, multi-asset collateral", adoption: "Growing", tokenomics: "n/a", economics: "Early", strengths: "Flexibility", weaknesses: "Younger", positioning: "Modular restaking" },
+        { name: "Babylon", technology: "Native BTC staking", adoption: "Large BTC deposits", tokenomics: "BABY", economics: "Early", strengths: "Taps idle BTC", weaknesses: "New security model", positioning: "Bitcoin shared security" },
+      ],
+    },
+    risks: [
+      { category: "technology", level: "elevated", claims: [view("Complex slashing and delegation logic; new mechanism with limited stress history.")] },
+      { category: "economic", level: "high", claims: [view("Yields largely funded by emissions; risk of capital flight when incentives end.")] },
+      { category: "regulatory", level: "moderate", claims: [view("Novel staking-derived products with uncertain classification.")] },
+      { category: "governance", level: "moderate", claims: [view("Eigen Foundation and Eigen Labs retain strong control over upgrades.")] },
+      { category: "liquidity", level: "moderate", claims: [view("Restaked positions and LRTs can face withdrawal delays in stress.")] },
+      { category: "centralization", level: "elevated", claims: [view("Concentration of operators and LRT intermediaries.")] },
+      { category: "competition", level: "elevated", claims: [view("Several well-funded restaking protocols compete for the same AVSs.")] },
+    ],
+    thesis: {
+      bull: [hyp("A meaningful market for verifiable off-chain services emerges and pays for security, creating demand for restaked ETH and EIGEN.")],
+      neutral: [view("EigenLayer remains a large deposit venue but AVS fees stay modest.")],
+      bear: [view("Restaking yields collapse as emissions decline; TVL migrates."), hyp("A cascading slashing event damages confidence.")],
+      catalysts: [fact("Mainnet slashing activated in 2025.", "docs-slashing"), hyp("Large AVSs paying meaningful fees.")],
+      assumptions: [hyp("Middleware prefers rented security to bootstrapping its own."), hyp("Slashing rules work as intended under stress.")],
+      monitor: ["AVS fee revenue", "Emission rate", "Slashing incidents", "TVL vs competitors"],
+      invalidation: ["AVS fees remain negligible after incentives taper", "Major loss from slashing or contract failure"],
+    },
+    framework: [
+      { pillar: "technology", rating: 3, confidence: "medium", summary: "Innovative but young slashing system.", dataUsed: ["Docs", "Whitepaper"], limitations: "Limited stress history.", sources: ["docs-slashing"] },
+      { pillar: "tokenomics", rating: 2, confidence: "medium", summary: "Inflationary token with large insider allocation.", dataUsed: ["Token overview"], limitations: "Unlock details to verify.", sources: ["token-overview"] },
+      { pillar: "adoption", rating: 3, confidence: "medium", summary: "Large TVL, incentive-driven.", dataUsed: ["DefiLlama"], limitations: "Organic demand unclear.", sources: ["defillama"] },
+      { pillar: "financials", rating: null, confidence: "low", summary: "Fee data too thin to rate.", dataUsed: ["DefiLlama fees"], limitations: "AVS revenue not yet meaningful.", sources: ["defillama"] },
+      { pillar: "governance", rating: 2, confidence: "medium", summary: "Foundation-led.", dataUsed: ["Docs"], limitations: "Qualitative.", sources: ["docs"] },
+      { pillar: "competition", rating: 3, confidence: "medium", summary: "First mover in a crowded field.", dataUsed: ["Market review"], limitations: "Qualitative.", sources: ["defillama"] },
+      { pillar: "risk", rating: 2, confidence: "medium", summary: "Stacked slashing and economic risks.", dataUsed: ["Risk review"], limitations: "Qualitative.", sources: ["whitepaper"] },
+    ],
+    concepts: ["restaking", "liquid-staking", "proof-of-stake", "data-availability", "token-unlocks"],
+    sources: [
+      source("whitepaper", "EigenLayer: The Restaking Collective", "Eigen Labs", "https://docs.eigenlayer.xyz/assets/files/EigenLayer_WhitePaper-88c47923ca0319870c611decd6e562ad.pdf", "primary", "Restaking design.", { published: "2023" }),
+      source("docs", "EigenLayer overview", "EigenCloud documentation", "https://docs.eigencloud.xyz", "documentation", "Restakers, operators, AVSs."),
+      source("docs-slashing", "Slashing on EigenLayer", "EigenCloud documentation", "https://docs.eigencloud.xyz/products/eigenlayer/concepts/slashing/slashing-concept", "documentation", "Operator sets, unique stake, slashing.", { limitations: "Documentation reorganised under EigenCloud." }),
+      source("docs-eigenda", "EigenDA", "EigenCloud documentation", "https://docs.eigencloud.xyz/products/eigenda/core-concepts/overview", "documentation", "Data-availability AVS."),
+      source("token-paper", "EIGEN: The Universal Intersubjective Work Token", "Eigen Labs", "https://github.com/Layr-Labs/whitepaper/blob/master/EIGEN_Token_Whitepaper.pdf", "primary", "Intersubjective slashing and token design.", { published: "2024-04" }),
+      source("token-overview", "EIGEN tokenomics", "Eigen Foundation", "https://blog.eigenfoundation.org/announcement/", "primary", "Allocation and incentives.", { reliability: "medium", limitations: "Foundation announcement; check for later updates." }),
+      coingecko("eigenlayer", "EigenLayer"),
+      defillamaProtocol("eigenlayer", "EigenLayer"),
+    ],
+  },
+};

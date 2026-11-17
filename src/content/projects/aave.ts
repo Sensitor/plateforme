@@ -1,0 +1,122 @@
+import type { Project } from "@/lib/research/types";
+import { coingecko, defillamaProtocol, fact, hyp, source, view } from "../helpers";
+
+export const aave: Project = {
+  slug: "aave",
+  name: "Aave",
+  ticker: "AAVE",
+  oneLiner: "The largest decentralised lending market, deployed across Ethereum and major L2s.",
+  sector: "defi",
+  tags: ["Lending", "Money markets", "GHO stablecoin"],
+  chains: ["ethereum", "multichain"],
+  launched: "2020-01-08",
+  maturity: "established",
+  riskLevel: "moderate",
+  logo: "/logos/aave.png",
+  accent: "#B6509E",
+  links: {
+    website: "https://aave.com",
+    whitepaper: "https://github.com/aave/aave-v3-core/blob/master/techpaper/Aave_V3_Technical_Paper.pdf",
+    docs: "https://aave.com/docs",
+    github: "https://github.com/aave",
+    governance: "https://governance.aave.com",
+  },
+  data: { coingeckoId: "aave", coinpaprikaId: "aave-new", llamaProtocol: "aave", llamaFees: "aave" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  dossier: {
+    overview: {
+      summary:
+        "Aave is a non-custodial liquidity protocol where users supply assets to earn interest and borrow against over-collateralised positions. Interest rates adjust algorithmically with utilisation, and undercollateralised positions are liquidated by third parties. Aave also issues GHO, a decentralised stablecoin.",
+      problem: [view("Holders of crypto assets want liquidity without selling; lenders want yield without a centralised counterparty."), fact("Aave pools liquidity and lets borrowers draw from it against collateral, with liquidation thresholds defined per asset.", "docs")],
+      valueProposition: [fact("V3 introduced efficiency mode (eMode) for correlated assets, isolation mode for riskier assets and cross-chain portals.", "v3-paper"), view("Scale and liquidity depth make Aave the reference money market; its risk parameters are curated by specialised risk service providers.")],
+      positioning: [view("Market leader in on-chain lending by deposits; competes with modular lending (Morpho), Sky's Spark and Compound.")],
+      team: [fact("Founded by Stani Kulechov as ETHLend (2017), rebranded Aave in 2020. Governed by the Aave DAO; Aave Labs and service providers contribute development and risk management.", "governance")],
+    },
+    technology: {
+      blocks: [
+        { topic: "architecture", claims: [fact("Pool contracts per market; suppliers receive interest-bearing aTokens; borrowers take variable-rate debt.", "docs")] },
+        { topic: "security", claims: [fact("Extensive audit history and a long-running bug bounty; risk parameters set per asset (LTV, liquidation threshold, caps).", "docs"), view("Main risk vectors are oracle failures, collateral illiquidity during crashes and bad debt.")] },
+        { topic: "scalability", claims: [fact("Deployed on Ethereum and many L2s / alt-L1s as separate markets.", "defillama")] },
+        { topic: "interoperability", claims: [view("Relies on Chainlink price feeds for most markets, a significant external dependency.")] },
+        { topic: "innovation", claims: [fact("GHO is a stablecoin minted by Aave borrowers against their collateral.", "gho")] },
+      ],
+      limitations: [view("Over-collateralisation limits capital efficiency; undercollateralised credit is out of scope."), view("Multi-chain deployments multiply operational and governance surface.")],
+    },
+    tokenomics: {
+      supplyModel: "fixed-cap",
+      supplyModelNote: "16 million AAVE maximum: 13M issued to LEND holders at a 100:1 migration in 2020 and 3M allocated to the Ecosystem Reserve.",
+      maxSupply: 16_000_000,
+      distribution: [
+        { label: "LEND migration (100:1)", pct: 81.25 },
+        { label: "Ecosystem Reserve", pct: 18.75 },
+      ],
+      distributionNote: "Supply at the 2020 token migration.",
+      distributionSources: ["docs-token"],
+      utility: [fact("AAVE is the governance token of the Aave DAO.", "governance"), fact("AAVE can be staked in the protocol's safety backstop to cover shortfall events in exchange for rewards.", "docs-token")],
+      emissions: [fact("No inflation; staking rewards are paid from the Ecosystem Reserve.", "docs-token")],
+      vesting: [fact("No outstanding insider vesting; the migration distributed supply to existing LEND holders.", "docs-token")],
+      valueAccrual: [fact("In 2025 governance approved a buyback programme using protocol revenue to buy AAVE on the market ('Aavenomics').", "governance"), view("Revenue comes from the reserve factor on interest, liquidation fees and GHO interest.")],
+    },
+    adoption: {
+      claims: [fact("Aave is the largest lending protocol by TVL (see live data).", "defillama"), view("Usage correlates with leverage demand in crypto markets; deposits of liquid staking tokens and stablecoins dominate."), view("Institutional-facing products (permissioned markets) expand the addressable market.")],
+      metricsToWatch: ["Active loans (borrowed amount)", "Protocol revenue", "Bad debt events", "GHO supply and peg"],
+    },
+    financials: {
+      model: "lending",
+      relevantMetrics: [
+        { label: "Revenue (reserve factor)", why: "Share of interest retained by the DAO." },
+        { label: "Active loans", why: "Revenue driver; TVL alone overstates activity." },
+        { label: "Buybacks vs emissions", why: "Net value returned to token holders." },
+      ],
+      claims: [view("Aave generates material recurring revenue, making it one of the few DeFi protocols with clear fundamentals."), view("Revenue is cyclical and falls when leverage demand and borrow rates fall.")],
+    },
+    onchain: {
+      claims: [view("Large positions and liquidation thresholds are transparent; concentrated whale positions can create liquidation cascades."), fact("All markets, rates and positions are on-chain and queryable.", "docs")],
+      dataAvailability: "Position-level and liquidation analytics are planned in Phase 2.",
+    },
+    competitors: {
+      columns: [
+        { name: "Aave", slug: "aave", technology: "Pooled money markets, GHO", adoption: "Largest lending TVL", tokenomics: "16M cap, buybacks", economics: "Material recurring revenue", strengths: "Liquidity, brand, risk management", weaknesses: "Governance complexity", positioning: "Default DeFi money market" },
+        { name: "Morpho", technology: "Isolated markets + curated vaults", adoption: "Fast-growing", tokenomics: "MORPHO governance", economics: "Lower take rate", strengths: "Capital efficiency, modularity", weaknesses: "Curator risk", positioning: "Modular lending infrastructure" },
+        { name: "Compound", technology: "Single-asset borrow markets (v3)", adoption: "Mature, smaller", tokenomics: "COMP governance", economics: "Lower revenue", strengths: "Simplicity, track record", weaknesses: "Lost share", positioning: "Conservative lending" },
+      ],
+    },
+    risks: [
+      { category: "technology", level: "moderate", claims: [view("Smart-contract and oracle risk across many deployments.")] },
+      { category: "economic", level: "moderate", claims: [view("Bad debt from collateral crashes or depegs of correlated assets in eMode.")] },
+      { category: "regulatory", level: "elevated", claims: [view("Lending is a regulated activity in most jurisdictions; front-end and institutional products are exposed.")] },
+      { category: "governance", level: "moderate", claims: [view("Relationships between the DAO, Aave Labs and service providers have generated public disputes; governance quality matters.")] },
+      { category: "liquidity", level: "lower", claims: [fact("Liquid token across major venues.", "coingecko")] },
+      { category: "centralization", level: "moderate", claims: [view("Dependence on oracle providers and a few risk managers.")] },
+      { category: "competition", level: "moderate", claims: [view("Modular lending protocols are gaining share in specific segments.")] },
+    ],
+    thesis: {
+      bull: [view("On-chain credit grows with tokenised assets and stablecoins; Aave remains the liquidity hub and buybacks scale with revenue."), hyp("Institutional markets bring new, stickier deposits.")],
+      neutral: [view("Aave keeps its lead but revenue tracks the crypto cycle.")],
+      bear: [view("A bad-debt event or oracle failure damages trust."), view("Fee compression from modular competitors.")],
+      catalysts: [hyp("Aave V4 deployment."), fact("Revenue-funded buybacks approved by governance.", "governance")],
+      assumptions: [hyp("Demand for crypto-collateralised borrowing persists."), hyp("Risk management keeps bad debt contained.")],
+      monitor: ["Revenue and buyback volume", "Bad debt", "GHO peg", "Market share vs Morpho"],
+      invalidation: ["Significant protocol insolvency event", "Sustained loss of leadership in active loans"],
+    },
+    framework: [
+      { pillar: "technology", rating: 4, confidence: "high", summary: "Mature, heavily audited protocol.", dataUsed: ["Audit history", "Docs"], limitations: "Multi-chain complexity.", sources: ["docs", "v3-paper"] },
+      { pillar: "tokenomics", rating: 4, confidence: "medium", summary: "Fixed supply, no insider overhang, buybacks.", dataUsed: ["Token docs", "Governance"], limitations: "Buyback size governance-dependent.", sources: ["docs-token", "governance"] },
+      { pillar: "adoption", rating: 5, confidence: "medium", summary: "Largest lending protocol.", dataUsed: ["DefiLlama"], limitations: "TVL price-sensitive.", sources: ["defillama"] },
+      { pillar: "financials", rating: 4, confidence: "medium", summary: "Material recurring revenue.", dataUsed: ["DefiLlama revenue"], limitations: "Cyclical.", sources: ["defillama"] },
+      { pillar: "governance", rating: 3, confidence: "medium", summary: "Active DAO; occasional conflicts.", dataUsed: ["Governance forum"], limitations: "Qualitative.", sources: ["governance"] },
+      { pillar: "competition", rating: 4, confidence: "medium", summary: "Clear leader, facing modular challengers.", dataUsed: ["Market share"], limitations: "Fast-moving.", sources: ["defillama"] },
+      { pillar: "risk", rating: 3, confidence: "medium", summary: "Oracle, bad-debt and regulatory risks.", dataUsed: ["Risk review"], limitations: "Qualitative.", sources: ["docs"] },
+    ],
+    concepts: ["lending-protocols", "oracles", "stablecoins", "protocol-revenue", "tvl", "governance-tokens"],
+    sources: [
+      source("docs", "Aave documentation", "Aave", "https://aave.com/docs", "documentation", "Protocol mechanics and risk parameters."),
+      source("v3-paper", "Aave V3 Technical Paper", "Aave", "https://github.com/aave/aave-v3-core/blob/master/techpaper/Aave_V3_Technical_Paper.pdf", "primary", "V3 features (eMode, isolation, portals).", { published: "2022" }),
+      source("docs-token", "AAVE token", "Aave documentation", "https://aave.com/docs/primitives/aave-token", "documentation", "Supply, migration and staking.", { limitations: "Documentation structure may change." }),
+      source("gho", "GHO stablecoin", "Aave", "https://aave.com/gho", "primary", "GHO design."),
+      source("governance", "Aave governance forum", "Aave DAO", "https://governance.aave.com", "governance", "Governance decisions incl. buyback programme."),
+      coingecko("aave", "Aave"),
+      defillamaProtocol("aave", "Aave"),
+    ],
+  },
+};
