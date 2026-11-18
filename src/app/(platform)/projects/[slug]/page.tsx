@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ChevronRight, CodeXml, ExternalLink, FileText, Globe, Scale, SearchCode } from "lucide-react";
+import { BookOpen, ChevronRight, CodeXml, ExternalLink, FileText, Globe, MessagesSquare, Scale, SearchCode } from "lucide-react";
 import { PROJECTS, getProject } from "@/content/projects";
 import { ACADEMY_CATEGORIES, CONCEPT_BY_SLUG } from "@/content/concepts";
 import { ACADEMY_COLORS, SECTOR_COLORS } from "@/lib/brand";
@@ -135,6 +135,9 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
               <ButtonLink href={`/compare?p=${[project.slug, ...d.competitors.columns.filter((c) => c.slug && c.slug !== project.slug).map((c) => c.slug)].slice(0, 4).join(",")}`} variant="secondary">
                 <Scale className="size-4" aria-hidden /> Compare
               </ButtonLink>
+              <ButtonLink href={`/copilot?mode=analyze&project=${project.slug}`} variant="secondary">
+                <MessagesSquare className="size-4" aria-hidden /> Ask the Copilot
+              </ButtonLink>
             </div>
           </div>
           <div className="mt-6 flex flex-col gap-4 border-t border-line pt-4 text-[13px] lg:flex-row lg:items-center lg:justify-between">
@@ -160,7 +163,7 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
         </Suspense>
       </Card>
 
-      <div className="grid gap-10 pt-4 xl:grid-cols-[190px_minmax(0,1fr)] xl:gap-14">
+      <div className="grid grid-cols-1 gap-10 pt-4 xl:grid-cols-[190px_minmax(0,1fr)] xl:gap-14">
         <aside>
           <Toc items={TOC} />
         </aside>
@@ -169,7 +172,7 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
             <p className="max-w-3xl border-l-2 pl-5 text-[18px] leading-[1.65] text-fg" style={{ borderColor: sectorColor }}>
               {d.overview.summary}
             </p>
-            <div className="mt-10 grid gap-x-12 gap-y-9 lg:grid-cols-2">
+            <div className="mt-10 grid grid-cols-1 gap-x-12 gap-y-9 lg:grid-cols-2">
               <ClaimGroup title="Problem addressed" claims={d.overview.problem} sources={d.sources} compact />
               <ClaimGroup title="Value proposition" claims={d.overview.valueProposition} sources={d.sources} compact />
               <ClaimGroup title="Positioning in its sector" claims={d.overview.positioning} sources={d.sources} compact />
@@ -180,7 +183,7 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
           <DossierSection id="technology" letter="B" title="Technology & architecture">
             <dl className="divide-y divide-line border-y border-line">
               {d.technology.blocks.map((b) => (
-                <div key={b.topic} className="grid gap-2 py-5 md:grid-cols-[190px_1fr] md:gap-8">
+                <div key={b.topic} className="grid grid-cols-1 gap-2 py-5 md:grid-cols-[190px_1fr] md:gap-8">
                   <dt className="serif-display text-[22px] leading-tight text-fg">{TECH_TOPICS[b.topic]}</dt>
                   <dd>
                     <ClaimList claims={b.claims} sources={d.sources} compact />
@@ -198,7 +201,7 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
           </DossierSection>
 
           <DossierSection id="adoption" letter="D" title="Adoption & ecosystem">
-            <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <div className="grid grid-cols-1 gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
               <ClaimList claims={d.adoption.claims} sources={d.sources} />
               <MetricsToWatch items={d.adoption.metricsToWatch} />
             </div>
@@ -242,7 +245,7 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
           </DossierSection>
 
           <DossierSection id="learn" title="Learn by research" intro="Concepts used in this dossier, explained in the Academy.">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {d.concepts
                 .map((c) => CONCEPT_BY_SLUG[c])
                 .filter(Boolean)

@@ -158,7 +158,7 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
       {view === "list" ? (
         <RelationshipTable edges={visibleEdges} bySlug={bySlug} />
       ) : (
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           {/* Graph */}
           <div className="relative overflow-hidden rounded-2xl border border-line bg-bg-elevated">
             <div className="absolute left-4 top-3 z-10 hidden text-[11.5px] text-subtle sm:block">Click a project to see its environment. Node size follows market cap.</div>

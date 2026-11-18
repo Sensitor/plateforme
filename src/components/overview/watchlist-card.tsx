@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { StorageNote } from "@/components/storage-note";
 import { useWatchlist } from "@/lib/watchlist/store";
 import { formatPrice } from "@/lib/format";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -27,7 +28,7 @@ export function WatchlistCard({ items }: { items: Record<string, WatchItem> }) {
     <Card className="h-full">
       <CardHeader
         title="Watchlist"
-        subtitle="Saved on this device"
+        subtitle={<StorageNote className="text-[13px] text-muted" />}
         icon={<Star className="size-4" />}
         action={
           <Link href="/watchlist" className="text-[12.5px] text-accent hover:text-accent-strong">

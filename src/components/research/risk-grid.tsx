@@ -25,7 +25,7 @@ export function RiskGrid({ project }: { project: Project }) {
         {sorted.map((r) => {
           const color = LEVEL_COLOR[r.level];
           return (
-            <li key={r.category} className="grid gap-2 py-4 md:grid-cols-[170px_150px_1fr] md:gap-6">
+            <li key={r.category} className="grid grid-cols-1 gap-2 py-4 md:grid-cols-[170px_150px_1fr] md:gap-6">
               <span className="text-[14.5px] font-medium text-fg">{RISK_CATEGORIES[r.category]}</span>
               <span className="flex items-center gap-2.5">
                 <span className="flex gap-1" aria-hidden>

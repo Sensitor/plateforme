@@ -31,7 +31,7 @@ export function ComingSoon({
       <div className="rounded-xl border border-dashed border-line-strong bg-bg-elevated px-5 py-4 text-[13.5px] leading-relaxed text-muted">
         This section is <strong className="text-fg-2">not available yet</strong>. Nothing on this page collects data or simulates the feature; it describes what is planned.
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card className="p-5">
           <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-muted">Planned features</h2>
           <ul className="mt-3 space-y-2.5 text-[13.5px] text-fg-2">

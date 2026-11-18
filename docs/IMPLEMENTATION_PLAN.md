@@ -1,8 +1,8 @@
 # Plan d'implémentation
 
-État au 17/11/2026. Projet démarré de zéro (dépôt vide) : aucune contrainte d'existant.
+État au 18/11/2026. Projet démarré de zéro (dépôt vide) : aucune contrainte d'existant.
 
-## Phase 1, MVP ✅ (livré, sauf authentification)
+## Phase 1, MVP ✅ (livré)
 
 - [x] Design system (tokens du brief, Geist / Geist Mono), sidebar Discover / Understand / Manage, topbar, recherche ⌘K
 - [x] Landing page
@@ -15,11 +15,8 @@
 - [x] Première intégration de données de marché (CoinGecko + repli CoinPaprika, DefiLlama, Alternative.me)
 - [x] Markets (sentiment, régime, secteurs, stablecoins, DeFi)
 - [x] Tests (205), vérification automatique des sources, build sans avertissement
-- [ ] **Authentification (Phase 1b)**, nécessite un projet Supabase :
-  1. `@supabase/ssr` : clients serveur/navigateur, rafraîchissement de session dans `proxy.ts`
-  2. Pages `/login` (magic link) et `/auth/callback`
-  3. Appliquer `supabase/migrations/0001_init.sql`, seed des tables `projects`/`sectors` depuis `src/content`
-  4. Watchlist : adaptateur Supabase derrière le hook `useWatchlist` (le stockage local reste pour les invités, avec fusion à la connexion)
+- [x] **Authentification (Phase 1b)** : Supabase Auth (mot de passe, lien magique, réinitialisation), `proxy.ts`, `/login`, `/auth/callback`, `/auth/confirm`, page compte
+- [x] Watchlist et portefeuille synchronisés (offline-first, fusion à la connexion, nettoyage à la déconnexion)
 - [ ] Relecture éditoriale des 20 dossiers (passage `draft` → `reviewed`)
 
 ## Phase 2, Intelligence
@@ -28,15 +25,16 @@
 - Funding rates / open interest (fournisseur dérivés)
 - Sector Intelligence enrichie
 - [x] Knowledge Graph : livré (`/graph`, relations dans `src/content/relationships.ts`, table `protocol_relationships` prête pour la migration en base)
-- Research Copilot (Learn / Analyze / Compare) adossé à la base Sensitor, citations obligatoires
-- Alertes (table `alerts` prête), notifications e-mail (Resend)
+- [x] Research Copilot (Learn / Analyze / Compare) adossé aux dossiers Sensitor, citations obligatoires, quotas par plan
+- [x] Alertes prix et volatilité, notifications in-app, e-mails Resend, planification pg_cron
+- Alertes éditoriales (mise à jour d'un dossier suivi, unlocks, gouvernance)
 - Snapshots quotidiens (`market_snapshots`) via cron pour construire un historique propre, y compris la capitalisation totale sans plan Pro
 - Localisation française de l'interface
 
 ## Phase 3, Portfolio (version locale livrée)
 
 Livré : `/portfolio` en stockage local (saisie, import/export CSV, coût moyen, P&L, performance, allocations, corrélations, dépendances, unlocks).
-Reste : synchronisation en base (table `portfolio_transactions`, RLS) une fois l'authentification en place, connexions read-only.
+Livré ensuite : synchronisation en base (table `portfolio_transactions`, RLS). Reste : connexions read-only.
 
 
 Positions manuelles, import CSV, P&L réalisé/latent, allocations (actif/secteur/chaîne), corrélations, risque de liquidité,

@@ -11,7 +11,7 @@ export function ThesisSection({ project }: { project: Project }) {
   const { thesis, sources } = project.dossier;
   return (
     <div className="space-y-10">
-      <div className="grid gap-8 lg:grid-cols-3 lg:gap-0 lg:divide-x lg:divide-line">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-0 lg:divide-x lg:divide-line">
         {CASES.map((c, i) => (
           <div key={c.key} className={i === 0 ? "lg:pr-7" : i === 1 ? "lg:px-7" : "lg:pl-7"}>
             <div className="mb-4 h-[3px] w-10 rounded-full" style={{ backgroundColor: c.color }} />
@@ -21,7 +21,7 @@ export function ThesisSection({ project }: { project: Project }) {
         ))}
       </div>
 
-      <div className="grid gap-10 border-t border-line pt-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-10 border-t border-line pt-8 lg:grid-cols-2">
         <div>
           <h3 className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-muted">Catalysts</h3>
           <ClaimList claims={thesis.catalysts} sources={sources} compact />
@@ -32,7 +32,7 @@ export function ThesisSection({ project }: { project: Project }) {
         </div>
       </div>
 
-      <div className="grid gap-10 border-t border-line pt-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-10 border-t border-line pt-8 lg:grid-cols-2">
         <div>
           <h3 className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-muted">Risks to monitor</h3>
           <ol className="space-y-2.5 text-[14px] text-fg-2">

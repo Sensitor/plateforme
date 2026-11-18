@@ -72,7 +72,7 @@ export default function ResearchPage() {
         <section key={sector.id} aria-labelledby={`sec-${sector.id}`}>
           <div className="mb-1.5 h-[3px] w-10 rounded-full" style={{ backgroundColor: SECTOR_COLORS[sector.id] }} aria-hidden />
           <SectionTitle id={`sec-${sector.id}`} title={sector.label} description={sector.description} />
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {projects.map((p) => {
               const stats = claimStats(p);
               const c = compositeScore(p.dossier.framework);
@@ -112,7 +112,7 @@ export default function ResearchPage() {
 
       <section>
         <SectionTitle title="Editorial formats" description="Research formats planned for the platform and the Research Club." />
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
           {FORMATS.map((f) => (
             <div key={f.title} className="rounded-xl border border-dashed border-line-strong p-4">
               <f.icon className="size-4 text-muted" aria-hidden />

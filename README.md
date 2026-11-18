@@ -2,15 +2,17 @@
 
 > *Understand the market. Research the projects. Master your knowledge.*
 
-Plateforme de recherche et d'intelligence sur les actifs numériques. Ce dépôt contient le **MVP (Phase 1)** :
-bibliothèque de projets, fiches de recherche approfondies, données de marché réelles, comparateur, watchlist,
-Market Intelligence, Academy (bibliothèque de concepts) et landing page.
+Plateforme de recherche et d'intelligence sur les actifs numériques : bibliothèque de projets, fiches de recherche
+approfondies, données de marché réelles, comparateur, watchlist, Knowledge Graph, Portfolio Intelligence, Market
+Intelligence, Academy, comptes utilisateurs (Supabase), Research Copilot (OpenAI) et alertes e-mail (Resend).
+
+Mise en production des comptes, du Copilot et des alertes : voir [`docs/SETUP.md`](docs/SETUP.md).
 
 ## Démarrage
 
 ```bash
 npm install
-cp .env.example .env.local   # facultatif : clés CoinGecko
+cp .env.example .env.local   # Supabase, OpenAI, Resend (tous facultatifs en local)
 npm run dev                  # http://localhost:3000
 ```
 
@@ -24,7 +26,8 @@ npm run dev                  # http://localhost:3000
 | `npm run check:sources` | Vérifie que chaque lien source des dossiers répond (HTTP) |
 
 Node 20+ requis. Aucune clé n'est obligatoire : sans clé, CoinGecko est appelé en mode public et
-CoinPaprika prend le relais automatiquement en cas de limitation.
+CoinPaprika prend le relais automatiquement en cas de limitation. Sans Supabase, la plateforme fonctionne en mode
+invité (données dans le navigateur) ; sans OpenAI, le Copilot l'indique ; sans Resend, les alertes restent in-app.
 
 ## Ce qui fonctionne aujourd'hui
 
@@ -35,15 +38,17 @@ CoinPaprika prend le relais automatiquement en cas de limitation.
 | Explore `/explore` | ✅ | 20 projets, 13 secteurs, recherche instantanée, filtres (secteur, blockchain, market cap, volume, performance, risque, maturité, couverture), tri, sélection pour comparaison, filtres synchronisés dans l'URL |
 | Fiche projet `/projects/[slug]` | ✅ | Sections A→J : overview, technologie, tokenomics (graphes de distribution + courbe d'émission modélisée), adoption, fondamentaux financiers (DefiLlama), on-chain, concurrents (tableau + données live), risques, thèse (bull/neutral/bear, catalyseurs, hypothèses, invalidation), framework 7 piliers, « Learn by Research », sources |
 | Comparateur `/compare` | ✅ | Jusqu'à 4 projets : marché, fondamentaux, profil, piliers, forces/faiblesses |
-| Watchlist `/watchlist` | ✅ (local) | Stockée dans le navigateur (mode invité), limite Free de 10 projets |
+| Watchlist `/watchlist` | ✅ | Navigateur en mode invité, synchronisée avec le compte une fois connecté ; limite Free de 10 projets |
 | Knowledge Graph `/graph` | ✅ | 34 relations documentées entre les 20 projets (règlement, déploiements, staking, oracles, bridges, messagerie, concurrents), mode focus, vue liste |
-| Portfolio `/portfolio` | ✅ (local) | Saisie manuelle et import CSV (format FR accepté), prix live, coût moyen, P&L réalisé/latent, performance, allocations, corrélations, dépendances, unlocks. Données stockées sur l'appareil uniquement |
+| Portfolio `/portfolio` | ✅ | Saisie manuelle et import CSV (format FR accepté), prix live, coût moyen, P&L réalisé/latent, performance, allocations, corrélations, dépendances, unlocks. Local en invité, synchronisé (RLS) une fois connecté |
+| Research Copilot `/copilot` | ✅ | Modes Learn / Analyze / Compare, réponses en streaming ancrées dans les dossiers, affirmations typées (fait / analyse / hypothèse), sources citées, prix avec fournisseur et horodatage, aucun conseil d'investissement, quotas par plan |
+| Alertes `/alerts` | ✅ | Prix au-dessus / en dessous, variation 24 h ; notifications in-app (cloche), e-mail Resend si activé ; vérification planifiée (`/api/cron/alerts`) |
+| Comptes `/login`, `/account` | ✅ | Supabase Auth : mot de passe, lien magique, réinitialisation ; profil, langue des e-mails, opt-in e-mail |
 | Markets `/markets` | ✅ | Graphiques 1D→ALL, sentiment 90 j, régime, intelligence sectorielle, stablecoins, DeFi |
 | Research `/research` + méthodologie | ✅ | Bibliothèque des dossiers, statistiques éditoriales, framework documenté |
 | Academy `/academy` | ✅ (concepts) | 32 concepts, liés depuis les dossiers et inversement |
 | Recherche ⌘K | ✅ | Projets, secteurs, pages, concepts |
-| Alerts, Community, Research Club, Private Program | 🕒 | Pages de roadmap explicitement « non disponible » (aucun faux bouton) |
-| Authentification | 🕒 Phase 1b | Schéma prêt (`supabase/migrations`), non branché, voir « Prochaines étapes » |
+| Community, Research Club, Private Program | 🕒 | Pages de roadmap explicitement « non disponible » (aucun faux bouton) |
 
 ## Principes de données (non négociables)
 
@@ -75,8 +80,15 @@ src/
   lib/
     market/               Fournisseurs (CoinGecko, CoinPaprika, DefiLlama, Alternative.me) + service avec repli et cache
     research/             Types du modèle de recherche, taxonomie, framework (score), modèles d'émission
-    watchlist/            Store local (useSyncExternalStore)
-supabase/migrations/      Modèle de données complet + Row Level Security
+    watchlist/, portfolio/ Stores locaux (useSyncExternalStore), moteur de portefeuille
+    supabase/             Clients navigateur / serveur / service role
+    auth/                 AuthProvider (session, profil), redirections sûres
+    sync/                 Synchronisation offline-first watchlist + portefeuille avec Supabase
+    copilot/              Contexte d'ancrage (dossiers, concepts, prix), prompt, quotas
+    alerts/, email/       Règles d'alerte, notifications, gabarit e-mail, envoi Resend
+  proxy.ts                Rafraîchissement de la session Supabase
+supabase/migrations/      0001_app.sql (schéma utilisé par l'app, RLS) ; 0002 modèle CMS pour plus tard
+supabase/schedule_alerts.sql  Planification pg_cron des alertes (facultatif)
 tests/                    vitest
 scripts/check-sources.mjs Vérification des liens sources
 ```

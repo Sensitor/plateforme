@@ -4,9 +4,9 @@ import { useCallback, useSyncExternalStore } from "react";
 import type { Transaction } from "./engine";
 
 /**
- * Portfolio ledger stored in this browser only (localStorage). Nothing is
- * sent to a server. When accounts are enabled, the same ledger will sync to
- * the `portfolio_transactions` table protected by row-level security.
+ * Portfolio ledger stored in localStorage (offline first). Guests' data never
+ * leaves the browser; for signed-in users CloudSync mirrors it to the
+ * `portfolio_transactions` table protected by row level security.
  */
 
 const KEY = "sensitor.portfolio.v1";
@@ -58,7 +58,7 @@ function subscribe(listener: () => void) {
   };
 }
 
-const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+export const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 export function usePortfolio() {
   const state = useSyncExternalStore(subscribe, read, () => EMPTY);
@@ -81,3 +81,11 @@ export function usePortfolio() {
   const setExample = useCallback((rows: Omit<Transaction, "id">[]) => write({ transactions: rows.map((r) => ({ ...r, id: newId() })), example: true }), []);
   return { ...state, ready, add, remove, clear, setExample };
 }
+
+/* Primitives for cloud sync (src/lib/sync/cloud-sync.tsx). */
+export const getPortfolio = () => read();
+export const replacePortfolio = (next: PortfolioState) => write(next);
+export const subscribePortfolio = (listener: () => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};

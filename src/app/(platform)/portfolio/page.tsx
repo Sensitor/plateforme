@@ -13,7 +13,7 @@ import { DataNotice } from "@/components/ui/data-notice";
 import { PortfolioApp } from "@/components/portfolio/portfolio-app";
 import type { AssetMeta } from "@/components/portfolio/types";
 
-export const metadata: Metadata = { title: "Portfolio", description: "Track your crypto positions and understand your exposures. Stored on your device only." };
+export const metadata: Metadata = { title: "Portfolio", description: "Track your crypto positions and understand your exposures." };
 
 export default function PortfolioPage() {
   return (
@@ -28,7 +28,7 @@ export default function PortfolioPage() {
       </Suspense>
       <p className="text-[12px] leading-relaxed text-subtle">
         Portfolio Intelligence is an educational tracking tool. It does not provide investment advice, does not execute transactions and does not connect to wallets or
-        exchanges. Your data stays in this browser; clearing site data deletes it, so export a CSV backup regularly.
+        exchanges. As a guest your data stays in this browser and clearing site data deletes it; signed in, it syncs to your account. Export a CSV backup regularly either way.
       </p>
     </div>
   );

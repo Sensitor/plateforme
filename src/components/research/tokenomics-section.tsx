@@ -36,7 +36,7 @@ export function TokenomicsSection({ project }: { project: Project }) {
   let fig = 0;
   return (
     <div className="space-y-10">
-      <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-[200px_1fr]">
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-[200px_1fr]">
         <dt className="text-[11.5px] font-semibold uppercase tracking-[0.14em] text-muted">Supply model</dt>
         <dd className="text-[15px] text-fg">
           {SUPPLY_MODEL_LABEL[t.supplyModel]}
@@ -45,7 +45,7 @@ export function TokenomicsSection({ project }: { project: Project }) {
         </dd>
       </dl>
 
-      <div className="grid gap-10 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
         {t.distribution?.length ? (
           <Figure
             n={++fig}
@@ -75,7 +75,7 @@ export function TokenomicsSection({ project }: { project: Project }) {
         ) : null}
       </div>
 
-      <div className="grid gap-x-12 gap-y-9 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-12 gap-y-9 lg:grid-cols-2">
         <ClaimGroup title="Token utility" claims={t.utility} sources={sources} compact />
         <ClaimGroup title="Emissions & inflation" claims={t.emissions} sources={sources} compact />
         <ClaimGroup title="Vesting & unlocks" claims={t.vesting} sources={sources} compact />

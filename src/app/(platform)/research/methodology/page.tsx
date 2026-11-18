@@ -27,7 +27,7 @@ export default function MethodologyPage() {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-fg">1. Three kinds of statements</h2>
         <p className="text-[14.5px] leading-relaxed text-fg-2">Every statement in a dossier is typed. The type is shown next to it, everywhere.</p>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {[
             { k: "fact" as const, t: "Verifiable from a cited source: protocol rules, documented events, published parameters. A fact without a source is flagged “source pending”." },
             { k: "interpretation" as const, t: "The analyst's reading of the facts: comparisons, assessments, judgements. Reasonable people can disagree." },
@@ -58,7 +58,7 @@ export default function MethodologyPage() {
                 <span className="text-[12px] text-subtle">{p.scaleNote}</span>
               </div>
               <p className="mt-1 text-[13.5px] text-muted">{p.question}</p>
-              <ul className="mt-3 grid gap-x-6 gap-y-1.5 text-[13px] text-fg-2 sm:grid-cols-2">
+              <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1.5 text-[13px] text-fg-2 sm:grid-cols-2">
                 {p.criteria.map((c) => (
                   <li key={c} className="flex gap-2">
                     <span className="mt-2 size-1 shrink-0 rounded-full bg-accent" aria-hidden /> {c}

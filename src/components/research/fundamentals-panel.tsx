@@ -69,7 +69,7 @@ export function FundamentalsPanel({ project }: { project: Project }) {
       <Suspense fallback={<Skeleton className="h-20 w-full rounded-xl" />}>
         <LiveFundamentals project={project} />
       </Suspense>
-      <div className="grid gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+      <div className="grid grid-cols-1 gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <div className="border-t-2 border-violet/60 pt-4">
           <h3 className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-muted">Metrics that matter for this model</h3>
           <dl className="space-y-3.5">

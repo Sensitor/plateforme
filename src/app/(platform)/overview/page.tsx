@@ -22,7 +22,7 @@ export const metadata: Metadata = { title: "Overview" };
 export default function OverviewPage() {
   return (
     <div className="space-y-8">
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] xl:items-stretch">
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] xl:items-stretch">
         <div className="relative flex flex-col justify-center overflow-hidden rounded-2xl border border-line bg-surface px-6 py-8 md:px-8">
           <HeroArtwork />
           <div className="relative">
@@ -71,7 +71,7 @@ export default function OverviewPage() {
         </Suspense>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         <LatestResearch />
         <Suspense fallback={<CardSkeleton lines={6} />}>
           <SectorCard />
@@ -81,7 +81,7 @@ export default function OverviewPage() {
         </Suspense>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Suspense fallback={<CardSkeleton lines={6} />}>
           <LiquidityCards />
         </Suspense>

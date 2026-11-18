@@ -45,7 +45,7 @@ export default function AcademyPage() {
 
       <section>
         <SectionTitle title="Learning tracks" description="From first principles to market psychology." />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {ACADEMY_CATEGORIES.map((c, i) => {
             const color = ACADEMY_COLORS[c.id];
             return (
@@ -76,7 +76,7 @@ export default function AcademyPage() {
 
       <section>
         <SectionTitle title="Coming to the Academy" description="Structured courses and progress tracking are planned for Phase 4." />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
           {COMING.map((x) => (
             <div key={x.t} className="rounded-xl border border-dashed border-line-strong p-4">
               <span className="flex size-8 items-center justify-center rounded-lg" style={{ backgroundColor: tint(x.color, 0.14), color: x.color }}>

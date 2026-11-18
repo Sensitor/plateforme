@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, CircleUser } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth/auth-provider";
 import { Logo } from "./logo";
 import { NAV_GROUPS, NAV_SECONDARY, isActive, type NavItem } from "./nav-config";
 
@@ -27,6 +28,40 @@ function NavLink({ item, pathname, onNavigate }: { item: NavItem; pathname: stri
           Soon
         </span>
       ) : null}
+    </Link>
+  );
+}
+
+const TIER_SHORT = { free: "Free", pro: "Pro", research_club: "Research Club" } as const;
+
+function AccountCard({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  const { configured, loading, user, profile } = useAuth();
+  const signedIn = Boolean(user);
+  const name = profile?.display_name || user?.email?.split("@")[0] || "My Account";
+  const subtitle = loading ? "Checking session" : signedIn ? `${TIER_SHORT[profile?.tier ?? "free"]} plan` : configured ? "Guest · Sign in" : "Guest · Free";
+  return (
+    <Link
+      href={signedIn || !configured ? "/account" : "/login?next=/account"}
+      onClick={onNavigate}
+      className={cn(
+        "flex items-center gap-3 rounded-xl border border-line bg-surface p-3 transition-colors hover:border-line-strong",
+        isActive(pathname, "/account") && "border-accent/40",
+      )}
+    >
+      {signedIn ? (
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-violet text-[14px] font-semibold text-[#0d1020]">
+          {name.slice(0, 1).toUpperCase()}
+        </span>
+      ) : (
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2a3150] to-[#3b2f5e] text-fg-2">
+          <CircleUser className="size-5" aria-hidden />
+        </span>
+      )}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-medium text-fg">{signedIn ? name : "My Account"}</span>
+        <span className="block truncate text-[11.5px] text-muted">{subtitle}</span>
+      </span>
+      <ChevronRight className="size-4 shrink-0 text-subtle" aria-hidden />
     </Link>
   );
 }
@@ -60,23 +95,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </nav>
       <div className="p-3">
-        <Link
-          href="/account"
-          onClick={onNavigate}
-          className={cn(
-            "flex items-center gap-3 rounded-xl border border-line bg-surface p-3 transition-colors hover:border-line-strong",
-            isActive(pathname, "/account") && "border-accent/40",
-          )}
-        >
-          <span className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-[#2a3150] to-[#3b2f5e] text-fg-2">
-            <CircleUser className="size-5" aria-hidden />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[13px] font-medium text-fg">My Account</span>
-            <span className="block text-[11.5px] text-muted">Guest · Free</span>
-          </span>
-          <ChevronRight className="size-4 text-subtle" aria-hidden />
-        </Link>
+        <AccountCard pathname={pathname} onNavigate={onNavigate} />
       </div>
     </div>
   );

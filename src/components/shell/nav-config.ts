@@ -7,6 +7,7 @@ import {
   GraduationCap,
   House,
   LineChart,
+  MessagesSquare,
   Network,
   Settings,
   Star,
@@ -46,6 +47,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Understand",
     items: [
       { label: "Research", href: "/research", icon: FileText },
+      { label: "Research Copilot", href: "/copilot", icon: MessagesSquare },
       { label: "Academy", href: "/academy", icon: GraduationCap },
       { label: "Community", href: "/community", icon: Users, soon: true, phase: "Phase 4" },
     ],
@@ -56,7 +58,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "Watchlist", href: "/watchlist", icon: Star },
       { label: "Portfolio", href: "/portfolio", icon: Wallet },
-      { label: "Alerts", href: "/alerts", icon: Bell, soon: true, phase: "Phase 2" },
+      { label: "Alerts", href: "/alerts", icon: Bell },
     ],
   },
 ];

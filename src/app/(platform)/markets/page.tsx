@@ -49,7 +49,7 @@ export default function MarketsPage() {
       <Suspense fallback={<CardSkeleton className="h-[360px]" lines={6} />}>
         <MarketChart />
       </Suspense>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Suspense fallback={<CardSkeleton lines={6} />}>
           <Sentiment />
         </Suspense>
@@ -60,7 +60,7 @@ export default function MarketsPage() {
       <Suspense fallback={<CardSkeleton lines={8} />}>
         <SectorIntelligence />
       </Suspense>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Suspense fallback={<CardSkeleton lines={6} />}>
           <Stablecoins />
         </Suspense>
@@ -68,7 +68,7 @@ export default function MarketsPage() {
           <Defi />
         </Suspense>
       </div>
-      <div className="grid gap-4 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <NotYetAvailable
           icon={<Percent className="size-4" />}
           title="Funding rates & derivatives"

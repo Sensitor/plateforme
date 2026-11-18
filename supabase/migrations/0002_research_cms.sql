@@ -1,5 +1,9 @@
 -- =====================================================================
--- SENSITOR, initial data model (PostgreSQL / Supabase)
+-- SENSITOR, research CMS data model (optional, Phase 2+)
+-- Not required by the current app: research content still lives in
+-- src/content. Apply when moving dossiers to an editorial back-office.
+-- The private user tables below duplicate concepts from 0001_app.sql and
+-- are kept for reference only; do not apply this file as is on top of 0001.
 --
 -- Two strictly separated domains:
 --   1. PUBLIC research & market data  → readable by everyone, writable only

@@ -49,7 +49,7 @@ export default function LandingPage() {
         {/* Hero */}
         <section className="relative">
           <HeroBackdrop />
-          <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pb-20 pt-16 md:px-6 md:pt-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center">
+          <div className="relative mx-auto grid grid-cols-1 max-w-6xl gap-12 px-4 pb-20 pt-16 md:px-6 md:pt-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center">
             <div>
               <Badge tone="accent" className="text-[12px]">Digital Asset Intelligence</Badge>
               <h1 className="serif-display mt-5 text-[46px] leading-[1] text-fg md:text-[68px]">
@@ -98,7 +98,7 @@ export default function LandingPage() {
         {/* Three dimensions */}
         <section className="mx-auto max-w-6xl px-4 py-20 md:px-6">
           <h2 className="serif-display max-w-2xl text-[36px] leading-tight text-fg md:text-[46px]">One environment to discover, understand and manage.</h2>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
             {[
               { k: "Discover", color: "#7C93FF", icon: Compass, text: "Explore a documented library of projects by sector, blockchain and maturity, with live market data, transparent sources and a map of how they connect.", links: [["Explore Projects", "/explore"], ["Knowledge Graph", "/graph"]], status: "Available" },
               { k: "Understand", color: "#A487F0", icon: BookOpen, text: "Read dossiers built like financial research, compare protocols and learn every concept they use in the Academy.", links: [["Research", "/research"], ["Academy", "/academy"]], status: "Available" },
@@ -128,7 +128,7 @@ export default function LandingPage() {
 
         {/* Research quality */}
         <section className="border-t border-line bg-bg-elevated">
-          <div className="mx-auto grid max-w-6xl gap-12 px-4 py-20 md:px-6 lg:grid-cols-2">
+          <div className="mx-auto grid grid-cols-1 max-w-6xl gap-12 px-4 py-20 md:px-6 lg:grid-cols-2">
             <div>
               <Badge tone="violet">Research standard</Badge>
               <h2 className="serif-display mt-4 text-[36px] leading-tight text-fg md:text-[46px]">Facts, interpretations and hypotheses, never mixed.</h2>
@@ -168,7 +168,7 @@ export default function LandingPage() {
 
         {/* Philosophy */}
         <section className="mx-auto max-w-6xl px-4 py-20 md:px-6">
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             {[
               { icon: ShieldCheck, t: "Independent", d: "No paid listings, no sponsored ratings." },
               { icon: FileSearch, t: "Sourced", d: "Every fact links to a source with its date and limits." },
@@ -189,7 +189,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-6xl px-4 py-20 md:px-6">
             <h2 className="serif-display text-[36px] leading-tight text-fg md:text-[46px]">Plans</h2>
             <p className="mt-2 text-[15px] text-muted">Indicative pricing. Everything currently in the platform is free while paid tiers are prepared.</p>
-            <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
               {PLANS.map((p) => (
                 <div key={p.id} className={cn("rounded-2xl border bg-surface p-6", p.highlight ? "border-accent/50" : "border-line")}>
                   <div className="flex items-center justify-between">

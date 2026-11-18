@@ -3,17 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, CircleUser, Menu, Search, X } from "lucide-react";
+import { CircleUser, Menu, Search, X } from "lucide-react";
 import type { SearchEntry } from "@/lib/search-index";
 import { CommandPalette } from "./command-palette";
 import { SidebarContent } from "./sidebar";
 import { LogoMark } from "./logo";
+import { useAuth } from "@/lib/auth/auth-provider";
+import { NotificationBell } from "./notification-bell";
 
 export function Topbar({ searchIndex }: { searchIndex: SearchEntry[] }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isMac, setIsMac] = useState(true);
   const pathname = usePathname();
+  const { user, profile } = useAuth();
+  const initial = (profile?.display_name || user?.email || "").slice(0, 1).toUpperCase();
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- platform detection is client-only
@@ -30,20 +34,20 @@ export function Topbar({ searchIndex }: { searchIndex: SearchEntry[] }) {
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 md:px-6 lg:px-8">
           <button
             type="button"
-            className="-ml-1 flex size-9 items-center justify-center rounded-lg text-fg-2 hover:bg-surface-2 lg:hidden"
+            className="-ml-1 flex size-9 shrink-0 items-center justify-center rounded-lg text-fg-2 hover:bg-surface-2 lg:hidden"
             onClick={() => setDrawerOpen(true)}
             aria-label="Open navigation"
           >
             <Menu className="size-5" />
           </button>
-          <Link href="/overview" className="lg:hidden" aria-label="Sensitor overview">
+          <Link href="/overview" className="shrink-0 lg:hidden" aria-label="Sensitor overview">
             <LogoMark className="size-7" />
           </Link>
 
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
-            className="group mx-auto flex h-10 w-full max-w-[560px] items-center gap-3 rounded-xl border border-line bg-surface px-3.5 text-left text-[13.5px] text-subtle transition-colors hover:border-line-strong"
+            className="group mx-auto flex h-10 w-full min-w-0 max-w-[560px] items-center gap-3 rounded-xl border border-line bg-surface px-3.5 text-left text-[13.5px] text-subtle transition-colors hover:border-line-strong"
             aria-label="Search projects, sectors and analyses"
           >
             <Search className="size-4 text-muted" aria-hidden />
@@ -53,22 +57,25 @@ export function Topbar({ searchIndex }: { searchIndex: SearchEntry[] }) {
             </kbd>
           </button>
 
-          <div className="flex items-center gap-1">
-            <Link
-              href="/alerts"
-              className="relative flex size-9 items-center justify-center rounded-lg text-fg-2 hover:bg-surface-2"
-              aria-label="Alerts (coming in Phase 2)"
-              title="Alerts, coming in Phase 2"
-            >
-              <Bell className="size-[18px]" />
-            </Link>
-            <Link
-              href="/account"
-              className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-[#2a3150] to-[#3b2f5e] text-fg-2 ring-1 ring-line-strong"
-              aria-label="My account"
-            >
-              <CircleUser className="size-5" />
-            </Link>
+          <div className="flex shrink-0 items-center gap-1">
+            <NotificationBell />
+            {user ? (
+              <Link
+                href="/account"
+                className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-accent to-violet text-[14px] font-semibold text-[#0d1020] ring-1 ring-line-strong"
+                aria-label="My account"
+              >
+                {initial || <CircleUser className="size-5" />}
+              </Link>
+            ) : (
+              <Link
+                href="/account"
+                className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-[#2a3150] to-[#3b2f5e] text-fg-2 ring-1 ring-line-strong"
+                aria-label="My account"
+              >
+                <CircleUser className="size-5" />
+              </Link>
+            )}
           </div>
         </div>
       </header>

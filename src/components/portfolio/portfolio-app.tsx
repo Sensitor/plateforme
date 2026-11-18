@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Download, Eye, FileUp, Lock, Plus, ShieldCheck, Sparkles, Trash2, WalletMinimal } from "lucide-react";
+import { ArrowUpRight, Download, Eye, FileUp, Plus, ShieldCheck, Sparkles, Trash2, WalletMinimal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatNumber, formatPercent, formatPrice, formatUsdCompact } from "@/lib/format";
 import { SECTOR_COLORS, tint } from "@/lib/brand";
@@ -18,6 +18,7 @@ import { Donut } from "@/components/charts/donut";
 import { BarList } from "@/components/charts/bar-list";
 import { MultiLineChart } from "@/components/charts/multi-line-chart";
 import { CATEGORICAL } from "@/components/charts/palette";
+import { StorageNote, useStorageWord } from "@/components/storage-note";
 import { ImportDialog, TransactionDialog } from "./dialogs";
 import { fetchHistories, useHistories } from "./use-histories";
 import type { AssetMeta } from "./types";
@@ -38,6 +39,7 @@ const EXAMPLE = [
 
 export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta[]; today: string; quoteSource: React.ReactNode }) {
   const { transactions, example, ready, add, remove, clear, setExample } = usePortfolio();
+  const storageWord = useStorageWord();
   const [dialog, setDialog] = useState<"add" | "import" | null>(null);
   const [range, setRange] = useState<ChartRange>("3M");
   const [loadingExample, setLoadingExample] = useState(false);
@@ -138,9 +140,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
 
   const principles = (
     <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[12px] text-muted">
-      <span className="inline-flex items-center gap-1.5">
-        <Lock className="size-3.5 text-positive" aria-hidden /> Stored on this device only
-      </span>
+      <StorageNote />
       <span className="inline-flex items-center gap-1.5">
         <Eye className="size-3.5 text-positive" aria-hidden /> Read-only: Sensitor never executes transactions
       </span>
@@ -322,7 +322,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       </Card>
 
       {/* Performance + allocation */}
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">
         <Card>
           <CardHeader
             title="Performance"
@@ -381,7 +381,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
           Portfolio intelligence
         </h2>
         <p className="mb-4 text-[13px] text-muted">Informative observations about your exposures. They describe, they do not recommend.</p>
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-start">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-start">
           <ul className="space-y-2.5">
             {insights.map((ins) => (
               <li key={ins.id} className={cn("rounded-xl border bg-surface p-4", ins.tone === "watch" ? "border-warning/30" : "border-line")}>
@@ -427,7 +427,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       <Card>
         <CardHeader
           title="Transactions"
-          subtitle={`${transactions.length} recorded on this device`}
+          subtitle={`${transactions.length} recorded ${storageWord}`}
           action={
             <button onClick={() => setShowLedger((v) => !v)} className="text-[12.5px] text-accent hover:text-accent-strong">
               {showLedger ? "Hide" : "Show"}

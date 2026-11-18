@@ -16,7 +16,7 @@ export default function PricingPage() {
         title="Choose how deep you want to go"
         description="Prices are indicative hypotheses. Paid subscriptions will open with Stripe in Phase 4; until then everything available in the app is free."
       />
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {PLANS.map((p) => (
           <div key={p.id} className={cn("flex flex-col rounded-2xl border bg-surface p-6", p.highlight ? "border-accent/50" : "border-line")}>
             <div className="flex items-center justify-between">

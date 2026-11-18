@@ -3,14 +3,18 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 /**
- * Guest watchlist persisted in localStorage (per browser).
- * When authentication is enabled, the same hook will sync with the
- * `watchlist_items` table (see supabase/migrations). The UI states clearly
- * that guest watchlists live on this device only.
+ * Watchlist persisted in localStorage (offline first). When the user is
+ * signed in, CloudSync mirrors it to the `watchlist_items` table.
  */
 
 const KEY = "sensitor.watchlist.v1";
 export const WATCHLIST_FREE_LIMIT = 10;
+export const WATCHLIST_PAID_LIMIT = 100;
+let limit = WATCHLIST_FREE_LIMIT;
+/** Raised by CloudSync for Pro and Research Club members. */
+export const setWatchlistLimit = (n: number) => {
+  limit = n;
+};
 
 const listeners = new Set<() => void>();
 let cache: string[] | null = null;
@@ -69,12 +73,20 @@ export function useWatchlist() {
       write(current.filter((s) => s !== slug));
       return "removed";
     }
-    if (current.length >= WATCHLIST_FREE_LIMIT) return "limit";
+    if (current.length >= limit) return "limit";
     write([...current, slug]);
     return "added";
   }, []);
 
   const remove = useCallback((slug: string) => write(read().filter((s) => s !== slug)), []);
 
-  return { slugs, ready, has: (slug: string) => slugs.includes(slug), toggle, remove, limit: WATCHLIST_FREE_LIMIT };
+  return { slugs, ready, has: (slug: string) => slugs.includes(slug), toggle, remove, limit };
 }
+
+/* Primitives for cloud sync (src/lib/sync/cloud-sync.tsx). */
+export const getWatchlist = () => read();
+export const replaceWatchlist = (slugs: string[]) => write([...new Set(slugs)]);
+export const subscribeWatchlist = (listener: () => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};

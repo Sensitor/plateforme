@@ -92,7 +92,7 @@ async function ConceptContent({ params }: { params: Promise<{ slug: string }> })
       {related.length ? (
         <section>
           <h2 className="serif-display mb-3 text-[26px] text-fg">Related concepts</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {related.map((r) => (
               <Link key={r.slug} href={`/academy/concepts/${r.slug}`} className="relative overflow-hidden rounded-xl border border-line bg-surface p-4 pt-5 hover:border-line-strong">
                 <span className="absolute inset-x-0 top-0 h-[3px]" style={{ backgroundColor: ACADEMY_COLORS[r.category] }} aria-hidden />

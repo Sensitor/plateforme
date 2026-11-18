@@ -45,6 +45,11 @@ Règles codées : `compositeScore()` (score retenu si pilier non noté ou confia
 - `/api/history` n'accepte que les actifs couverts et des intervalles valides.
 - Schéma Supabase : séparation stricte public / privé, RLS « propriétaire uniquement » sur toutes les données utilisateur, accès au contenu par niveau d'abonnement (`current_tier()`).
 - Engagements produit codés dans le schéma : aucune colonne pour clé privée ou seed phrase ; connexions d'exchange en lecture seule via Supabase Vault.
+- Comptes : `@supabase/ssr` (session en cookies), `proxy.ts` rafraîchit la session ; l'autorisation est assurée par la RLS, pas par le front. Les utilisateurs ne peuvent modifier ni leur niveau d'abonnement (droits de colonne) ni leurs notifications (insertion réservée au service role).
+- Redirections après connexion limitées aux chemins internes (`safeNext`).
+- Synchronisation : le stockage local reste la source pour l'interface ; à la connexion, les données invité sont rattachées au compte, celles d'un autre compte sont écartées ; à la déconnexion, la copie locale est effacée.
+- Copilot : clé OpenAI côté serveur uniquement ; contexte construit à partir des dossiers (affirmations typées + sources) et des prix avec fournisseur et horodatage ; tirets longs retirés du flux ; quotas en base (`copilot_usage`) ou cookie signé HMAC pour les invités.
+- Alertes : `/api/cron/alerts` protégé par `CRON_SECRET` (comparaison à temps constant) ; une alerte n'est revendiquée qu'une fois (mise à jour conditionnelle `active = true`), ce qui évite les doublons si deux exécutions se chevauchent.
 
 ## Accessibilité & responsive
 

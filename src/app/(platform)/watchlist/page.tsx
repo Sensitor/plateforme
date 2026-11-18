@@ -17,7 +17,7 @@ export default function WatchlistPage() {
       <PageHeader
         eyebrow="Manage"
         title="Watchlist"
-        description="Projects you follow. In guest mode your watchlist is stored in this browser only; it will sync to your account once sign-in is enabled."
+        description="Projects you follow, with live prices and the latest from their dossiers. Signed in, your watchlist syncs across your devices."
       />
       <Suspense fallback={<CardSkeleton lines={6} />}>
         <WatchlistData />

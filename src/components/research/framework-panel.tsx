@@ -54,7 +54,7 @@ export function FrameworkPanel({ project }: { project: Project }) {
           const color = PILLAR_COLORS[pillar.id];
           return (
             <details key={pillar.id} className="group border-b border-line/70 last:border-0">
-              <summary className="grid cursor-pointer list-none gap-2 py-4 md:grid-cols-[220px_170px_110px_1fr_20px] md:items-center md:gap-5">
+              <summary className="grid grid-cols-1 cursor-pointer list-none gap-2 py-4 md:grid-cols-[220px_170px_110px_1fr_20px] md:items-center md:gap-5">
                 <span className="flex items-center gap-2.5 text-[14.5px] font-medium text-fg">
                   <span className="size-2 rounded-full" style={{ backgroundColor: color }} aria-hidden />
                   {pillar.label}
@@ -65,7 +65,7 @@ export function FrameworkPanel({ project }: { project: Project }) {
                 <ChevronDown className="hidden size-4 text-subtle transition-transform group-open:rotate-180 md:block" aria-hidden />
               </summary>
               {a ? (
-                <dl className="grid gap-3 pb-5 text-[13px] leading-relaxed md:grid-cols-3 md:pl-[245px]">
+                <dl className="grid grid-cols-1 gap-3 pb-5 text-[13px] leading-relaxed md:grid-cols-3 md:pl-[245px]">
                   <div>
                     <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle">Criteria</dt>
                     <dd className="mt-1 text-fg-2">{pillar.criteria.join("; ")}.</dd>

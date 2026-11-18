@@ -8,13 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { LocalDataControls } from "@/components/local-data-controls";
+import { StorageNote } from "@/components/storage-note";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <PageHeader eyebrow="Settings" title="Settings" description="Preferences and data status for this device." />
+      <PageHeader eyebrow="Settings" title="Settings" description="Preferences, your data and the status of our data providers." />
       <Card>
         <CardHeader title="Display" subtitle="Interface preferences" />
         <CardBody className="space-y-3 text-[13.5px]">
@@ -33,7 +34,7 @@ export default function SettingsPage() {
         </CardBody>
       </Card>
       <Card>
-        <CardHeader title="Data on this device" subtitle="Guest mode stores your watchlist in this browser only" />
+        <CardHeader title="Your data" subtitle={<StorageNote variant="long" />} />
         <CardBody>
           <LocalDataControls />
         </CardBody>
