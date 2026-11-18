@@ -1294,4 +1294,598 @@ export const CONCEPT_DEEP: Record<string, ConceptDeep> = {
       { title: "How USDe works", publisher: "Ethena", url: "https://docs.ethena.fi/overview/how-usde-works" },
     ],
   },
+
+  "rollup-stages": {
+    minute:
+      "L2BEAT's stages rate how much a rollup's users still depend on its operators. Stage 0 has training wheels: the team can change or override the system. Stage 1 runs on a working proof system, with a security council as a limited backstop. Stage 2 lets code rule: users can leave before any ordinary upgrade takes effect.",
+    steps: [
+      { title: "The entry ticket", text: "Stage 0 requires the basics of a rollup: state and data published on Ethereum, and open-source software that lets anyone rebuild the rollup's state." },
+      { title: "Stage 0: training wheels", text: "Operators or a small multisig can upgrade contracts or override the system at will; the proof system may be missing, incomplete or restricted to approved parties." },
+      { title: "Stage 1: limited backstop", text: "A working proof system secures the rollup. A security council with a high signing threshold and members independent of the team can still override it, and other upgrades come with a delay that lets users exit." },
+      { title: "Stage 2: code rules", text: "Proofs are fully permissionless, ordinary upgrades give users at least 30 days to exit, and the council can only act on bugs provable on-chain." },
+      { title: "Check it again", text: "A stage is a snapshot. It can move up or down with every upgrade, and it does not cover every risk: sequencer and data availability are rated separately." },
+    ],
+    visual: "table",
+    table: {
+      columns: ["Stage 0", "Stage 1", "Stage 2"],
+      rows: [
+        { label: "Proof system", values: ["Missing, incomplete or restricted", "Working; challengers can submit proofs", "Working and fully permissionless"] },
+        { label: "Who can override", values: ["Operators or a small multisig", "A security council with a high threshold", "Only to fix bugs provable on-chain"] },
+        { label: "Time to exit before upgrades", values: ["Not guaranteed", "A delay for upgrades not made by the council", "At least 30 days for ordinary upgrades"] },
+        { label: "What you trust", values: ["The team", "The proofs, with the council as backstop", "The code and Ethereum"] },
+      ],
+    },
+    visualCaption: "The three stages side by side, simplified from L2BEAT's framework.",
+    example: {
+      projects: ["arbitrum", "optimism"],
+      title: "Arbitrum and OP Mainnet: proofs and councils",
+      paragraphs: [
+        "Arbitrum One's BoLD protocol lets anyone take part in validation, and a 12-member Security Council can perform emergency upgrades. OP Mainnet's permissionless fault proofs went live in 2024, and its Security Council also keeps emergency powers.",
+        "Both dossiers track the L2BEAT stage and upgrade delays rather than quoting a rating that can change with the next upgrade. That is the right habit: check the stage before trusting a rollup with size.",
+      ],
+    },
+    metrics: [
+      { label: "Current stage", read: "The headline rating. Read the reasons listed with it, not just the number." },
+      { label: "Who can submit proofs", read: "Anyone, an allow-listed set, or nobody yet. Permissionless proofs are the core of Stages 1 and 2." },
+      { label: "Upgrade delay versus withdrawal time", read: "If upgrades can take effect faster than users can withdraw, users cannot escape an unwanted change." },
+      { label: "Security council", read: "Number of members, signing threshold and independence from the team." },
+    ],
+    misconceptions: [
+      { myth: "Stage 2 means no risk.", reality: "It removes trust in operators, not bugs. Code, proof system and Ethereum risks remain." },
+      { myth: "A rollup's stage is permanent.", reality: "It can change with each upgrade. Check the current rating, not last year's." },
+      { myth: "Stages measure how decentralised the sequencer is.", reality: "Stages focus on proofs, upgrades and exits. A Stage 1 rollup can still have a single sequencer." },
+    ],
+    risks: [
+      "Instant upgrades on Stage 0 systems that could redirect funds.",
+      "Collusion or compromise of a security council.",
+      "Bugs in young proof systems that the stage framework cannot detect.",
+    ],
+    quiz: [
+      {
+        question: "What does a Stage 0 rating indicate?",
+        options: ["The rollup has no users", "Operators can still change or override the system", "The rollup is fully trustless", "The rollup does not post data to Ethereum"],
+        answer: 1,
+        explanation: "Stage 0 rollups still have training wheels: the team or a small multisig keeps the final say.",
+      },
+      {
+        question: "What mainly distinguishes Stage 2?",
+        options: ["A token listed on major exchanges", "Permissionless proofs and at least 30 days to exit before ordinary upgrades", "A decentralised sequencer", "Zero fees"],
+        answer: 1,
+        explanation: "At Stage 2, users are protected by code and by time to leave, with the council limited to provable bugs.",
+      },
+      {
+        question: "Can a Stage 1 rollup run a single, centralised sequencer?",
+        options: ["No, Stage 1 forbids it", "Yes: stages assess proofs, upgrades and exits, not sequencing", "Only on weekends", "Only if it has no token"],
+        answer: 1,
+        explanation: "Sequencer centralisation is a separate risk that L2BEAT reports alongside the stage.",
+      },
+    ],
+    sources: [
+      { title: "Stages framework", publisher: "L2BEAT", url: "https://l2beat.com/stages" },
+      { title: "Scaling summary", publisher: "L2BEAT", url: "https://l2beat.com/scaling/summary" },
+      { title: "Fault proofs explainer", publisher: "Optimism Docs", url: "https://docs.optimism.io/stack/fault-proofs/explainer" },
+      { title: "Layer 2", publisher: "ethereum.org", url: "https://ethereum.org/en/layer-2/" },
+    ],
+  },
+
+  sequencers: {
+    minute:
+      "A sequencer receives a rollup's transactions, decides their order, executes them and posts the results to the base chain. Most rollups today run a single sequencer operated by their team: fast and simple, but a central point that can censor, extract MEV or go offline.",
+    steps: [
+      { title: "Receive", text: "Users send their transactions to the sequencer rather than directly to Ethereum." },
+      { title: "Order and confirm", text: "The sequencer orders the transactions, executes them and returns soft confirmations within a fraction of a second." },
+      { title: "Batch and post", text: "It compresses transactions into batches and posts them to Ethereum, paying the data costs." },
+      { title: "Force inclusion", text: "If the sequencer ignores a user, the user can submit the transaction through a contract on Ethereum, which the rollup must include after a delay." },
+      { title: "Earn a margin", text: "Fees collected on the rollup minus data costs paid to Ethereum form the sequencer margin, the main revenue line of most rollups." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Users", text: "Send transactions to the rollup." },
+        { title: "Sequencer", text: "Orders, executes and soft-confirms them." },
+        { title: "Batches", text: "Compressed and posted to Ethereum." },
+        { title: "Ethereum", text: "Holds the data and settles the rollup." },
+      ],
+      outcomes: { positive: "Fast confirmations and low fees from a single, efficient operator.", negative: "A single point of failure for censorship, MEV and downtime, mitigated only by force inclusion." },
+    },
+    visualCaption: "The sequencer sits between users and Ethereum: convenient, and a point of control.",
+    example: {
+      projects: ["arbitrum", "optimism"],
+      title: "Sequencer economics in the coverage",
+      paragraphs: [
+        "Arbitrum's sequencer orders transactions and posts batches to Ethereum, giving soft confirmations. The dossier lists sequencer revenue minus Ethereum data costs as a key metric, and notes that Timeboost revenue goes to the DAO treasury.",
+        "Chains in the Optimism Superchain contribute a share of their sequencer revenue to the Optimism Collective, so the collective's economics depend on sequencer margins across many chains, not just one.",
+      ],
+    },
+    metrics: [
+      { label: "Sequencer margin", read: "Rollup fees minus data costs on Ethereum. It shows whether the rollup earns money from its users." },
+      { label: "Uptime and incidents", read: "How often the sequencer stopped or degraded, and for how long." },
+      { label: "Force inclusion delay", read: "How long a censored user must wait before Ethereum forces the transaction in." },
+      { label: "Decentralisation plans", read: "Shared or based sequencing, and whether they are live or only on a roadmap." },
+    ],
+    misconceptions: [
+      { myth: "If the sequencer goes down, funds are lost.", reality: "Funds remain secured on Ethereum. Users can wait, or use force inclusion and the bridge to exit, with delays." },
+      { myth: "A centralised sequencer can steal funds.", reality: "It can censor or reorder transactions, but it cannot get an invalid state accepted if the proof system works." },
+      { myth: "Soft confirmations are final.", reality: "Finality comes once the batch is posted to Ethereum and, for withdrawals, once the proof or challenge period completes." },
+    ],
+    risks: [
+      "Censorship of specific users or applications.",
+      "Downtime that freezes activity on the rollup.",
+      "Value extraction through transaction ordering.",
+    ],
+    quiz: [
+      {
+        question: "What is force inclusion for?",
+        options: ["Speeding up confirmations", "Letting users bypass a censoring sequencer through the base chain", "Lowering fees", "Minting new tokens"],
+        answer: 1,
+        explanation: "A transaction submitted on Ethereum must eventually be included by the rollup, whatever the sequencer wants.",
+      },
+      {
+        question: "What is the main revenue line of most rollups?",
+        options: ["Token sales", "Fees collected on the rollup minus data costs paid to Ethereum", "Staking rewards", "Bridge deposits"],
+        answer: 1,
+        explanation: "The sequencer margin is the gap between what users pay on the rollup and what the rollup pays Ethereum.",
+      },
+      {
+        question: "If the proof system works, what can a centralised sequencer not do?",
+        options: ["Reorder transactions", "Delay transactions", "Get an invalid state that steals funds accepted", "Go offline"],
+        answer: 2,
+        explanation: "Ordering power is not validity power: a fraudulent state would be rejected by proofs on Ethereum.",
+      },
+    ],
+    sources: [
+      { title: "The Sequencer and censorship resistance", publisher: "Arbitrum Docs", url: "https://docs.arbitrum.io/how-arbitrum-works/sequencer" },
+      { title: "Inside Arbitrum Nitro", publisher: "Arbitrum Docs", url: "https://docs.arbitrum.io/how-arbitrum-works/inside-arbitrum-nitro" },
+      { title: "Optimistic rollups", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/scaling/optimistic-rollups/" },
+      { title: "OP Stack: getting started", publisher: "Optimism Docs", url: "https://docs.optimism.io/stack/getting-started" },
+    ],
+  },
+
+  "data-availability": {
+    minute:
+      "To verify a chain, you need its data. Data availability is the guarantee that the data behind a block has actually been published, so anyone can check it or rebuild the state. Rollups must buy this guarantee somewhere: on Ethereum, on a specialised network, or from a committee.",
+    steps: [
+      { title: "Why it matters", text: "A block producer could publish a valid-looking block header and withhold the data. Without the data, nobody can prove fraud or reconstruct balances to exit." },
+      { title: "Publish", text: "Rollups post their transaction data to a data availability layer: Ethereum blobs since EIP-4844, or external networks such as Celestia or EigenDA." },
+      { title: "Add redundancy", text: "Erasure coding extends the data with redundancy so that the whole block can be recovered from part of the pieces." },
+      { title: "Sample", text: "Light nodes download a few small random pieces. If enough samples succeed, the full data is available with very high probability, without anyone downloading everything." },
+      { title: "Weigh the trade-offs", text: "Cost, the security of the data layer, and how proofs of availability reach the settlement chain all change what users trust." },
+    ],
+    visual: "table",
+    table: {
+      columns: ["Ethereum blobs", "External DA network", "Data committee"],
+      rows: [
+        { label: "Who guarantees the data", values: ["Ethereum validators", "The network's own validators (for example Celestia)", "A small set of known members"] },
+        { label: "Relative cost", values: ["Market-priced blob fee", "Usually lower", "Lowest"] },
+        { label: "What you trust", values: ["Ethereum itself", "The DA network and its bridge to Ethereum", "The committee's honesty"] },
+        { label: "Usual label", values: ["Rollup", "Often classed as validium or optimium", "Validium or optimium"] },
+      ],
+    },
+    visualCaption: "Where a rollup publishes its data decides who users must trust to verify and exit.",
+    example: {
+      projects: ["celestia", "ethereum"],
+      title: "Celestia and Ethereum blobs",
+      paragraphs: [
+        "Celestia grew out of the LazyLedger paper: a chain that only orders data and guarantees its availability, leaving execution to others. Data availability sampling and two-dimensional erasure coding let its block size grow as more light nodes sample.",
+        "Rollups that use Celestia from Ethereum rely on Celestia's validators and on Blobstream for data guarantees, a different trust model from Ethereum blobs. The dossier also notes that fees paid to Celestia have been small, since demand depends on rollups choosing external data availability.",
+      ],
+    },
+    metrics: [
+      { label: "Blob usage and blob fees", read: "How full Ethereum's data space is. Sustained full blobs push fees up and make alternatives more attractive." },
+      { label: "Data cost per transaction", read: "What a rollup pays to publish each transaction. It drives the fees users see." },
+      { label: "Adoption of external DA", read: "How many rollups, and how much value, rely on each data layer." },
+      { label: "Number of sampling nodes", read: "More light nodes sampling means stronger availability guarantees and room for larger blocks." },
+    ],
+    misconceptions: [
+      { myth: "Data availability means data is stored forever.", reality: "It guarantees publication for long enough to verify and exit. Ethereum blobs are pruned after about 18 days." },
+      { myth: "Cheaper data availability is only a cost saving.", reality: "It changes who users trust for the safety of their funds." },
+      { myth: "Checking availability requires downloading whole blocks.", reality: "Sampling lets light nodes check it by downloading a few small pieces." },
+    ],
+    risks: [
+      "Data withholding that prevents fraud proofs and exits.",
+      "Weak bridges carrying availability proofs between chains.",
+      "Collusion of a small data committee.",
+    ],
+    quiz: [
+      {
+        question: "Why does a rollup need data availability?",
+        options: ["To make its token scarcer", "So that anyone can verify the state, prove fraud and exit", "To speed up the sequencer", "To store users' private keys"],
+        answer: 1,
+        explanation: "Without published data, nobody can check what the operator did or rebuild balances to withdraw.",
+      },
+      {
+        question: "What does data availability sampling allow?",
+        options: ["Faster block times", "Light nodes to check availability by downloading small random pieces", "Free transactions", "Private transactions"],
+        answer: 1,
+        explanation: "Thanks to erasure coding, a handful of successful random samples gives high confidence that the whole block is available.",
+      },
+      {
+        question: "A rollup moves its data from Ethereum to a small committee. What changes for users?",
+        options: ["Nothing at all", "They must now trust the committee to keep data available", "Their funds move to the committee", "Withdrawals become instant"],
+        answer: 1,
+        explanation: "The data guarantee no longer comes from Ethereum but from the committee members.",
+      },
+    ],
+    sources: [
+      { title: "Data availability", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/data-availability/" },
+      { title: "Data availability layer", publisher: "Celestia Docs", url: "https://docs.celestia.org/learn/how-celestia-works/data-availability-layer" },
+      { title: "LazyLedger: A Distributed Data Availability Ledger With Client-Side Smart Contracts", publisher: "arXiv", url: "https://arxiv.org/abs/1905.09274" },
+      { title: "EIP-4844: Shard Blob Transactions", publisher: "Ethereum Improvement Proposals", url: "https://eips.ethereum.org/EIPS/eip-4844" },
+    ],
+  },
+
+  interoperability: {
+    minute:
+      "Blockchains cannot read each other. A bridge or messaging protocol moves assets and data between them by having someone verify what happened on the source chain. Who that verifier is defines the security, and bridges have suffered some of the largest hacks in crypto.",
+    steps: [
+      { title: "Lock or burn", text: "Tokens are locked in a contract, or burned, on the source chain." },
+      { title: "Verify the event", text: "A verifier attests that the lock happened: a multisig, an oracle or verifier network, a light client or a zero-knowledge proof." },
+      { title: "Mint or release", text: "The destination chain mints a representation of the token, or releases native tokens from a pool." },
+      { title: "Carry messages", text: "Messaging protocols generalise the idea to arbitrary data, so applications can call contracts on other chains." },
+      { title: "Choose the security", text: "Some protocols let each application pick its own verifiers, which moves risk decisions from the protocol to the application." },
+    ],
+    visual: "table",
+    table: {
+      columns: ["Multisig or committee", "Verifier network", "Light client or ZK proof"],
+      rows: [
+        { label: "Who verifies", values: ["A few key holders", "Independent node operators", "The destination chain checks the source chain's consensus"] },
+        { label: "Main risk", values: ["Key theft or collusion", "Operator collusion or a weak configuration", "Bugs in complex code, higher cost"] },
+        { label: "Examples", values: ["Many early bridges", "Chainlink CCIP, LayerZero verifier networks", "IBC, zero-knowledge bridges"] },
+      ],
+    },
+    visualCaption: "Three ways to verify a cross-chain message, from most trusted to most trust-minimised.",
+    example: {
+      projects: ["layerzero", "chainlink"],
+      title: "Configurable security versus a fixed design",
+      paragraphs: [
+        "LayerZero v2 separates verification, done by decentralised verifier networks (DVNs), from execution, and lets each application set its own security stack. The dossier notes that security is only as strong as the configuration an application chooses, and that users rarely know which verifiers secure the token they hold.",
+        "Chainlink CCIP takes a different approach: it adds a separate Risk Management Network that monitors cross-chain activity and can pause it.",
+      ],
+    },
+    metrics: [
+      { label: "Verifier set", read: "Who attests to messages, how many of them, and how independent they are." },
+      { label: "Value at risk", read: "How much value sits in the bridge's contracts or depends on its messages." },
+      { label: "Configuration", read: "For configurable protocols, the setup each application actually uses. A single verifier concentrates trust." },
+      { label: "Limits and monitoring", read: "Rate limits, pause mechanisms and incident history." },
+    ],
+    misconceptions: [
+      { myth: "A bridged token is the same as the original.", reality: "A wrapped token is a claim on assets locked by the bridge. If the bridge fails, the claim can become worthless." },
+      { myth: "More connected chains means more security.", reality: "Reach and security are different; each new connection adds attack surface." },
+      { myth: "Messaging protocols remove trust.", reality: "They move it to verifiers, configuration and code." },
+    ],
+    risks: [
+      "Compromised verifiers or keys releasing funds without a real deposit.",
+      "Contract bugs in bridge logic.",
+      "Wrapped tokens losing their backing, with contagion to every chain that uses them.",
+    ],
+    quiz: [
+      {
+        question: "What defines a bridge's security?",
+        options: ["The number of chains it supports", "Who verifies events on the source chain", "Its token's market cap", "The speed of transfers"],
+        answer: 1,
+        explanation: "Whoever can attest that a deposit happened can, if compromised, release funds that were never deposited.",
+      },
+      {
+        question: "What is a wrapped token?",
+        options: ["A token with a higher yield", "A claim on assets locked by a bridge", "A token that cannot be traded", "A governance token"],
+        answer: 1,
+        explanation: "Its value depends entirely on the locked assets remaining safe in the bridge.",
+      },
+      {
+        question: "Why are configurable security stacks harder for users to assess?",
+        options: [
+          "Because they are slower",
+          "Because the risk depends on the verifiers each application chooses, which users rarely check",
+          "Because they charge higher fees",
+          "Because they only work on one chain",
+        ],
+        answer: 1,
+        explanation: "Two tokens on the same protocol can have very different security depending on their configuration.",
+      },
+    ],
+    sources: [
+      { title: "Bridges", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/bridges/" },
+      { title: "LayerZero V2 documentation", publisher: "LayerZero", url: "https://docs.layerzero.network/v2" },
+      { title: "Cross-Chain Interoperability Protocol (CCIP)", publisher: "Chainlink Docs", url: "https://docs.chain.link/ccip" },
+      { title: "Bridges summary", publisher: "L2BEAT", url: "https://l2beat.com/bridges/summary" },
+    ],
+  },
+
+  "validator-decentralization": {
+    minute:
+      "Counting validators says little about who controls a network. Decentralisation is measured by how many independent entities would have to collude to halt or censor the chain, how diverse its software and hosting are, and who can change its rules.",
+    steps: [
+      { title: "Group by entity", text: "Many validators can belong to one company, exchange or staking pool. Count independent entities, not nodes." },
+      { title: "Nakamoto coefficient", text: "The minimum number of entities that together control enough stake to halt or censor the chain. On Ethereum, more than one third of stake can stop finality." },
+      { title: "Client diversity", text: "If one software client runs most nodes, a single bug can stall the network or cause mass penalties." },
+      { title: "Hosting and geography", text: "Concentration in a few cloud providers or countries creates shared points of failure and legal pressure points." },
+      { title: "Governance", text: "Who can upgrade the protocol, whether a foundation or a company can change the rules, and how hard it would be to coordinate a fork." },
+    ],
+    visual: "table",
+    table: {
+      columns: ["What to measure", "Warning sign"],
+      rows: [
+        { label: "Stake", values: ["Share held by the largest entities; Nakamoto coefficient", "A handful of entities together above one third"] },
+        { label: "Clients", values: ["Share of nodes running each client implementation", "One client above two thirds"] },
+        { label: "Hosting", values: ["Share of nodes per cloud provider and per country", "Most nodes in one provider or jurisdiction"] },
+        { label: "Hardware", values: ["Cost and bandwidth needed to run a node", "Only data centres can keep up"] },
+        { label: "Governance", values: ["Who can upgrade the protocol, and with what delay", "One organisation can change the rules alone"] },
+      ],
+    },
+    visualCaption: "A checklist for decentralisation: five dimensions, each with its own warning sign.",
+    example: {
+      projects: ["ethereum", "solana", "hyperliquid"],
+      title: "Three networks, three trade-offs",
+      paragraphs: [
+        "Ethereum runs several independent execution and consensus clients, which limits the impact of a bug in any one of them. Solana added a second independently written validator client, Firedancer, after outages in 2021-2022 and a halt of about five hours in February 2024; its dossier also notes high hardware costs and stake concentrated among large operators.",
+        "Hyperliquid shows the trade-off from the other side: a small validator set and centralised development buy performance, and the dossier treats them as explicit trust assumptions rather than hiding them.",
+      ],
+    },
+    metrics: [
+      { label: "Nakamoto coefficient", read: "The smaller it is, the fewer parties need to collude to halt or censor the chain." },
+      { label: "Client shares", read: "No client should approach two thirds of the network." },
+      { label: "Top entities' stake", read: "Share of stake held by the ten largest entities, including exchanges and liquid staking protocols." },
+      { label: "Hosting concentration", read: "Share of nodes in the largest cloud provider and in the largest country." },
+    ],
+    misconceptions: [
+      { myth: "Thousands of validators means a decentralised network.", reality: "If a few entities run most of them, the effective number is small." },
+      { myth: "Decentralisation is binary.", reality: "It is a spectrum across several dimensions, and a trade-off with performance." },
+      { myth: "A decentralised network cannot be changed.", reality: "Its rules change through coordination. The real question is who can force a change, and how easily." },
+    ],
+    risks: [
+      "Correlated failures from shared clients, clouds or operators.",
+      "Censorship by a few entities under legal or commercial pressure.",
+      "Capture of governance by a foundation, company or large holders.",
+    ],
+    quiz: [
+      {
+        question: "What does the Nakamoto coefficient measure?",
+        options: ["The number of nodes", "The minimum number of entities that together could halt or censor the chain", "The block time", "The number of tokens burned"],
+        answer: 1,
+        explanation: "It turns concentration into a single number: how many independent parties would need to collude.",
+      },
+      {
+        question: "Why does client diversity matter?",
+        options: ["It lowers fees", "A bug in a dominant client could stall the network or cause mass penalties", "It increases token supply", "It speeds up blocks"],
+        answer: 1,
+        explanation: "When software is diverse, a bug in one client affects only part of the network.",
+      },
+      {
+        question: "A chain has 2,000 validators, but three staking providers control 40% of the stake. What is the main concern?",
+        options: ["Nothing, 2,000 validators is plenty", "Together, those three could stop finality, being above one third", "Fees will rise", "The token will be delisted"],
+        answer: 1,
+        explanation: "On a BFT-style chain, more than one third of stake acting together can prevent finality.",
+      },
+    ],
+    sources: [
+      { title: "Client diversity", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/nodes-and-clients/client-diversity/" },
+      { title: "Client diversity dashboard", publisher: "clientdiversity.org", url: "https://clientdiversity.org" },
+      { title: "Proof-of-stake attack and defense", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/attack-and-defense/" },
+      { title: "Nodes and clients", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/nodes-and-clients/" },
+    ],
+  },
+
+  "burn-mechanisms": {
+    minute:
+      "A burn permanently removes tokens from supply. It can be built into the protocol, like Ethereum's burned base fee, or funded by revenue through buy-and-burn. A burn only matters if real usage pays for it, and only the net change, issuance minus burn, tells you whether supply is shrinking.",
+    steps: [
+      { title: "Destroy the tokens", text: "Tokens are sent to an address from which they can never be spent, or destroyed directly by the contract." },
+      { title: "Protocol burns", text: "Some protocols burn part of every fee automatically, as Ethereum does with the base fee since EIP-1559." },
+      { title: "Buy-and-burn", text: "Others use revenue to buy tokens on the market and burn them, linking token supply to business activity." },
+      { title: "Buyback and hold", text: "Tokens can also be bought and kept in a fund or treasury rather than destroyed: economically close, but they could return to circulation." },
+      { title: "Net it out", text: "Compare the burn with issuance and unlocks over a full market cycle, not just in a busy month." },
+    ],
+    visual: "table",
+    table: {
+      columns: ["Protocol burn", "Buy-and-burn", "Buyback and hold"],
+      rows: [
+        { label: "How it works", values: ["Fees destroyed by protocol rules", "Revenue buys tokens on the market, then destroys them", "Revenue buys tokens, kept in a fund or treasury"] },
+        { label: "Funded by", values: ["Usage fees", "Protocol revenue", "Protocol revenue"] },
+        { label: "Example in coverage", values: ["Ethereum base fee (EIP-1559)", "Uniswap UNIfication proposal", "Hyperliquid Assistance Fund"] },
+        { label: "What to check", values: ["Burn versus issuance", "Source of the revenue and buying price", "Whether the tokens can come back"] },
+      ],
+    },
+    visualCaption: "Three ways protocols reduce circulating supply, and the question to ask about each.",
+    example: {
+      projects: ["ethereum", "uniswap", "hyperliquid"],
+      title: "Burns across the coverage",
+      paragraphs: [
+        "Ethereum burns the base fee of every transaction. The dossier notes that since rollups moved their data to low-cost blobs, less fee has been burned on mainnet and net supply has trended inflationary: the burn depends on base-layer demand.",
+        "Uniswap's UNIfication proposal would burn UNI with protocol fees and Unichain sequencer fees, while Hyperliquid directs fees to an Assistance Fund that buys HYPE. Both tie the token to usage, the condition that makes a burn meaningful.",
+      ],
+    },
+    metrics: [
+      { label: "Net supply change", read: "Issuance and unlocks minus burns over the same period. The only number that says whether supply shrinks." },
+      { label: "What funds the burn", read: "Recurring user fees, or treasury reserves and one-off events." },
+      { label: "Burn as a share of supply", read: "How much of the supply is removed per year. Small percentages have small effects." },
+      { label: "Consistency across cycles", read: "Burns tied to activity shrink in quiet markets. Look at a full cycle." },
+    ],
+    misconceptions: [
+      { myth: "A deflationary token will go up.", reality: "Lower supply only helps if demand holds. Price depends on both." },
+      { myth: "Every burn returns value to holders.", reality: "Burns funded by the treasury or a one-off event create no new value; burns funded by recurring revenue do." },
+      { myth: "A large burn announcement means a large effect.", reality: "Compare the burn with total supply, and with issuance and unlocks over the same period." },
+    ],
+    risks: [
+      "Burns that fade when activity drops.",
+      "Marketing burns that do not reflect real revenue.",
+      "Regulatory scrutiny of revenue-funded buybacks.",
+    ],
+    quiz: [
+      {
+        question: "What determines whether a token's supply actually shrinks?",
+        options: ["The size of the largest burn", "Burns exceeding issuance and unlocks over the period", "The number of holders", "The price"],
+        answer: 1,
+        explanation: "Only the net change counts: tokens destroyed minus tokens created or unlocked.",
+      },
+      {
+        question: "Which burn creates the most durable value for holders?",
+        options: ["A one-time burn of treasury tokens", "A burn funded by recurring usage revenue", "A burn announced on social media", "A burn of tokens that were never in circulation"],
+        answer: 1,
+        explanation: "Recurring revenue keeps funding the burn; one-off burns do not change the economics.",
+      },
+      {
+        question: "Ethereum burns fees, yet its supply can grow. Why?",
+        options: ["The burn is reversed every year", "When issuance to validators exceeds the base fee burned", "Because of halvings", "Because burned ETH is re-minted"],
+        answer: 1,
+        explanation: "In quiet periods, the base fee burned is smaller than the new ETH paid to validators, so net supply rises.",
+      },
+    ],
+    sources: [
+      { title: "EIP-1559: Fee market change for ETH 1.0 chain", publisher: "Ethereum Improvement Proposals", url: "https://eips.ethereum.org/EIPS/eip-1559" },
+      { title: "Gas and fees", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/gas/" },
+      { title: "UNIfication", publisher: "Uniswap Labs blog", url: "https://blog.uniswap.org/unification" },
+      { title: "ETH supply dashboard", publisher: "ultrasound.money", url: "https://ultrasound.money" },
+    ],
+  },
+
+  "governance-tokens": {
+    minute:
+      "A governance token gives its holders a vote on a protocol's decisions: fee settings, treasury spending, upgrades. Voting rights are not cash-flow rights: many governance tokens give no direct claim on revenue, and real influence often sits with a few large holders and delegates.",
+    steps: [
+      { title: "Discuss", text: "Proposals usually start on a public forum, where delegates and the community debate them." },
+      { title: "Signal", text: "An off-chain poll often tests support before anything binding happens." },
+      { title: "Vote on-chain", text: "Token holders, or the delegates they chose, vote. A proposal needs a quorum and a majority to pass." },
+      { title: "Wait in a timelock", text: "Passed proposals wait for a delay before execution, giving users time to react or exit." },
+      { title: "Execute, or veto", text: "The change executes automatically. Some systems keep emergency powers for a council, or give another group a veto." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Forum", text: "Open debate on the proposal." },
+        { title: "Signal", text: "An off-chain poll of support." },
+        { title: "On-chain vote", text: "Quorum and majority required." },
+        { title: "Timelock", text: "A delay before anything changes." },
+        { title: "Execution", text: "The contracts apply the decision." },
+      ],
+      outcomes: { positive: "Transparent rules, delegated expertise and time to exit before changes apply.", negative: "Low turnout and concentrated votes can let a few holders steer the treasury." },
+    },
+    visualCaption: "The typical life of a DAO proposal.",
+    example: {
+      projects: ["arbitrum", "optimism", "lido"],
+      title: "How governance differs across the coverage",
+      paragraphs: [
+        "ARB, OP, UNI and LDO are governance tokens in Sensitor's coverage. The Arbitrum DAO controls a large treasury and sequencer revenue, but any distribution to ARB holders would require a governance decision. The Optimism Collective splits power between a Token House of OP holders and a Citizens' House.",
+        "Lido's Dual Governance goes further: stETH holders, not only LDO holders, are meant to be able to delay DAO decisions they object to, a check on the token holders themselves.",
+      ],
+    },
+    metrics: [
+      { label: "Voter turnout", read: "The share of supply that votes. Low turnout makes outcomes easier to capture." },
+      { label: "Concentration", read: "The share of voting power held by the top delegates and insiders." },
+      { label: "Treasury", read: "Its size, composition and spending: often the most important thing governance controls." },
+      { label: "Safeguards", read: "Proposal thresholds, quorum, timelocks and emergency powers." },
+    ],
+    misconceptions: [
+      { myth: "Holding a governance token entitles me to fees.", reality: "Only if governance decides so. Most governance tokens carry no automatic economic rights." },
+      { myth: "DAO decisions are decentralised by definition.", reality: "A few delegates or insiders often decide outcomes." },
+      { myth: "Governance can change anything instantly.", reality: "Timelocks, councils and on-chain limits constrain what can change, and how fast." },
+    ],
+    risks: [
+      "Capture by large holders or coordinated delegates.",
+      "Governance attacks with borrowed or bought voting power.",
+      "Treasury misuse and regulatory uncertainty over token holder rights.",
+    ],
+    quiz: [
+      {
+        question: "Does a governance token automatically give a share of revenue?",
+        options: ["Yes, always", "No, only if governance decides to distribute value", "Only on Ethereum", "Only after a halving"],
+        answer: 1,
+        explanation: "Voting rights and economic rights are separate; the second must be created by a decision.",
+      },
+      {
+        question: "Why do timelocks matter?",
+        options: ["They make votes cheaper", "They give users time to react or exit before a change executes", "They increase token supply", "They hide votes"],
+        answer: 1,
+        explanation: "A delay between approval and execution protects users from sudden harmful changes.",
+      },
+      {
+        question: "What is a governance attack?",
+        options: ["A hack of the website", "Acquiring or borrowing enough votes to pass a self-serving proposal", "A drop in turnout", "A fork of the code"],
+        answer: 1,
+        explanation: "If voting power can be bought or borrowed cheaply, an attacker can vote treasury funds to themselves.",
+      },
+    ],
+    sources: [
+      { title: "Decentralized autonomous organizations (DAOs)", publisher: "ethereum.org", url: "https://ethereum.org/en/dao/" },
+      { title: "A gentle introduction to Arbitrum DAO governance", publisher: "Arbitrum Foundation", url: "https://docs.arbitrum.foundation/gentle-intro-dao-governance" },
+      { title: "Welcome to the Optimism Collective", publisher: "Optimism Collective", url: "https://community.optimism.io/welcome/welcome-overview" },
+      { title: "Tally governance platform", publisher: "Tally", url: "https://www.tally.xyz" },
+    ],
+  },
+
+  "synthetic-dollars": {
+    minute:
+      "A synthetic dollar holds crypto collateral and opens an equal short position in perpetual futures, so that price moves cancel out and the combined value stays close to one dollar. It earns yield from funding payments and staking rewards, and carries risks that a cash-backed stablecoin does not.",
+    steps: [
+      { title: "Deposit collateral", text: "Users deposit assets such as BTC, ETH, liquid staking tokens or stable assets to mint the synthetic dollar." },
+      { title: "Hedge", text: "The protocol shorts perpetual futures of the same size, so a fall in the collateral's price is offset by a gain on the short: the position is delta-neutral." },
+      { title: "Keep custody separate", text: "Collateral sits with off-exchange custodians while serving as margin, which limits exposure to the failure of any single exchange." },
+      { title: "Earn yield", text: "Funding paid by longs when it is positive, plus staking rewards on the collateral, flows to holders who stake the token." },
+      { title: "Absorb stress", text: "When funding turns negative or redemptions surge, a reserve fund and the ability to shift backing to safer assets cushion the system." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Collateral", text: "BTC, ETH, staking tokens or stable assets." },
+        { title: "Mint", text: "The synthetic dollar is issued." },
+        { title: "Short perpetuals", text: "An equal short hedges the price." },
+        { title: "Delta-neutral", text: "Price moves cancel out." },
+        { title: "Yield", text: "Funding and staking rewards to stakers." },
+      ],
+      outcomes: {
+        positive: "Dollar exposure with crypto-native yield, scaling with derivatives markets rather than bank deposits.",
+        negative: "Depends on funding, exchanges, custodians and hedging; mass redemptions in a crash test its liquidity.",
+      },
+    },
+    visualCaption: "How a hedged position becomes a dollar, and where its yield comes from.",
+    example: {
+      projects: ["ethena"],
+      title: "Ethena's USDe",
+      paragraphs: [
+        "USDe is backed by crypto assets hedged with short perpetual futures, plus stable assets. Holders who stake it receive sUSDe, which earns yield from funding and staking rewards. A reserve fund is designed to absorb periods of negative funding, and USDtb, a separate stablecoin backed mainly by tokenised Treasury funds, can serve as backing when funding is unattractive.",
+        "The dossier notes that the smart contracts are relatively simple: the main risks are operational, in exchanges, custodians and the execution of the hedge.",
+      ],
+    },
+    metrics: [
+      { label: "Funding rates", read: "The main source of yield. Watch the level across exchanges and how long negative periods last." },
+      { label: "Reserve fund versus supply", read: "How many weeks of negative funding the buffer could cover." },
+      { label: "Collateral mix", read: "The share in volatile crypto versus stable assets, which changes the risk profile." },
+      { label: "Exchange and custodian concentration", read: "How much of the hedge sits with any single venue or custodian." },
+    ],
+    misconceptions: [
+      { myth: "A synthetic dollar is a stablecoin like USDC.", reality: "It is backed by a hedged crypto position, not by cash. Its risks are market structure and counterparties." },
+      { myth: "Delta-neutral means risk-free.", reality: "It removes exposure to price direction, not funding, basis, exchange or custody risk." },
+      { myth: "The yield is fixed.", reality: "It moves with funding rates and can approach zero or turn negative." },
+    ],
+    risks: [
+      "Long periods of negative funding that drain reserves.",
+      "The failure of an exchange or custodian holding part of the hedge.",
+      "Basis dislocations and mass redemptions during extreme volatility.",
+    ],
+    quiz: [
+      {
+        question: "What keeps a synthetic dollar's value stable?",
+        options: ["Cash in a bank", "A short perpetual position that offsets moves in the collateral's price", "A central bank guarantee", "Daily votes by holders"],
+        answer: 1,
+        explanation: "Long collateral plus an equal short leaves a position whose dollar value barely moves with price.",
+      },
+      {
+        question: "Where does most of the yield come from?",
+        options: ["Interest from bank deposits", "Funding payments and staking rewards", "Trading fees on the token", "New token issuance"],
+        answer: 1,
+        explanation: "Shorts receive funding when longs pay it, and staked collateral earns staking rewards.",
+      },
+      {
+        question: "What happens when funding turns negative for a long period?",
+        options: ["Yield rises", "The short position pays funding, so yield falls and reserves may be drawn down", "Nothing changes", "The protocol mints more tokens to compensate"],
+        answer: 1,
+        explanation: "Negative funding means shorts pay longs; the system's yield turns into a cost that the reserve must cover.",
+      },
+    ],
+    sources: [
+      { title: "How USDe works", publisher: "Ethena", url: "https://docs.ethena.fi/overview/how-usde-works" },
+      { title: "Reserve fund", publisher: "Ethena", url: "https://docs.ethena.fi/solution-design/reserve-fund" },
+      { title: "Protocol revenue", publisher: "Ethena", url: "https://docs.ethena.fi/backing-assets/protocol-revenue" },
+      { title: "Perpetual contracts guide", publisher: "BitMEX", url: "https://www.bitmex.com/app/perpetualContractsGuide" },
+    ],
+  },
 };
