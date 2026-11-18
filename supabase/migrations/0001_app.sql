@@ -120,17 +120,28 @@ alter table public.alerts enable row level security;
 drop policy if exists "alerts: own rows" on public.alerts;
 create policy "alerts: own rows" on public.alerts for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
+-- Active alerts per plan: Free 5, Pro and Research Club 50. Also checked
+-- when a paused alert is re-armed. (PL/pgSQL reads an IF condition up to the
+-- first THEN, so the limit is computed in a variable, not with an inline CASE.)
 create or replace function public.enforce_alert_limit() returns trigger
 language plpgsql security definer set search_path = public as $$
+declare
+  plan text;
+  max_active integer;
 begin
-  if (select count(*) from public.alerts where user_id = new.user_id and active) >= case when public.current_tier() = 'free' then 5 else 50 end then
+  if not new.active or (tg_op = 'UPDATE' and old.active) then
+    return new;
+  end if;
+  select tier into plan from public.profiles where id = new.user_id;
+  max_active := case when coalesce(plan, 'free') = 'free' then 5 else 50 end;
+  if (select count(*) from public.alerts where user_id = new.user_id and active and id <> new.id) >= max_active then
     raise exception 'Active alert limit reached for your plan' using errcode = 'P0001';
   end if;
   return new;
 end;
 $$;
 drop trigger if exists alert_limit on public.alerts;
-create trigger alert_limit before insert on public.alerts
+create trigger alert_limit before insert or update of active on public.alerts
   for each row execute function public.enforce_alert_limit();
 
 create table if not exists public.notifications (
@@ -177,3 +188,16 @@ language sql stable security definer set search_path = public as $$
   select count(*)::int from public.copilot_usage
   where user_id = auth.uid() and created_at >= date_trunc('day', now() at time zone 'utc') at time zone 'utc';
 $$;
+
+-- ---------------------------------------------------------------------
+-- Privileges. Explicit, so the script does not depend on the project's
+-- default grants. Row Level Security still filters every row.
+-- ---------------------------------------------------------------------
+revoke all on public.profiles, public.watchlist_items, public.portfolio_transactions, public.alerts, public.notifications, public.copilot_usage from anon;
+grant all on public.profiles, public.watchlist_items, public.portfolio_transactions, public.alerts, public.notifications, public.copilot_usage to service_role;
+grant select on public.profiles to authenticated;
+grant select, insert, update, delete on public.watchlist_items, public.portfolio_transactions, public.alerts to authenticated;
+grant select, delete on public.notifications to authenticated;
+grant select, insert on public.copilot_usage to authenticated;
+-- Column-level rights set above stay in force: profiles (display_name, locale,
+-- email_alerts) and notifications (read_at) are the only updatable columns.
