@@ -22,7 +22,7 @@ export const avalanche: Project = {
     explorer: "https://subnets.avax.network",
   },
   data: { coingeckoId: "avalanche-2", coinpaprikaId: "avax-avalanche", llamaChain: "Avalanche", llamaFees: "avalanche" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Avalanche: does a network of sovereign L1s compound value for AVAX?" },
   dossier: {
     overview: {
       summary:

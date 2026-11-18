@@ -22,7 +22,7 @@ export const bittensor: Project = {
     explorer: "https://taostats.io",
   },
   data: { coingeckoId: "bittensor", coinpaprikaId: "tao-bittensor" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Bittensor: can token incentives produce useful machine intelligence?" },
   dossier: {
     overview: {
       summary:

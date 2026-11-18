@@ -34,7 +34,7 @@ invité (données dans le navigateur) ; sans OpenAI, le Copilot l'indique ; sans
 | Section | Statut | Détails |
 |---|---|---|
 | Landing `/` | ✅ | Instantané de marché réel, présentation produit, plans |
-| Overview `/overview` | ✅ | Capitalisation totale, dominance BTC/ETH, Fear & Greed, *altcoin breadth*, régime de marché (BTC vs MM200), stablecoins, TVL DeFi, projets en focus, secteurs, watchlist, dates clés |
+| Overview `/overview` | ✅ | Terminal de recherche : contexte de marché daté (phrase factuelle calculée), bandeau capitalisation / dominance BTC / Fear & Greed / volume 24 h, dossier à la une (couverture = vrai graphique 1 an, rotation quotidienne), Market watch avec onglet watchlist, tuiles projets, flux de recherche (titres éditoriaux, temps de lecture), accès au Copilot, calendrier d'offre, graphique, tableau sectoriel et « développements » calculés à partir des données (source et heure sur chaque ligne) |
 | Explore `/explore` | ✅ | 20 projets, 13 secteurs, recherche instantanée, filtres (secteur, blockchain, market cap, volume, performance, risque, maturité, couverture), tri, sélection pour comparaison, filtres synchronisés dans l'URL |
 | Fiche projet `/projects/[slug]` | ✅ | Sections A→J : overview, technologie, tokenomics (graphes de distribution + courbe d'émission modélisée), adoption, fondamentaux financiers (DefiLlama), on-chain, concurrents (tableau + données live), risques, thèse (bull/neutral/bear, catalyseurs, hypothèses, invalidation), framework 7 piliers, « Learn by Research », sources |
 | Comparateur `/compare` | ✅ | Jusqu'à 4 projets : marché, fondamentaux, profil, piliers, forces/faiblesses |

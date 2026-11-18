@@ -23,7 +23,7 @@ export const chainlink: Project = {
     explorer: "https://data.chain.link",
   },
   data: { coingeckoId: "chainlink", coinpaprikaId: "link-chainlink", llamaFees: "chainlink" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Chainlink: can oracle leadership translate into token value?" },
   dossier: {
     overview: {
       summary:

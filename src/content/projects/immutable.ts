@@ -21,7 +21,7 @@ export const immutable: Project = {
     explorer: "https://explorer.immutable.com",
   },
   data: { coingeckoId: "immutable-x", coinpaprikaId: "imx-immutable-x", llamaChain: "Immutable zkEVM", llamaFees: "immutable-zkevm" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Immutable: how much of web3 gaming can one infrastructure stack capture?" },
   dossier: {
     overview: {
       summary:

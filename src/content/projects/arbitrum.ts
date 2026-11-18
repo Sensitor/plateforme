@@ -23,7 +23,7 @@ export const arbitrum: Project = {
     governance: "https://forum.arbitrum.foundation",
   },
   data: { coingeckoId: "arbitrum", coinpaprikaId: "arb-arbitrum", llamaChain: "Arbitrum", llamaFees: "arbitrum" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Arbitrum: can a governance token capture rollup economics?" },
   dossier: {
     overview: {
       summary:

@@ -22,7 +22,7 @@ export const celestia: Project = {
     explorer: "https://celenium.io",
   },
   data: { coingeckoId: "celestia", coinpaprikaId: "tia-celestia", llamaFees: "celestia" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Celestia: can data availability be a durable business?" },
   dossier: {
     overview: {
       summary:

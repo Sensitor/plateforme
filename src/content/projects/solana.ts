@@ -24,7 +24,7 @@ export const solana: Project = {
     governance: "https://github.com/solana-foundation/solana-improvement-documents",
   },
   data: { coingeckoId: "solana", coinpaprikaId: "sol-solana", llamaChain: "Solana", llamaFees: "solana" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Solana: what does a high-performance monolithic design trade away?" },
   dossier: {
     overview: {
       summary:

@@ -134,3 +134,48 @@ describe("copilot grounding", () => {
     expect(stripDashes("ETH \u2014 a settlement layer, 2015\u20132022")).toBe("ETH, a settlement layer, 2015-2022");
   });
 });
+
+describe("overview and editorial", async () => {
+  const { marketContext, buildDevelopments } = await import("@/lib/overview");
+  const { featuredDossierFor, readingMinutes, dossierTitle, researchFeed } = await import("@/lib/research/editorial");
+  const { PROJECTS } = await import("@/content/projects");
+  const src = { name: "X", url: "https://x" };
+  const ok = <T,>(data: T) => ({ status: "ok" as const, data, source: src, asOf: "2026-11-18T08:00:00Z" });
+  const none = { status: "unavailable" as const, data: null, source: null, asOf: null };
+
+  it("writes a factual market context and skips missing parts", () => {
+    const s = marketContext({ totalMarketCap: 2.19e12, totalVolume24h: 7e10, marketCapChange24h: -2.3, btcDominance: 59, ethDominance: 10, activeCryptocurrencies: 1 }, null, { value: 11, classification: "Extreme Fear", t: 0 });
+    expect(s).toBe("Total crypto market cap $2.19T, down 2.3% over 24 hours. Sentiment: Extreme Fear (11).");
+    expect(marketContext(null, null, null)).toBeNull();
+  });
+  it("derives developments only from available data, with sources", () => {
+    const d = buildDevelopments({
+      regime: ok({ price: 64000, ma200: 72000, ma50: 0, distancePct: -11.1, regime: "below-200d" as const, series: [], maSeries: [] }),
+      breadth: none, fng: none, defi: none,
+      stables: ok({ totalCirculating: 2.88e11, change30dPct: -5.29, top: [], series: [] }),
+      quotes: ok({ solana: { change24h: 3.6 } as never, ethereum: { change24h: -0.5 } as never }),
+      names: { solana: "Solana" },
+    });
+    expect(d.map((x) => x.id)).toEqual(["regime", "stables", "mover"]);
+    expect(d[0].text).toBe("Bitcoin at $64,000.00 is 11.1% below its 200-day average ($72,000.00).");
+    expect(d[1].text).toContain("shrank 5.3%");
+    expect(d[2].text).toContain("Solana");
+    expect(d.every((x) => x.source && x.asOf)).toBe(true);
+  });
+  it("rotates the featured dossier daily among featured projects", () => {
+    const a = featuredDossierFor(new Date("2026-11-18T10:00:00Z"));
+    const b = featuredDossierFor(new Date("2026-11-18T23:00:00Z"));
+    const c = featuredDossierFor(new Date("2026-11-19T01:00:00Z"));
+    expect(a.slug).toBe(b.slug);
+    expect(a.featured).toBe(true);
+    expect(c.slug).not.toBe(a.slug);
+  });
+  it("gives every dossier a headline without live figures and a reading time", () => {
+    for (const p of PROJECTS) {
+      expect(dossierTitle(p).startsWith(p.name.split(" ")[0])).toBe(true);
+      expect(p.editorial.headline).not.toMatch(/\$|\d+(\.\d+)?%/);
+      expect(readingMinutes(p)).toBeGreaterThanOrEqual(1);
+    }
+    expect(researchFeed()[0].featured).toBe(true);
+  });
+});

@@ -22,7 +22,7 @@ export const sui: Project = {
     explorer: "https://suiscan.xyz",
   },
   data: { coingeckoId: "sui", coinpaprikaId: "sui-sui", llamaChain: "Sui", llamaFees: "sui" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Sui: can parallel execution and Move win developers?" },
   dossier: {
     overview: {
       summary:

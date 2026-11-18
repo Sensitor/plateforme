@@ -21,7 +21,7 @@ export const lido: Project = {
     governance: "https://research.lido.fi",
   },
   data: { coingeckoId: "lido-dao", coinpaprikaId: "ldo-lido-dao", llamaProtocol: "lido", llamaFees: "lido" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Lido: how much stake concentration can Ethereum tolerate?" },
   dossier: {
     overview: {
       summary:

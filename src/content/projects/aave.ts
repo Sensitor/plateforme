@@ -22,7 +22,7 @@ export const aave: Project = {
     governance: "https://governance.aave.com",
   },
   data: { coingeckoId: "aave", coinpaprikaId: "aave-new", llamaProtocol: "aave", llamaFees: "aave" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Aave: what sustains the largest lending market across chains?" },
   dossier: {
     overview: {
       summary:

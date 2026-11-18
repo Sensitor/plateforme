@@ -24,7 +24,7 @@ export const ethereum: Project = {
     governance: "https://eips.ethereum.org",
   },
   data: { coingeckoId: "ethereum", coinpaprikaId: "eth-ethereum", llamaChain: "Ethereum", llamaFees: "ethereum" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Ethereum: can the settlement layer capture value from its rollups?" },
   dossier: {
     overview: {
       summary:

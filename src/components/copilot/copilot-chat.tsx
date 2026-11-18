@@ -127,6 +127,22 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
     }
   }
 
+  // Questions sent from elsewhere (Overview "Ask the research"): /copilot?q=...&send=1
+  const autoSent = useRef(false);
+  useEffect(() => {
+    if (autoSent.current) return;
+    const q = params.get("q")?.trim();
+    if (params.get("send") !== "1" || !q) return;
+    autoSent.current = true;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("send");
+    url.searchParams.delete("q");
+    window.history.replaceState(null, "", url.toString());
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-off question handed over by URL, sent after mount
+    void ask(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, []);
+
   const disabledReason = quota.data && !quota.data.configured ? "The Copilot is not configured on this deployment." : needsProjects ? (mode === "analyze" ? "Pick a project first." : "Pick at least two projects.") : null;
 
   return (

@@ -22,7 +22,7 @@ export const layerzero: Project = {
     explorer: "https://layerzeroscan.com",
   },
   data: { coingeckoId: "layerzero", coinpaprikaId: "zro-layerzero", llamaFees: "layerzero" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "LayerZero: who secures omnichain messages?" },
   dossier: {
     overview: {
       summary:

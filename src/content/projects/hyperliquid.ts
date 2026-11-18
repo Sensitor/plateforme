@@ -21,7 +21,7 @@ export const hyperliquid: Project = {
     explorer: "https://app.hyperliquid.xyz/explorer",
   },
   data: { coingeckoId: "hyperliquid", coinpaprikaId: "hype-hyperliquid", llamaProtocol: "hyperliquid", llamaFees: "hyperliquid" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Hyperliquid: can a fully on-chain order book compete with centralised venues?" },
   dossier: {
     overview: {
       summary:

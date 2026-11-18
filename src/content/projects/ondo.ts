@@ -20,7 +20,7 @@ export const ondo: Project = {
     github: "https://github.com/ondoprotocol",
   },
   data: { coingeckoId: "ondo-finance", coinpaprikaId: "ondo-ondo", llamaFees: "ondo-finance" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Ondo: what does tokenising Treasuries change for on-chain finance?" },
   dossier: {
     overview: {
       summary:

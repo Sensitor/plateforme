@@ -22,7 +22,7 @@ export const optimism: Project = {
     governance: "https://gov.optimism.io",
   },
   data: { coingeckoId: "optimism", coinpaprikaId: "op-optimism", llamaChain: "OP Mainnet", llamaFees: "op-mainnet" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Optimism: can the Superchain turn shared revenue into token value?" },
   dossier: {
     overview: {
       summary:

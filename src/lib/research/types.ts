@@ -270,6 +270,8 @@ export interface EditorialInfo {
   author: string;
   reviewer?: string;
   version: string;
+  /** Editorial headline, framed as the question the dossier examines (no live figures). */
+  headline?: string;
 }
 
 export interface Project {

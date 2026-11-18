@@ -22,7 +22,7 @@ export const uniswap: Project = {
     governance: "https://gov.uniswap.org",
   },
   data: { coingeckoId: "uniswap", coinpaprikaId: "uni-uniswap", llamaProtocol: "uniswap", llamaFees: "uniswap" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Uniswap: how do fees reach UNI holders after UNIfication?" },
   dossier: {
     overview: {
       summary:

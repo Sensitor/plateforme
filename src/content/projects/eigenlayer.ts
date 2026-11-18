@@ -21,7 +21,7 @@ export const eigenlayer: Project = {
     github: "https://github.com/Layr-Labs",
   },
   data: { coingeckoId: "eigenlayer", coinpaprikaId: "eigen-eigenlayer", llamaProtocol: "eigenlayer", llamaFees: "eigenlayer" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "EigenLayer: what is shared security worth, and what does it risk?" },
   dossier: {
     overview: {
       summary:

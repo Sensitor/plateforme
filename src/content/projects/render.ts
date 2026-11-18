@@ -21,7 +21,7 @@ export const render: Project = {
     governance: "https://github.com/rendernetwork/RNPs",
   },
   data: { coingeckoId: "render-token", coinpaprikaId: "rndr-render-token" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Render: can one GPU network serve both rendering and AI compute?" },
   dossier: {
     overview: {
       summary:

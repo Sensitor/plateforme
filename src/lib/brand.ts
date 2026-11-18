@@ -51,3 +51,19 @@ export function tint(hex: string, alpha: number): string {
   const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
+
+/**
+ * Project accents are brand colours chosen for light backgrounds; some are
+ * too dark (or too grey) to read on Sensitor's midnight surfaces. This lifts
+ * very dark accents towards white so lines and labels stay visible.
+ */
+export function readableAccent(hex: string): string {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
+  const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  const lum = (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
+  if (lum >= 0.32) return hex;
+  const mix = Math.min(0.6, 0.32 - lum + 0.25);
+  const out = rgb.map((c) => Math.round(c + (255 - c) * mix));
+  return `#${out.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
+}

@@ -24,7 +24,7 @@ export const bitcoin: Project = {
     governance: "https://github.com/bitcoin/bips",
   },
   data: { coingeckoId: "bitcoin", coinpaprikaId: "btc-bitcoin", llamaFees: "bitcoin" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Bitcoin: how does a fixed-supply network pay for its security?" },
   dossier: {
     overview: {
       summary:

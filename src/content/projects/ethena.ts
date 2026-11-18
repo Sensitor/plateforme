@@ -21,7 +21,7 @@ export const ethena: Project = {
     governance: "https://gov.ethenafoundation.com",
   },
   data: { coingeckoId: "ethena", coinpaprikaId: "ena-ethena", llamaProtocol: "ethena-usde", llamaFees: "ethena" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1" },
+  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Ethena: how resilient is a synthetic dollar built on hedged collateral?" },
   dossier: {
     overview: {
       summary:
