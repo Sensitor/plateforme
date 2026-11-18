@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Award, BookMarked, ClipboardCheck, Route, Video } from "lucide-react";
-import { CONCEPT_DEEP } from "@/content/academy-deep";
+import { START_HERE } from "@/content/academy-deep";
 import { lessonMinutes } from "@/lib/academy/lesson";
 import { LessonPath, type PathLesson } from "@/components/academy/lesson-path";
 import { ACADEMY_CATEGORIES, CONCEPTS } from "@/content/concepts";
@@ -23,7 +23,7 @@ const COMING = [
 export default function AcademyPage() {
   const usage: Record<string, number> = {};
   for (const p of PROJECTS) for (const c of p.dossier.concepts) usage[c] = (usage[c] ?? 0) + 1;
-  const path: PathLesson[] = Object.keys(CONCEPT_DEEP)
+  const path: PathLesson[] = START_HERE
     .map((slug) => CONCEPTS.find((c) => c.slug === slug)!)
     .map((c) => ({ slug: c.slug, title: c.title, summary: c.summary, category: c.category, categoryLabel: ACADEMY_CATEGORIES.find((x) => x.id === c.category)!.label, minutes: lessonMinutes(c) }));
   const counts = Object.fromEntries(ACADEMY_CATEGORIES.map((c) => [c.id, CONCEPTS.filter((x) => x.category === c.id).length]));
@@ -44,7 +44,7 @@ export default function AcademyPage() {
           </h1>
           <p className="mt-4 text-[16px] leading-relaxed text-fg-2">
             Every dossier links to the concepts it relies on. Read an analysis, open the concept you need, come back with the right vocabulary. {CONCEPTS.length} explainers
-            across eight tracks, {path.length} of them as in-depth lessons with step-by-step mechanics, worked examples from our research and a quiz.
+            across eight tracks, each an in-depth lesson with step-by-step mechanics, a worked example from our research, a visual and a quiz.
           </p>
         </div>
       </header>
@@ -76,13 +76,13 @@ export default function AcademyPage() {
       </section>
 
       <section>
-        <SectionTitle title="Start here: in-depth lessons" description="The fundamentals, in a suggested order. Each lesson ends with a three-question quiz; passing it marks the lesson as completed." />
+        <SectionTitle title="Start here: in-depth lessons" description="Ten fundamentals, in a suggested order. Every lesson ends with a three-question quiz; passing it marks the lesson as completed." />
         <LessonPath lessons={path} />
       </section>
 
       <section>
-        <SectionTitle title="Concept library" description="Search or filter by track. Each concept shows where it is used in our research." />
-        <ConceptBrowser concepts={CONCEPTS} usage={usage} deep={Object.keys(CONCEPT_DEEP)} />
+        <SectionTitle title="All lessons" description="Search or filter by track. Each lesson shows where the concept is used in our research, and whether you completed it." />
+        <ConceptBrowser concepts={CONCEPTS} usage={usage} />
       </section>
 
       <section>

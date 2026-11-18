@@ -14,7 +14,7 @@ import { ConceptQuiz } from "@/components/academy/concept-quiz";
 import { LessonStatus } from "@/components/academy/lesson-status";
 import { ComparisonTable, ContractsDiagram, FlowFromSpec, HalvingChart, PosDiagram, PowDiagram, RollupDiagram, StablecoinModels, VestingChart } from "@/components/academy/visuals";
 import { AmmSimulator, DiversificationSimulator, FeeCalculator, FundingCalculator, HealthFactorCalculator, RecoveryCalculator } from "@/components/academy/interactive";
-import { KeyDatesTable, McapFdvSkeleton, McapFdvTable, TvlTable } from "@/components/academy/live";
+import { BtcDrawdownChart, FearGreedHistory, KeyDatesTable, McapFdvSkeleton, McapFdvTable, RegimeChart, TvlTable } from "@/components/academy/live";
 import { Toc, type TocItem } from "@/components/research/toc";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TokenLogo } from "@/components/ui/token-logo";
@@ -58,9 +58,23 @@ function Visual({ kind, deep, color }: { kind: ConceptVisual; deep: ConceptDeep;
         </Suspense>
       );
     case "fear-greed-live":
+      return (
+        <Suspense fallback={<McapFdvSkeleton />}>
+          <FearGreedHistory />
+        </Suspense>
+      );
     case "btc-drawdown":
+      return (
+        <Suspense fallback={<McapFdvSkeleton />}>
+          <BtcDrawdownChart />
+        </Suspense>
+      );
     case "regime-live":
-      return null;
+      return (
+        <Suspense fallback={<McapFdvSkeleton />}>
+          <RegimeChart />
+        </Suspense>
+      );
     case "pow":
       return <PowDiagram color={color} />;
     case "pos":
@@ -132,11 +146,6 @@ async function ConceptContent({ params }: { params: Promise<{ slug: string }> })
             <span className="inline-flex items-center gap-1.5 text-[11.5px] text-muted">
               <Clock className="size-3.5" aria-hidden /> {minutes} min
             </span>
-            {deep ? (
-              <span className="rounded-md px-1.5 py-0.5 text-[11px] font-medium" style={{ backgroundColor: tint(color, 0.16), color }}>
-                In-depth lesson
-              </span>
-            ) : null}
             <LessonStatus slug={c.slug} />
           </div>
           <h1 className="serif-display mt-3 text-[42px] leading-[1.03] text-fg md:text-[52px]">{c.title}</h1>
@@ -193,7 +202,6 @@ function PracticeAndRelated({ c }: { c: Concept }) {
                 <span className="absolute inset-x-0 top-0 h-[3px]" style={{ backgroundColor: ACADEMY_COLORS[r.category] }} aria-hidden />
                 <div className="serif-display text-[21px] leading-tight text-fg">{r.title}</div>
                 <p className="mt-1 text-[12.5px] text-muted">{r.summary}</p>
-                {CONCEPT_DEEP[r.slug] ? <span className="mt-2 inline-block text-[11px] text-subtle">In-depth lesson</span> : null}
               </Link>
             ))}
           </div>
@@ -286,6 +294,20 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
               </p>
             ))}
           </div>
+          {deep.example.live === "btc-drawdown" ? (
+            <div className="mt-5">
+              <Suspense fallback={<McapFdvSkeleton />}>
+                <BtcDrawdownChart />
+              </Suspense>
+            </div>
+          ) : null}
+          {deep.example.live === "regime" ? (
+            <div className="mt-5">
+              <Suspense fallback={<McapFdvSkeleton />}>
+                <RegimeChart />
+              </Suspense>
+            </div>
+          ) : null}
           {deep.example.live === "key-dates" ? (
             <div className="mt-5">
               <KeyDatesTable />

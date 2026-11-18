@@ -7,6 +7,9 @@
  */
 import type { ConceptDeep } from "./concepts";
 
+/** Suggested first path through the Academy: the fundamentals, in order. */
+export const START_HERE = ["proof-of-work", "proof-of-stake", "smart-contracts", "gas-fees", "halving", "stablecoins", "amm", "layer-2-rollups", "market-cap-vs-fdv", "token-unlocks"];
+
 export const CONCEPT_DEEP: Record<string, ConceptDeep> = {
   "proof-of-work": {
     minute:
@@ -1886,6 +1889,417 @@ export const CONCEPT_DEEP: Record<string, ConceptDeep> = {
       { title: "Reserve fund", publisher: "Ethena", url: "https://docs.ethena.fi/solution-design/reserve-fund" },
       { title: "Protocol revenue", publisher: "Ethena", url: "https://docs.ethena.fi/backing-assets/protocol-revenue" },
       { title: "Perpetual contracts guide", publisher: "BitMEX", url: "https://www.bitmex.com/app/perpetualContractsGuide" },
+    ],
+  },
+
+  "rwa-tokenization": {
+    minute:
+      "Real-world asset tokenisation puts claims on off-chain assets, such as government bonds, funds, loans or shares, into tokens. The token moves like any crypto asset, but its value rests on a legal structure, an issuer and custodians in the traditional financial system.",
+    steps: [
+      { title: "Structure", text: "An issuer sets up a legal vehicle, such as a fund, a note or a special purpose vehicle, that holds the underlying asset." },
+      { title: "Custody", text: "A custodian or transfer agent holds the assets and keeps the official register of who owns what." },
+      { title: "Issue tokens", text: "Tokens representing shares or claims are minted on-chain. Smart contracts enforce allowlists and transfer restrictions where securities rules require them." },
+      { title: "Distribute", text: "Investors who pass identity checks subscribe or redeem. Tokens can move on-chain at any time, while subscriptions and redemptions follow the vehicle's own schedule." },
+      { title: "Use on-chain", text: "Within their permissions, tokens can serve as collateral or as backing for stablecoins and other products." },
+    ],
+    visual: "table",
+    table: {
+      columns: ["Tokenised Treasury fund", "Yield-bearing note", "Tokenised stocks"],
+      rows: [
+        { label: "What you hold", values: ["Shares of a fund holding short-term US Treasuries", "A note secured by Treasuries and bank deposits", "Exposure to US-listed stocks and ETFs"] },
+        { label: "Who can access", values: ["Usually qualified or institutional investors", "Non-US persons, after identity checks", "Eligible non-US investors"] },
+        { label: "Main risks", values: ["Issuer, custodian and fund structure", "Issuer solvency and legal terms", "Issuer, custody and how closely the token tracks the share"] },
+        { label: "Example in coverage", values: ["Ondo OUSG", "Ondo USDY", "Ondo Global Markets"] },
+      ],
+    },
+    visualCaption: "Three families of tokenised real-world assets, with examples from the Ondo dossier.",
+    example: {
+      projects: ["ondo"],
+      title: "Ondo: tokenised Treasuries and beyond",
+      paragraphs: [
+        "OUSG gives tokenised exposure to short-term US Treasuries, partly through tokenised funds such as BlackRock's BUIDL. USDY is a tokenised note secured by short-term Treasuries and bank deposits, available to non-US persons. Ondo Global Markets extends the model to US-listed stocks and ETFs for eligible non-US investors.",
+        "The dossier stresses that the primary risks are legal and operational rather than consensus-level: holders rely on off-chain legal claims and on the solvency of the issuing entities, and permissioned access limits composability with open DeFi.",
+      ],
+    },
+    metrics: [
+      { label: "Assets in the vehicle", read: "How much is held in the underlying fund or note, and whether it is independently audited or attested." },
+      { label: "Yield versus the underlying", read: "The token's yield compared with the rate on the underlying asset, after fees." },
+      { label: "Redemption terms", read: "Who can redeem, how fast, with what minimum, and what happens if the issuer suspends redemptions." },
+      { label: "Legal chain", read: "Issuer, jurisdiction, custodian and transfer agent: each one is a point that must hold." },
+    ],
+    misconceptions: [
+      { myth: "Owning the token means owning the asset directly.", reality: "You usually own a claim on a vehicle that owns the asset. Your rights depend on its legal terms." },
+      { myth: "Tokenised assets trade freely like any token.", reality: "Many carry transfer restrictions and allowlists required by securities law." },
+      { myth: "On-chain settlement removes traditional risks.", reality: "The chain settles the token; the asset itself still depends on traditional custodians, markets and courts." },
+    ],
+    risks: [
+      "Issuer insolvency or a dispute over the legal claim.",
+      "Custodian and operational failures off-chain.",
+      "Regulatory changes that restrict who may hold or trade the tokens.",
+    ],
+    quiz: [
+      {
+        question: "What does a tokenised Treasury fund token usually represent?",
+        options: ["A Treasury bond held directly in your wallet", "A claim on shares of a legal vehicle that holds Treasuries", "A stablecoin issued by the US government", "A governance vote on interest rates"],
+        answer: 1,
+        explanation: "The token is a digital representation of an interest in a fund or note; the bonds stay with the vehicle's custodian.",
+      },
+      {
+        question: "Why do many real-world asset tokens restrict transfers?",
+        options: ["To reduce gas fees", "Because securities rules limit who may hold them", "Because the tokens have no value", "To prevent price changes"],
+        answer: 1,
+        explanation: "Allowlists and identity checks let issuers comply with the rules that apply to the underlying security.",
+      },
+      {
+        question: "What is the main class of risk for tokenised real-world assets?",
+        options: ["Consensus failures of the blockchain", "Legal and operational risk: issuer, custody, jurisdiction", "Mining centralisation", "Oracle latency only"],
+        answer: 1,
+        explanation: "The chain usually works fine; what can fail is the off-chain structure that gives the token its value.",
+      },
+    ],
+    sources: [
+      { title: "Ondo Finance documentation", publisher: "Ondo Finance", url: "https://docs.ondo.finance" },
+      { title: "OUSG", publisher: "Ondo Finance", url: "https://docs.ondo.finance/qualified-access-products/ousg" },
+      { title: "USDY", publisher: "Ondo Finance", url: "https://docs.ondo.finance/general-access-products/usdy" },
+    ],
+  },
+
+  depin: {
+    minute:
+      "DePIN, decentralised physical infrastructure networks, pays people in tokens to contribute real-world resources such as GPUs, storage, wireless coverage or sensors, and sells the resulting service to users. Token rewards can bootstrap supply quickly; whether users actually pay for the service is the real test.",
+    steps: [
+      { title: "Contribute", text: "Providers connect hardware to the network: a GPU, a hard drive, a wireless hotspot, a sensor." },
+      { title: "Coordinate", text: "The network matches users' jobs or requests with providers and checks that the work was done, often partly off-chain." },
+      { title: "Pay", text: "Users pay for the service, usually priced in fiat terms so that costs are predictable." },
+      { title: "Burn and mint", text: "In a burn-and-mint model, payments burn tokens while providers receive newly minted emissions, so supply shrinks when paid demand outgrows emissions." },
+      { title: "Hand over to demand", text: "Emissions reward early providers before demand exists. Over time, paid usage has to take over from subsidies." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Providers", text: "Connect GPUs, storage, radios or sensors." },
+        { title: "Network", text: "Matches jobs with providers and checks the work." },
+        { title: "Users", text: "Pay for the service, priced in fiat terms." },
+        { title: "Burn", text: "Payments burn tokens." },
+        { title: "Mint", text: "Providers earn newly minted tokens." },
+      ],
+      outcomes: {
+        positive: "Paid demand above emissions: supply growth is earned, and burns can exceed new tokens.",
+        negative: "Rewards without paying users: providers are paid in dilution and leave when the token falls.",
+      },
+    },
+    visualCaption: "A DePIN network's economic loop, in a burn-and-mint design.",
+    example: {
+      projects: ["render"],
+      title: "Render: GPUs for rendering and AI",
+      paragraphs: [
+        "Render pays GPU node operators to render 3D scenes and, increasingly, to run AI workloads. Users pay for jobs priced in fiat terms; under its burn-and-mint model, tokens equivalent to the job value are burned while operators receive new emissions.",
+        "The dossier is candid about the limits: verifying rendering or AI output is mostly handled off-chain through reputation and review, so work verification is not trustless, and competing with large cloud providers on reliability is difficult.",
+      ],
+    },
+    metrics: [
+      { label: "Paid demand versus emissions", read: "Revenue from users compared with the value of tokens paid to providers. The core sustainability test." },
+      { label: "Utilisation", read: "How much of the supplied capacity is actually used. Idle supply means rewards are paying for nothing." },
+      { label: "Price versus centralised alternatives", read: "Whether the service is cheaper or better than a cloud provider for the same job." },
+      { label: "Provider retention", read: "How many providers stay when token rewards fall." },
+    ],
+    misconceptions: [
+      { myth: "More nodes means a successful network.", reality: "Supply is easy to buy with token rewards. Paid demand is what proves the network works." },
+      { myth: "DePIN runs entirely on-chain.", reality: "Hardware, job routing and verification usually happen off-chain; the chain handles payments and rewards." },
+      { myth: "Burn-and-mint guarantees a falling supply.", reality: "Supply only falls when burns from paid usage exceed emissions." },
+    ],
+    risks: [
+      "Demand subsidised by the token rather than paid by users.",
+      "Off-chain verification that depends on a central operator.",
+      "Competition from large, reliable centralised providers.",
+    ],
+    quiz: [
+      {
+        question: "What is the real test of a DePIN network?",
+        options: ["The number of providers", "Users paying for the service, not just supply growing", "The token's listing on exchanges", "The size of the airdrop"],
+        answer: 1,
+        explanation: "Token rewards can attract supply without any demand; paid usage shows the service is worth buying.",
+      },
+      {
+        question: "In a burn-and-mint model, when does token supply shrink?",
+        options: ["Every month", "When tokens burned by paid usage exceed new emissions", "When providers leave", "Never"],
+        answer: 1,
+        explanation: "Burns come from users' payments, emissions go to providers; supply falls only if the first outweighs the second.",
+      },
+      {
+        question: "Why is verifying work a challenge for DePIN?",
+        options: ["Because blockchains are slow", "Because physical or off-chain work is hard to prove trustlessly on-chain", "Because users refuse to pay", "Because tokens cannot be burned"],
+        answer: 1,
+        explanation: "A chain cannot see that a GPU rendered a scene correctly or that a hotspot provided coverage without some trusted reporting.",
+      },
+    ],
+    sources: [
+      { title: "Burn Mint Equilibrium", publisher: "Render Network Knowledge Base", url: "https://know.rendernetwork.com/basics/burn-mint-equilibrium" },
+      { title: "Render Network Knowledge Base", publisher: "Render Network", url: "https://know.rendernetwork.com" },
+      { title: "Helium documentation", publisher: "Helium", url: "https://docs.helium.com" },
+    ],
+  },
+
+  diversification: {
+    minute:
+      "Diversification means holding assets that do not all move together, so that one loss can be offset by another. In crypto it is harder than it looks: most tokens move with Bitcoin, especially in sell-offs, and many share the same chains, oracles or stablecoins.",
+    steps: [
+      { title: "Correlation", text: "A number from -1 to +1 describing how two assets' returns move together. At +1 they move in lockstep; at 0 they are unrelated." },
+      { title: "Portfolio volatility", text: "Combining assets whose correlation is below +1 gives a portfolio less volatile than the weighted average of its parts." },
+      { title: "Crypto correlations", text: "Most large tokens are strongly correlated with Bitcoin, so ten tokens can behave much like one position." },
+      { title: "Hidden dependencies", text: "Protocols that rely on the same chain, oracle, bridge or stablecoin can fail together, even if their prices usually diverge." },
+      { title: "Practical tools", text: "Position limits, a stablecoin or cash allocation, sector balance and periodic rebalancing are simple ways to control concentration." },
+    ],
+    visual: "diversification",
+    visualCaption: "Try it: lower the correlation and watch portfolio volatility fall below the average of the two assets. Illustrative inputs.",
+    example: {
+      projects: ["aave", "chainlink", "arbitrum"],
+      title: "Dependencies in the coverage",
+      paragraphs: [
+        "Sensitor's Knowledge Graph maps dependencies between covered projects: Aave relies on Chainlink price feeds, Arbitrum and OP Mainnet settle on Ethereum, Lido and EigenLayer build on staked ETH. Three positions in that cluster are partly one bet on Ethereum's ecosystem.",
+        "The Portfolio page applies this to your own holdings: alongside allocation by asset and sector, it shows ecosystems, shared dependencies, a concentration index and the correlation of daily returns between your positions.",
+      ],
+    },
+    metrics: [
+      { label: "Correlation with Bitcoin", read: "How much of each position simply follows the market. High values mean little diversification." },
+      { label: "Largest position weight", read: "A single position above a fixed share of the portfolio dominates its outcome." },
+      { label: "Ecosystem exposure", read: "The share of the portfolio that depends on one chain or one infrastructure provider." },
+      { label: "Concentration index", read: "The sum of squared weights (HHI). The Portfolio page computes it; higher means more concentrated." },
+    ],
+    misconceptions: [
+      { myth: "Owning many tokens means being diversified.", reality: "If they all move with Bitcoin or depend on the same chain, the portfolio behaves like a few positions." },
+      { myth: "Low correlation protects you in a crash.", reality: "Correlations measured in calm periods tend to rise in sell-offs, exactly when protection is needed." },
+      { myth: "Diversification increases returns.", reality: "It mainly reduces volatility and the impact of any single failure; it can also dilute the best performer." },
+    ],
+    risks: [
+      "Correlations jumping towards one during market stress.",
+      "Failures in shared dependencies hitting several positions at once.",
+      "Spreading into many small, illiquid tokens in the name of diversification.",
+    ],
+    quiz: [
+      {
+        question: "What does a correlation of +1 between two assets mean?",
+        options: ["They move in opposite directions", "Their returns move in lockstep", "They are unrelated", "One is a stablecoin"],
+        answer: 1,
+        explanation: "At +1, combining the two gives no diversification benefit at all.",
+      },
+      {
+        question: "Why does diversification often disappoint during crypto crashes?",
+        options: ["Because exchanges close", "Because correlations between assets tend to rise in sell-offs", "Because stablecoins lose value", "Because fees rise"],
+        answer: 1,
+        explanation: "In a broad sell-off, most tokens fall together, so the offsetting effect largely disappears.",
+      },
+      {
+        question: "Two tokens run on the same chain and use the same oracle. What hidden risk do they share?",
+        options: ["None if their prices differ", "A failure in the shared chain or oracle can hit both at once", "They will always have the same price", "They cannot be held together"],
+        answer: 1,
+        explanation: "Shared infrastructure is a common point of failure that price correlations do not show.",
+      },
+    ],
+    sources: [
+      { title: "Modern portfolio theory", publisher: "Wikipedia", url: "https://en.wikipedia.org/wiki/Modern_portfolio_theory" },
+      { title: "Diversification (finance)", publisher: "Wikipedia", url: "https://en.wikipedia.org/wiki/Diversification_(finance)" },
+      { title: "Crypto shocks and retail losses (BIS Bulletin No 69)", publisher: "Bank for International Settlements", url: "https://www.bis.org/publ/bisbull69.htm" },
+    ],
+  },
+
+  drawdowns: {
+    minute:
+      "A drawdown is the fall from a peak to a later low. Crypto assets have gone through drawdowns of 70% or more several times, and losses compound asymmetrically: a 50% loss needs a 100% gain to break even. Sizing positions for realistic drawdowns is the core of risk management.",
+    steps: [
+      { title: "Mark the peak", text: "Track the highest value reached so far by the asset or the portfolio." },
+      { title: "Measure the fall", text: "Drawdown = current value ÷ previous peak - 1. It is always zero or negative." },
+      { title: "Maximum drawdown", text: "The deepest fall over a period: the worst case that a holder actually lived through." },
+      { title: "Recovery time", text: "How long it took to regain the previous peak. It can take years, and many tokens never recover." },
+      { title: "Size for it", text: "Choose position sizes so that a realistic drawdown is bearable, financially and emotionally, without forced selling." },
+    ],
+    visual: "recovery",
+    visualCaption: "Try it: the gain needed to recover grows much faster than the loss.",
+    example: {
+      projects: ["bitcoin"],
+      title: "Bitcoin's drawdowns, computed from price history",
+      paragraphs: [
+        "Even Bitcoin, the largest and most liquid crypto asset, has repeatedly traded far below its previous highs. The chart computes its drawdown from price history: each dip shows how far it stood below its prior peak.",
+        "Smaller tokens have typically fallen further and recovered less often. Dossier pages show each project's distance from its all-time high as live data, never as a fixed number in the text.",
+      ],
+      live: "btc-drawdown",
+    },
+    metrics: [
+      { label: "Maximum drawdown", read: "The deepest peak-to-trough fall over a period. Compare it with what you could tolerate." },
+      { label: "Current drawdown", read: "How far below its peak an asset trades today." },
+      { label: "Volatility", read: "The size of typical moves, usually annualised. Higher volatility means deeper drawdowns are more likely." },
+      { label: "Recovery time", read: "How long past drawdowns took to recover, if they did." },
+    ],
+    misconceptions: [
+      { myth: "A token down 90% cannot fall much further.", reality: "Another 50% fall from there halves what is left. The remaining value can still be lost." },
+      { myth: "A loss and a gain of the same size cancel out.", reality: "A 50% loss followed by a 50% gain still leaves you 25% down." },
+      { myth: "Volatility only means losses.", reality: "It measures the size of moves in both directions. It is a measure of uncertainty." },
+    ],
+    risks: [
+      "Leverage that turns a drawdown into a liquidation.",
+      "Forced selling near the lows to meet other needs.",
+      "Giving up at the bottom after an unbearable loss.",
+    ],
+    quiz: [
+      {
+        question: "What gain is needed to recover from a 50% loss?",
+        options: ["50%", "100%", "75%", "25%"],
+        answer: 1,
+        explanation: "Half the value must double to get back to the start: 1 ÷ 0.5 - 1 = 100%.",
+      },
+      {
+        question: "An asset falls 50%, then rises 50%. Where does it stand?",
+        options: ["Back to where it started", "25% below where it started", "25% above where it started", "50% below"],
+        answer: 1,
+        explanation: "0.5 × 1.5 = 0.75, so it is still 25% below its starting value.",
+      },
+      {
+        question: "What is the purpose of sizing positions for drawdowns?",
+        options: ["To maximise leverage", "To keep a realistic worst case bearable, so you are not forced or tempted to sell at the bottom", "To avoid paying fees", "To time the market"],
+        answer: 1,
+        explanation: "If the worst plausible loss is tolerable, you can stick to your plan through it.",
+      },
+    ],
+    sources: [
+      { title: "Drawdown (economics)", publisher: "Wikipedia", url: "https://en.wikipedia.org/wiki/Drawdown_(economics)" },
+      { title: "Crypto shocks and retail losses (BIS Bulletin No 69)", publisher: "Bank for International Settlements", url: "https://www.bis.org/publ/bisbull69.htm" },
+      { title: "API documentation (price data used for the chart)", publisher: "DefiLlama", url: "https://defillama.com/docs/api" },
+    ],
+  },
+
+  "market-cycles": {
+    minute:
+      "Crypto markets have moved in pronounced booms and busts: accumulation, expansion, euphoria, then capitulation. Liquidity, leverage and narratives drive these phases. Recognising them helps you describe where the market stands, but their timing and size never repeat exactly.",
+    steps: [
+      { title: "Accumulation", text: "After a crash, prices move sideways and attention is low. Many who bought at the top have already sold." },
+      { title: "Expansion", text: "Prices trend up, new narratives and capital arrive, and leverage starts to build." },
+      { title: "Euphoria", text: "Gains accelerate, mainstream attention peaks, funding rates and leverage run high and new tokens launch in large numbers." },
+      { title: "Capitulation", text: "A sharp fall triggers liquidations and forced selling, and sentiment collapses." },
+      { title: "Describe, do not predict", text: "Transparent trend filters such as the 200-day moving average describe the current regime without claiming to know when it will end." },
+    ],
+    visual: "table",
+    table: {
+      columns: ["Accumulation", "Expansion", "Euphoria", "Capitulation"],
+      rows: [
+        { label: "Price", values: ["Sideways after a crash", "Steady uptrend", "Steep, accelerating rise", "Sharp fall"] },
+        { label: "Sentiment", values: ["Indifference", "Optimism", "Greed", "Fear and despair"] },
+        { label: "Leverage", values: ["Low", "Rising", "Very high, expensive funding", "Liquidations"] },
+        { label: "Attention", values: ["Few newcomers", "Growing narratives", "Mainstream headlines", "Exits and blame"] },
+      ],
+    },
+    visualCaption: "A simplified map of a cycle. Real markets blur the phases and skip steps.",
+    example: {
+      projects: ["bitcoin"],
+      title: "Describing today's regime",
+      paragraphs: [
+        "The Markets page and the Overview describe the current regime with one transparent rule: Bitcoin's price compared with its 200-day moving average. Above it, the trend over recent months has been up; below it, down. The chart below is computed live.",
+        "A Bank for International Settlements study of crypto trading app data from August 2015 to December 2022 found that a majority of app users in nearly all economies made losses on their bitcoin holdings. It also observed large, sophisticated investors selling while smaller retail investors were buying.",
+      ],
+      live: "regime",
+    },
+    metrics: [
+      { label: "Price versus 200-day average", read: "A simple, lagging description of the trend. It describes the regime, it does not forecast it." },
+      { label: "Funding and leverage", read: "Very high funding and open interest are typical of late expansion and euphoria." },
+      { label: "Sentiment", read: "Extreme greed or fear marks crowded emotion. See the sentiment lesson." },
+      { label: "Stablecoin supply", read: "Growing stablecoin supply means more dollars on-chain, often a precondition for expansion." },
+    ],
+    misconceptions: [
+      { myth: "Cycles last exactly four years.", reality: "Past cycles roughly followed Bitcoin halvings, but there have only been a few, and timing and amplitude change each time." },
+      { myth: "You can reliably time the top.", reality: "Euphoria can last longer and go further than expected, and trend filters lag by design." },
+      { myth: "A new cycle lifts every token.", reality: "Many tokens from previous cycles never regained their highs; leadership changes from one cycle to the next." },
+    ],
+    risks: [
+      "Overconfidence in a pattern built on very few observations.",
+      "Leverage taken late in the cycle.",
+      "Regime changes driven by macroeconomic liquidity rather than crypto itself.",
+    ],
+    quiz: [
+      {
+        question: "Which phase typically combines very high leverage and expensive funding?",
+        options: ["Accumulation", "Euphoria", "Capitulation", "None of them"],
+        answer: 1,
+        explanation: "Late in a boom, traders pay up for leveraged long exposure, which also sets up the next liquidation wave.",
+      },
+      {
+        question: "What does Bitcoin trading above its 200-day moving average tell you?",
+        options: ["That the price will keep rising", "That the trend over recent months has been up", "That the top is near", "That a halving is coming"],
+        answer: 1,
+        explanation: "It is a description of the recent trend, not a forecast.",
+      },
+      {
+        question: "Why is the four-year cycle not a law?",
+        options: ["Because halvings were cancelled", "Because there are only a few observations and conditions change each time", "Because regulators forbid it", "It is a law"],
+        answer: 1,
+        explanation: "A handful of cycles, each with different liquidity and participants, cannot establish a reliable rule.",
+      },
+    ],
+    sources: [
+      { title: "Crypto shocks and retail losses (BIS Bulletin No 69)", publisher: "Bank for International Settlements", url: "https://www.bis.org/publ/bisbull69.htm" },
+      { title: "Market trend", publisher: "Wikipedia", url: "https://en.wikipedia.org/wiki/Market_trend" },
+      { title: "Crypto Fear & Greed Index", publisher: "Alternative.me", url: "https://alternative.me/crypto/fear-and-greed-index/" },
+    ],
+  },
+
+  "fear-and-greed": {
+    minute:
+      "Sentiment indicators condense crowd emotion into a number. The Crypto Fear & Greed Index scores the market from 0, extreme fear, to 100, extreme greed. Extremes reveal crowded emotion: useful to question your own decisions, unreliable as a timing signal because sentiment can stay extreme for weeks.",
+    steps: [
+      { title: "Collect inputs", text: "Alternative.me's index combines volatility (25%), momentum and volume (25%), social media (15%), surveys (15%), Bitcoin dominance (10%) and search trends (10%)." },
+      { title: "Score", text: "The inputs are normalised and combined into one daily value between 0 and 100." },
+      { title: "Read the zones", text: "Low values signal fear, high values greed, with extremes at both ends." },
+      { title: "Watch the direction", text: "The change over recent days or weeks often says more than the level alone." },
+      { title: "Check your bias", text: "Use extremes as a prompt to review your reasons, not as a trigger to buy or sell." },
+    ],
+    visual: "fear-greed-live",
+    visualCaption: "The index over the last 90 days, coloured by zone, from Alternative.me.",
+    example: {
+      projects: ["bitcoin"],
+      title: "Sentiment on Sensitor",
+      paragraphs: [
+        "The Overview and Markets pages show the index every day, sourced from Alternative.me, next to market data, so that sentiment is always read alongside prices and trend.",
+        "Funding rates and liquidations, covered in the perpetual futures lesson, are complementary gauges: they show how much traders are actually paying for leveraged exposure, not just how the crowd feels.",
+      ],
+    },
+    metrics: [
+      { label: "Index level", read: "Where the crowd's mood stands today, from 0 to 100." },
+      { label: "Seven-day change", read: "A sharp swing shows that sentiment is shifting, whatever the level." },
+      { label: "Time spent in extremes", read: "Long stretches of extreme fear or greed show how persistent crowd emotion can be." },
+      { label: "Divergence with price", read: "Sentiment improving while prices fall, or the reverse, can flag a change in tone." },
+    ],
+    misconceptions: [
+      { myth: "Extreme fear is a buy signal.", reality: "It has sometimes coincided with lows, but fear can deepen for weeks. It is context, not a trigger." },
+      { myth: "The index measures fundamentals.", reality: "It measures mood and market behaviour, not adoption, fees or revenue." },
+      { myth: "Sentiment is objective data.", reality: "It depends on the chosen inputs and weights; different indices can disagree." },
+    ],
+    risks: [
+      "Following the crowd at emotional extremes.",
+      "Confirmation bias: reading the index only when it supports a decision already made.",
+      "Relying on a single indicator.",
+    ],
+    quiz: [
+      {
+        question: "What does an index reading of 15 indicate?",
+        options: ["Extreme greed", "Neutral sentiment", "Extreme fear", "A data error"],
+        answer: 2,
+        explanation: "Readings below 25 fall in the extreme fear zone.",
+      },
+      {
+        question: "Why is the index unreliable for timing trades?",
+        options: ["Because it is published monthly", "Because sentiment can stay extreme for long periods", "Because it only covers stocks", "Because it is random"],
+        answer: 1,
+        explanation: "Extreme readings can last weeks while prices keep moving in the same direction.",
+      },
+      {
+        question: "What is the most useful way to use a sentiment index?",
+        options: ["As an automatic buy or sell rule", "As context and a check on your own emotional bias", "To predict next week's price", "To value a protocol"],
+        answer: 1,
+        explanation: "It tells you how the crowd feels, which helps you notice when you are simply following it.",
+      },
+    ],
+    sources: [
+      { title: "Crypto Fear & Greed Index", publisher: "Alternative.me", url: "https://alternative.me/crypto/fear-and-greed-index/" },
+      { title: "Crypto API", publisher: "Alternative.me", url: "https://alternative.me/crypto/api/" },
+      { title: "Crypto shocks and retail losses (BIS Bulletin No 69)", publisher: "Bank for International Settlements", url: "https://www.bis.org/publ/bisbull69.htm" },
     ],
   },
 };

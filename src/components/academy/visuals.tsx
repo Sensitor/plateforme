@@ -251,7 +251,7 @@ export function StablecoinModels() {
 /* Computed charts (SVG lines, HTML labels so text stays readable)     */
 /* ------------------------------------------------------------------ */
 
-function ChartFrame({ children, height = 240, yLeft, yRight, xLabels }: { children: React.ReactNode; height?: number; yLeft?: string[]; yRight?: string[]; xLabels: { pct: number; label: string }[] }) {
+export function ChartFrame({ children, height = 240, yLeft, yRight, xLabels }: { children: React.ReactNode; height?: number; yLeft?: string[]; yRight?: string[]; xLabels: { pct: number; label: string }[] }) {
   return (
     <div className="flex gap-2">
       {yLeft ? (
@@ -272,7 +272,11 @@ function ChartFrame({ children, height = 240, yLeft, yRight, xLabels }: { childr
         </div>
         <div className="relative mt-1.5 h-4">
           {xLabels.map((x) => (
-            <span key={x.label} className="num absolute -translate-x-1/2 text-[10.5px] text-subtle" style={{ left: `${x.pct}%` }}>
+            <span
+              key={x.label}
+              className={cn("num absolute whitespace-nowrap text-[10.5px] text-subtle", x.pct >= 92 ? "-translate-x-full" : x.pct <= 4 ? "" : "-translate-x-1/2")}
+              style={{ left: `${x.pct}%` }}
+            >
               {x.label}
             </span>
           ))}

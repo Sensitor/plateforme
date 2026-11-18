@@ -3,12 +3,19 @@ import { CONCEPTS, CONCEPT_BY_SLUG } from "@/content/concepts";
 import { CONCEPT_DEEP } from "@/content/academy-deep";
 import { PROJECT_BY_SLUG } from "@/content/projects";
 import { lessonMinutes } from "@/lib/academy/lesson";
+import { drawdownSeries } from "@/lib/market/series";
 
 const entries = Object.entries(CONCEPT_DEEP);
 
 describe("Academy in-depth lessons", () => {
-  it("covers at least the ten fundamentals", () => {
-    expect(entries.length).toBeGreaterThanOrEqual(10);
+  it("gives every concept an in-depth lesson", () => {
+    for (const c of CONCEPTS) expect(CONCEPT_DEEP[c.slug], c.slug).toBeDefined();
+  });
+
+  it("starts the suggested path with existing lessons", async () => {
+    const { START_HERE } = await import("@/content/academy-deep");
+    expect(START_HERE.length).toBe(10);
+    for (const s of START_HERE) expect(CONCEPT_DEEP[s], s).toBeDefined();
   });
 
   for (const [slug, d] of entries) {
@@ -54,5 +61,10 @@ describe("Academy in-depth lessons", () => {
   it("gives every lesson a reading time", () => {
     for (const c of CONCEPTS) expect(lessonMinutes(c)).toBeGreaterThanOrEqual(1);
     expect(lessonMinutes(CONCEPT_BY_SLUG.amm)).toBeGreaterThan(lessonMinutes({ ...CONCEPT_BY_SLUG.amm, slug: "x" }, undefined));
+  });
+
+  it("computes drawdowns from the running peak", () => {
+    const dd = drawdownSeries([100, 120, 60, 90, 130].map((v, i) => ({ t: i, v })));
+    expect(dd.map((p) => Math.round(p.v))).toEqual([0, 0, -50, -25, 0]);
   });
 });

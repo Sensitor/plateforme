@@ -92,7 +92,7 @@ export interface ConceptDeep {
   visualCaption?: string;
   flow?: FlowSpec;
   table?: TableSpec;
-  example: { projects: string[]; title: string; paragraphs: string[]; live?: "mcap-fdv" | "key-dates" };
+  example: { projects: string[]; title: string; paragraphs: string[]; live?: "mcap-fdv" | "key-dates" | "btc-drawdown" | "regime" };
   metrics: { label: string; read: string }[];
   misconceptions: { myth: string; reality: string }[];
   risks: string[];

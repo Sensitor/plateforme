@@ -38,3 +38,14 @@ export function seriesChange(series: SeriesPoint[]): number | null {
   if (series.length < 2 || series[0].v === 0) return null;
   return (series[series.length - 1].v / series[0].v - 1) * 100;
 }
+
+/** Drawdown from the running peak, in percent (0 at a new high, negative below it). */
+export function drawdownSeries(series: SeriesPoint[]): SeriesPoint[] {
+  const out: SeriesPoint[] = [];
+  let peak = -Infinity;
+  for (const p of series) {
+    peak = Math.max(peak, p.v);
+    out.push({ t: p.t, v: peak > 0 ? (p.v / peak - 1) * 100 : 0 });
+  }
+  return out;
+}
