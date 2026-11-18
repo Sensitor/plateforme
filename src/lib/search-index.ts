@@ -16,6 +16,7 @@ const PAGES: SearchEntry[] = [
   { id: "p-overview", type: "page", title: "Overview", subtitle: "Dashboard", href: "/overview", keywords: "dashboard home" },
   { id: "p-explore", type: "page", title: "Explore Projects", subtitle: "Project library", href: "/explore", keywords: "projects library screener" },
   { id: "p-compare", type: "page", title: "Compare projects", subtitle: "Side-by-side comparison", href: "/compare", keywords: "comparator versus vs" },
+  { id: "p-graph", type: "page", title: "Knowledge Graph", subtitle: "Relationships between projects", href: "/graph", keywords: "map network ecosystem dependencies relationships oracle bridge" },
   { id: "p-markets", type: "page", title: "Markets", subtitle: "Market intelligence", href: "/markets", keywords: "market cap dominance stablecoins defi sentiment fear greed" },
   { id: "p-research", type: "page", title: "Research library", subtitle: "All dossiers", href: "/research", keywords: "reports dossiers analysis" },
   { id: "p-method", type: "page", title: "Research methodology", subtitle: "Sensitor Research Framework", href: "/research/methodology", keywords: "framework score methodology pillars" },

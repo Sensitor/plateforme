@@ -10,7 +10,7 @@
 - Every claim is typed fact / interpretation / hypothesis; facts link to sources.
 
 ## Brand
-- Logo: the slanted two-stroke "S" from the brand mockup (`src/components/shell/logo.tsx`). Do not redesign without the founder's approval.
+- Logo: the slanted two-stroke "S" from the brand mockup (`src/components/shell/logo.tsx`). Default variant "chart": the top stroke ends in an arrowhead (approved by the founder); variant "classic" keeps the original tip. Do not redesign without the founder's approval.
 - Fonts: Instrument Serif for display headlines (`.serif-display`), Geist for UI, Geist Mono for figures (`.num`).
 - Colours: core indigo `#7896FF` and violet `#9C83E8`, plus the sector / Academy / pillar palettes in `src/lib/brand.ts`. Colour always comes with a text label.
 

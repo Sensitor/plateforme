@@ -213,7 +213,19 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
             <p className="mt-6 border-l-2 border-line-strong pl-4 text-[13px] italic leading-relaxed text-muted">{d.onchain.dataAvailability}</p>
           </DossierSection>
 
-          <DossierSection id="competitors" letter="G" title="Competitors">
+          <DossierSection
+            id="competitors"
+            letter="G"
+            title="Competitors"
+            intro={
+              <>
+                Direct alternatives and how they compare.{" "}
+                <Link href={`/graph?focus=${project.slug}`} className="text-accent hover:text-accent-strong">
+                  See {project.name} in the Knowledge Graph
+                </Link>
+              </>
+            }
+          >
             <CompetitorsSection project={project} />
           </DossierSection>
 

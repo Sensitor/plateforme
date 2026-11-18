@@ -5,10 +5,12 @@ import { cn } from "@/lib/utils";
 
 /**
  * Sensitor mark: the slanted "S" from the brand mockup, made of two hairpin
- * strokes (silver above, violet below). Gradient ids are unique per instance
- * so several logos can coexist on a page (sidebar + mobile header).
+ * strokes (silver above, violet below). The default "chart" variant ends the
+ * top stroke with an arrowhead, so the S also reads as a rising price line;
+ * "classic" keeps the original pointed tip. Gradient ids are unique per
+ * instance so several logos can coexist on a page (sidebar + mobile header).
  */
-export function LogoMark({ className }: { className?: string }) {
+export function LogoMark({ className, variant = "chart" }: { className?: string; variant?: "chart" | "classic" }) {
   const uid = useId().replace(/:/g, "");
   const silver = `s-silver-${uid}`;
   const blend = `s-blend-${uid}`;
@@ -32,8 +34,17 @@ export function LogoMark({ className }: { className?: string }) {
         </linearGradient>
       </defs>
       <g transform="translate(32 32.5) rotate(-33)">
-        <path d="M20 -8.6 H -9 A 4.3 4.3 0 0 0 -9 0 H 2.5" stroke={`url(#${silver})`} strokeWidth="5" />
-        <polygon points="19.9,-11.1 23.4,-10.2 19.9,-6.1" fill="#EEEEF3" />
+        {variant === "chart" ? (
+          <>
+            <path d="M17.6 -8.6 H -9 A 4.3 4.3 0 0 0 -9 0 H 2.5" stroke={`url(#${silver})`} strokeWidth="5" />
+            <polygon points="16.8,-13.3 24.6,-8.6 16.8,-3.9" fill="#EEEEF3" />
+          </>
+        ) : (
+          <>
+            <path d="M20 -8.6 H -9 A 4.3 4.3 0 0 0 -9 0 H 2.5" stroke={`url(#${silver})`} strokeWidth="5" />
+            <polygon points="19.9,-11.1 23.4,-10.2 19.9,-6.1" fill="#EEEEF3" />
+          </>
+        )}
         <path d="M -4 0 H 9.1" stroke={`url(#${blend})`} strokeWidth="5" strokeLinecap="round" />
         <path d="M 9 0 A 4.3 4.3 0 0 1 9 8.6 H -20" stroke={`url(#${violet})`} strokeWidth="5" />
         <polygon points="-19.9,6.1 -23.4,10.2 -19.9,11.1" fill="#8C6CE4" />

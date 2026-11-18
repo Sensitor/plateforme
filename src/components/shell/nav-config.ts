@@ -7,6 +7,7 @@ import {
   GraduationCap,
   House,
   LineChart,
+  Network,
   Settings,
   Star,
   Users,
@@ -37,6 +38,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Overview", href: "/overview", icon: House },
       { label: "Explore Projects", href: "/explore", icon: Compass },
       { label: "Markets", href: "/markets", icon: LineChart },
+      { label: "Knowledge Graph", href: "/graph", icon: Network },
     ],
   },
   {
