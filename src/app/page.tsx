@@ -100,9 +100,9 @@ export default function LandingPage() {
           <h2 className="serif-display max-w-2xl text-[36px] leading-tight text-fg md:text-[46px]">One environment to discover, understand and manage.</h2>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
-              { k: "Discover", color: "#7C93FF", icon: Compass, text: "Explore a documented library of projects by sector, blockchain and maturity, with live market data and transparent sources.", links: [["Explore Projects", "/explore"], ["Markets", "/markets"]], status: "Available" },
+              { k: "Discover", color: "#7C93FF", icon: Compass, text: "Explore a documented library of projects by sector, blockchain and maturity, with live market data, transparent sources and a map of how they connect.", links: [["Explore Projects", "/explore"], ["Knowledge Graph", "/graph"]], status: "Available" },
               { k: "Understand", color: "#A487F0", icon: BookOpen, text: "Read dossiers built like financial research, compare protocols and learn every concept they use in the Academy.", links: [["Research", "/research"], ["Academy", "/academy"]], status: "Available" },
-              { k: "Manage", color: "#5FCB86", icon: Wallet, text: "Follow projects in your watchlist today; portfolio intelligence, risk analysis and alerts arrive in the next phases.", links: [["Watchlist", "/watchlist"], ["Roadmap", "/portfolio"]], status: "Partly available" },
+              { k: "Manage", color: "#5FCB86", icon: Wallet, text: "Track your portfolio with live prices and see your real exposures: concentration, sectors, shared dependencies, correlations and unlocks. Alerts come next.", links: [["Portfolio", "/portfolio"], ["Watchlist", "/watchlist"]], status: "Available" },
             ].map((d) => (
               <div key={d.k} className="relative overflow-hidden rounded-2xl border border-line bg-surface p-6">
                 <span className="absolute inset-x-0 top-0 h-[3px]" style={{ backgroundColor: d.color }} aria-hidden />

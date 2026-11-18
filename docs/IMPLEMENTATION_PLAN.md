@@ -26,13 +26,18 @@
 
 - Données on-chain (Etherscan, Dune) et calendrier d'unlocks sous licence (Tokenomist ou équivalent)
 - Funding rates / open interest (fournisseur dérivés)
-- Sector Intelligence enrichie, Knowledge Graph (table `protocol_relationships` prête)
+- Sector Intelligence enrichie
+- [x] Knowledge Graph : livré (`/graph`, relations dans `src/content/relationships.ts`, table `protocol_relationships` prête pour la migration en base)
 - Research Copilot (Learn / Analyze / Compare) adossé à la base Sensitor, citations obligatoires
 - Alertes (table `alerts` prête), notifications e-mail (Resend)
 - Snapshots quotidiens (`market_snapshots`) via cron pour construire un historique propre, y compris la capitalisation totale sans plan Pro
 - Localisation française de l'interface
 
-## Phase 3, Portfolio
+## Phase 3, Portfolio (version locale livrée)
+
+Livré : `/portfolio` en stockage local (saisie, import/export CSV, coût moyen, P&L, performance, allocations, corrélations, dépendances, unlocks).
+Reste : synchronisation en base (table `portfolio_transactions`, RLS) une fois l'authentification en place, connexions read-only.
+
 
 Positions manuelles, import CSV, P&L réalisé/latent, allocations (actif/secteur/chaîne), corrélations, risque de liquidité,
 unlocks à venir sur les positions, dépendances entre protocoles. Jamais de transaction, jamais de seed phrase.

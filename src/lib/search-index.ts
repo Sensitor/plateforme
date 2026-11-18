@@ -20,6 +20,7 @@ const PAGES: SearchEntry[] = [
   { id: "p-markets", type: "page", title: "Markets", subtitle: "Market intelligence", href: "/markets", keywords: "market cap dominance stablecoins defi sentiment fear greed" },
   { id: "p-research", type: "page", title: "Research library", subtitle: "All dossiers", href: "/research", keywords: "reports dossiers analysis" },
   { id: "p-method", type: "page", title: "Research methodology", subtitle: "Sensitor Research Framework", href: "/research/methodology", keywords: "framework score methodology pillars" },
+  { id: "p-portfolio", type: "page", title: "Portfolio Intelligence", subtitle: "Track your positions", href: "/portfolio", keywords: "portfolio holdings positions pnl allocation csv import" },
   { id: "p-watchlist", type: "page", title: "Watchlist", subtitle: "Your followed projects", href: "/watchlist", keywords: "favorites saved" },
   { id: "p-academy", type: "page", title: "Academy", subtitle: "Concepts & courses", href: "/academy", keywords: "learn courses education" },
   { id: "p-pricing", type: "page", title: "Plans", subtitle: "Free, Pro, Research Club", href: "/pricing", keywords: "pricing subscription pro premium" },

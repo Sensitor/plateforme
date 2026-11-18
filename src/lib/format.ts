@@ -42,7 +42,7 @@ export function formatUsdCompact(value: number | null | undefined): string {
 export function formatPrice(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "n/a";
   const abs = Math.abs(value);
-  const digits = abs >= 1000 ? 2 : abs >= 1 ? 2 : abs >= 0.01 ? 4 : 6;
+  const digits = abs === 0 || abs >= 1 ? 2 : abs >= 0.01 ? 4 : 6;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",

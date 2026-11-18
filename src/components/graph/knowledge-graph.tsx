@@ -94,7 +94,8 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
     <div className="space-y-4">
       {/* Controls */}
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Relationship types">
+        <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <div className="flex w-max gap-1.5 sm:w-auto sm:flex-wrap" role="group" aria-label="Relationship types">
           {KINDS.map((k) => {
             const m = RELATION_META[k];
             const on = kinds.has(k);
@@ -114,6 +115,7 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
               </button>
             );
           })}
+        </div>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -159,8 +161,8 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           {/* Graph */}
           <div className="relative overflow-hidden rounded-2xl border border-line bg-bg-elevated">
-            <div className="absolute left-4 top-3 z-10 text-[11.5px] text-subtle">Click a project to see its environment. Node size follows market cap.</div>
-            <div className="absolute bottom-3 left-4 z-10 flex flex-wrap gap-x-4 gap-y-1 text-[11.5px] text-muted">
+            <div className="absolute left-4 top-3 z-10 hidden text-[11.5px] text-subtle sm:block">Click a project to see its environment. Node size follows market cap.</div>
+            <div className="absolute bottom-3 left-4 z-10 hidden flex-wrap gap-x-4 gap-y-1 text-[11.5px] text-muted sm:flex">
               {halos.map((h) => (
                 <span key={h.id} className="inline-flex items-center gap-1.5">
                   <span className="size-2.5 rounded-sm" style={{ backgroundColor: tint(h.color, 0.45) }} aria-hidden />

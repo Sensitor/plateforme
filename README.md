@@ -36,11 +36,13 @@ CoinPaprika prend le relais automatiquement en cas de limitation.
 | Fiche projet `/projects/[slug]` | ✅ | Sections A→J : overview, technologie, tokenomics (graphes de distribution + courbe d'émission modélisée), adoption, fondamentaux financiers (DefiLlama), on-chain, concurrents (tableau + données live), risques, thèse (bull/neutral/bear, catalyseurs, hypothèses, invalidation), framework 7 piliers, « Learn by Research », sources |
 | Comparateur `/compare` | ✅ | Jusqu'à 4 projets : marché, fondamentaux, profil, piliers, forces/faiblesses |
 | Watchlist `/watchlist` | ✅ (local) | Stockée dans le navigateur (mode invité), limite Free de 10 projets |
+| Knowledge Graph `/graph` | ✅ | 34 relations documentées entre les 20 projets (règlement, déploiements, staking, oracles, bridges, messagerie, concurrents), mode focus, vue liste |
+| Portfolio `/portfolio` | ✅ (local) | Saisie manuelle et import CSV (format FR accepté), prix live, coût moyen, P&L réalisé/latent, performance, allocations, corrélations, dépendances, unlocks. Données stockées sur l'appareil uniquement |
 | Markets `/markets` | ✅ | Graphiques 1D→ALL, sentiment 90 j, régime, intelligence sectorielle, stablecoins, DeFi |
 | Research `/research` + méthodologie | ✅ | Bibliothèque des dossiers, statistiques éditoriales, framework documenté |
 | Academy `/academy` | ✅ (concepts) | 32 concepts, liés depuis les dossiers et inversement |
 | Recherche ⌘K | ✅ | Projets, secteurs, pages, concepts |
-| Portfolio, Alerts, Community, Research Club, Private Program | 🕒 | Pages de roadmap explicitement « non disponible » (aucun faux bouton) |
+| Alerts, Community, Research Club, Private Program | 🕒 | Pages de roadmap explicitement « non disponible » (aucun faux bouton) |
 | Authentification | 🕒 Phase 1b | Schéma prêt (`supabase/migrations`), non branché, voir « Prochaines étapes » |
 
 ## Principes de données (non négociables)
