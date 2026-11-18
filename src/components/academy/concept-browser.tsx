@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { CircleCheck, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ACADEMY_CATEGORIES, type AcademyCategory, type Concept } from "@/content/concepts";
 import { ACADEMY_COLORS, tint } from "@/lib/brand";
+import { isCompleted, useAcademyProgress } from "@/lib/academy/progress";
 
 const LEVELS = { beginner: 1, intermediate: 2, advanced: 3 } as const;
 
@@ -22,7 +23,8 @@ export function LevelDots({ level, color }: { level: Concept["level"]; color: st
   );
 }
 
-export function ConceptBrowser({ concepts, usage }: { concepts: Concept[]; usage: Record<string, number> }) {
+export function ConceptBrowser({ concepts, usage, deep = [] }: { concepts: Concept[]; usage: Record<string, number>; deep?: string[] }) {
+  const { progress, ready } = useAcademyProgress();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<AcademyCategory | "all">("all");
   const list = useMemo(
@@ -81,8 +83,19 @@ export function ConceptBrowser({ concepts, usage }: { concepts: Concept[]; usage
               style={{ backgroundImage: `linear-gradient(180deg, ${tint(color, 0.07)}, transparent 55%)` }}
             >
               <span className="absolute inset-x-0 top-0 h-[3px]" style={{ backgroundColor: color }} aria-hidden />
-              <div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color }}>
-                {ACADEMY_CATEGORIES.find((x) => x.id === c.category)?.label}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color }}>
+                  {ACADEMY_CATEGORIES.find((x) => x.id === c.category)?.label}
+                </span>
+                {ready && isCompleted(progress[c.slug]) ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-positive">
+                    <CircleCheck className="size-3.5" aria-hidden /> Completed
+                  </span>
+                ) : deep.includes(c.slug) ? (
+                  <span className="rounded px-1.5 py-0.5 text-[10.5px] font-medium" style={{ backgroundColor: tint(color, 0.16), color }}>
+                    In-depth
+                  </span>
+                ) : null}
               </div>
               <div className="serif-display mt-2 text-[25px] leading-[1.1] text-fg">{c.title}</div>
               <p className="mt-2 flex-1 text-[13.5px] leading-relaxed text-muted">{c.summary}</p>

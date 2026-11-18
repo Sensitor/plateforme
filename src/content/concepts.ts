@@ -36,6 +36,36 @@ export interface Concept {
   related: string[];
 }
 
+/** Visuals available to in-depth concept pages (see components/academy/diagrams). */
+export type ConceptVisual = "pow" | "pos" | "contracts" | "fee-calculator" | "halving" | "stablecoin-models" | "amm" | "rollup" | "mcap-fdv" | "vesting";
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  /** Index of the correct option. */
+  answer: number;
+  explanation: string;
+}
+
+/**
+ * In-depth layer of a concept page. Educational content: protocol rules and
+ * mechanisms only, never live market figures (those are rendered from data
+ * providers with their source and timestamp).
+ */
+export interface ConceptDeep {
+  /** "In one minute": the whole idea in two or three sentences. */
+  minute: string;
+  steps: { title: string; text: string }[];
+  visual?: ConceptVisual;
+  visualCaption?: string;
+  example: { projects: string[]; title: string; paragraphs: string[]; live?: "mcap-fdv" | "key-dates" };
+  metrics: { label: string; read: string }[];
+  misconceptions: { myth: string; reality: string }[];
+  risks: string[];
+  quiz: QuizQuestion[];
+  sources: { title: string; publisher: string; url: string }[];
+}
+
 export const CONCEPTS: Concept[] = [
   {
     slug: "proof-of-work",

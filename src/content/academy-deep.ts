@@ -1,0 +1,717 @@
+/**
+ * In-depth Academy lessons. Each entry extends a concept from concepts.ts
+ * with a step-by-step mechanism, a worked example taken from a Sensitor
+ * dossier, metrics to watch, common misconceptions, risks, a short quiz and
+ * primary sources. No live market figures here: lessons that need them render
+ * provider data at request time, with source and timestamp.
+ */
+import type { ConceptDeep } from "./concepts";
+
+export const CONCEPT_DEEP: Record<string, ConceptDeep> = {
+  "proof-of-work": {
+    minute:
+      "Proof of Work secures a blockchain by making block production expensive. Miners compete to find a hash below a target; the winner adds the next block and earns the block subsidy plus fees. Rewriting history would mean redoing that work faster than everyone else combined.",
+    steps: [
+      { title: "Collect transactions", text: "A miner assembles pending transactions into a candidate block that points to the hash of the previous block, chaining the history together." },
+      {
+        title: "Search for a valid hash",
+        text: "The miner changes a small field (the nonce) and hashes the block header again and again (double SHA-256 on Bitcoin) until the result falls below the network target. There is no shortcut: it is pure trial and error.",
+      },
+      { title: "Broadcast and verify", text: "The first valid block is broadcast. Every other node checks the hash and the transactions almost instantly, so producing a block is costly while verifying it is cheap." },
+      { title: "Follow the most work", text: "Nodes build on the chain with the most accumulated work. Each new block on top makes the earlier ones harder to reverse, which is why exchanges wait for several confirmations." },
+      { title: "Adjust the difficulty", text: "Every 2,016 blocks (about two weeks) Bitcoin recalibrates the target so that blocks keep arriving roughly every ten minutes, whatever the total computing power." },
+    ],
+    visual: "pow",
+    visualCaption: "The mining loop: miners repeat the hash search until one finds a valid block, then everyone moves to the next one.",
+    example: {
+      projects: ["bitcoin"],
+      title: "Bitcoin: security paid by the subsidy, then by fees",
+      paragraphs: [
+        "Bitcoin is the reference Proof of Work network. Miners are paid the block subsidy, 3.125 BTC per block since the April 2024 halving, plus the fees of the transactions they include. Together they form the security budget: what an attacker would have to out-spend.",
+        "Because the subsidy halves every 210,000 blocks, the Sensitor dossier treats one question as open: whether fee demand will grow enough to fund the network's security once new issuance becomes small.",
+      ],
+    },
+    metrics: [
+      { label: "Hash rate", read: "Total computing power securing the network. A high, stable hash rate makes an attack more expensive; sharp drops can follow price falls or regional shutdowns." },
+      { label: "Difficulty", read: "Follows hash rate at each adjustment. A rising difficulty means more competition for the same rewards." },
+      { label: "Fee share of miner revenue", read: "The part of miner income that comes from fees rather than new coins. It shows how ready the network is for future halvings." },
+      { label: "Mining pool concentration", read: "Share of recent blocks found by the largest pools. Pools choose which transactions go into blocks, so concentration matters even though miners can switch pools." },
+    ],
+    misconceptions: [
+      { myth: "Miners solve useful mathematical problems.", reality: "The puzzle is deliberately useless: a brute-force search whose only purpose is to make block production costly and easy to verify." },
+      { myth: "More energy means more transactions.", reality: "Hash power secures the chain but does not raise capacity. Block size and block interval set how many transactions fit." },
+      {
+        myth: "Whoever controls 51% of the hash power can steal any coin.",
+        reality: "A majority can censor or reorder recent transactions and double-spend its own coins. It cannot sign transactions for keys it does not hold, nor create coins beyond the rules.",
+      },
+    ],
+    risks: [
+      "Concentration of hash power in a few pools, manufacturers or regions.",
+      "A shrinking security budget if fees do not replace the halving subsidy.",
+      "Energy use and the regulatory pressure it attracts on mining.",
+    ],
+    quiz: [
+      {
+        question: "What makes a Proof of Work block hard to produce but easy to verify?",
+        options: [
+          "Finding a hash below the target takes many attempts, checking one takes a single hash",
+          "Validators vote on every block before it is accepted",
+          "Each block is encrypted with the miner's private key",
+          "A central server approves valid blocks",
+        ],
+        answer: 0,
+        explanation: "Producing a block is a lottery of countless hash attempts; anyone can verify the winning hash with one computation.",
+      },
+      {
+        question: "Why does Bitcoin adjust its difficulty every 2,016 blocks?",
+        options: ["To raise the block subsidy", "To keep the average block interval close to ten minutes", "To lower transaction fees", "To change the 21 million cap"],
+        answer: 1,
+        explanation: "The adjustment compensates for changes in total hash power so that blocks keep arriving about every ten minutes.",
+      },
+      {
+        question: "What can an attacker with a majority of the hash power do?",
+        options: ["Steal coins from any address", "Create coins beyond the supply cap", "Double-spend its own coins by reorganising recent blocks", "Change other users' private keys"],
+        answer: 2,
+        explanation: "Majority hash power lets an attacker rewrite recent history, for example to double-spend, but not to break signatures or supply rules.",
+      },
+    ],
+    sources: [
+      { title: "Bitcoin: A Peer-to-Peer Electronic Cash System", publisher: "Satoshi Nakamoto", url: "https://bitcoin.org/bitcoin.pdf" },
+      { title: "Block chain (developer guide)", publisher: "Bitcoin Project", url: "https://developer.bitcoin.org/devguide/block_chain.html" },
+      { title: "Proof-of-work (PoW)", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/consensus-mechanisms/pow/" },
+      { title: "Cambridge Bitcoin Electricity Consumption Index", publisher: "Cambridge Centre for Alternative Finance", url: "https://ccaf.io/cbnsi/cbeci" },
+    ],
+  },
+
+  "proof-of-stake": {
+    minute:
+      "In Proof of Stake, validators lock the network's token as collateral to propose and confirm blocks. Honest work earns rewards; provable misbehaviour is punished by destroying part of the stake (slashing). Security comes from capital at risk instead of energy spent.",
+    steps: [
+      { title: "Stake collateral", text: "A validator deposits tokens into the protocol. On Ethereum, activating a validator requires at least 32 ETH." },
+      { title: "Get selected", text: "For each slot (12 seconds on Ethereum) the protocol pseudo-randomly picks a block proposer and assigns other validators to vote, or attest, on the head of the chain." },
+      { title: "Propose and attest", text: "The proposer builds a block; attestations from other validators add weight behind it so the network converges on one chain." },
+      {
+        title: "Reach finality",
+        text: "When validators holding two thirds of the stake vote for the same checkpoints (epochs of 32 slots), those blocks are finalised. Reverting them would require at least a third of all stake to be slashed.",
+      },
+      { title: "Reward or penalise", text: "Validators earn new issuance and fees for timely duties, lose small amounts when offline, and are slashed for provable attacks such as signing two conflicting blocks." },
+    ],
+    visual: "pos",
+    visualCaption: "A validator's cycle: stake, get selected, propose or attest, then earn rewards or face penalties.",
+    example: {
+      projects: ["ethereum", "lido"],
+      title: "Ethereum: who controls the stake?",
+      paragraphs: [
+        "Ethereum moved from Proof of Work to Proof of Stake with the Merge in September 2022. Its security now depends on how much ETH is staked and on who operates it.",
+        "The Ethereum and Lido dossiers follow a recurring question: liquid staking protocols and exchanges pool large shares of stake. Even with many independent node operators behind them, that concentration gives a few entities outsized weight in consensus.",
+      ],
+    },
+    metrics: [
+      { label: "Share of supply staked", read: "A higher share raises the cost of attacking the chain, but locks up liquidity and concentrates rewards." },
+      {
+        label: "Stake concentration by entity",
+        read: "Share controlled by the largest staking providers. Watch the thresholds: one third of stake can stop finality, two thirds could finalise blocks on its own.",
+      },
+      { label: "Real yield", read: "Staking reward minus supply growth. If new issuance dilutes everyone at a similar rate, a nominal yield is mostly compensation for dilution." },
+      { label: "Client diversity", read: "Share of validators running each software client. A bug in a client used by a large majority could cause mass penalties." },
+    ],
+    misconceptions: [
+      { myth: "Staking yield is free money.", reality: "Rewards are largely new issuance: non-stakers are diluted and stakers roughly keep pace. What matters is the return after supply growth." },
+      {
+        myth: "In Proof of Stake, the richest decide the rules.",
+        reality: "Stake buys influence over block production and finality, not over protocol rules, which node operators and users must still choose to run. Concentration is a real risk that is measured separately.",
+      },
+      { myth: "Validators are slashed all the time.", reality: "Slashing is rare and targets provable attacks. Ordinary downtime only costs small penalties roughly equal to the rewards missed." },
+    ],
+    risks: [
+      "Concentration of stake in a few liquid staking protocols or exchanges.",
+      "Correlated penalties when many validators share one operator, cloud provider or client.",
+      "Uncertain legal and tax treatment of staking rewards in several jurisdictions.",
+    ],
+    quiz: [
+      {
+        question: "What replaces energy expenditure as the cost of security in Proof of Stake?",
+        options: ["Transaction fees paid by users", "Capital locked as collateral that can be slashed", "The number of nodes on the network", "Specialised mining hardware"],
+        answer: 1,
+        explanation: "Validators put capital at risk: misbehaviour can be punished by destroying part of their stake.",
+      },
+      {
+        question: "On Ethereum, what share of the stake must vote for a checkpoint to finalise it?",
+        options: ["One half", "One third", "Two thirds", "All validators"],
+        answer: 2,
+        explanation: "Finality requires a two-thirds supermajority of staked ETH, which is why one third of stake is the threshold that can halt finality.",
+      },
+      {
+        question: "Why is a high staking yield not automatically a gain?",
+        options: [
+          "Because part of it only offsets the dilution from new issuance",
+          "Because rewards are paid in a different token",
+          "Because staking rewards are always taxed at 100%",
+          "Because validators must refund rewards after a year",
+        ],
+        answer: 0,
+        explanation: "When rewards come from new issuance, holders who do not stake are diluted; the yield above supply growth is the real gain.",
+      },
+    ],
+    sources: [
+      { title: "Proof-of-stake (PoS)", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/" },
+      { title: "Proof-of-stake rewards and penalties", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/rewards-and-penalties/" },
+      { title: "Proof-of-stake attack and defense", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/attack-and-defense/" },
+      { title: "The Merge", publisher: "ethereum.org", url: "https://ethereum.org/en/roadmap/merge/" },
+    ],
+  },
+
+  "smart-contracts": {
+    minute:
+      "A smart contract is a program stored on a blockchain. Anyone can call it, every node runs it the same way, and it can hold and move assets by itself. Because contracts can call one another, applications stack like building blocks, which spreads both innovation and risk.",
+    steps: [
+      { title: "Write and deploy", text: "Developers write code (often in Solidity for the Ethereum Virtual Machine) and deploy the compiled bytecode to an address. Deployment is itself a transaction." },
+      { title: "Call a function", text: "Users send transactions that call the contract's functions, paying gas for the computation and storage they use." },
+      { title: "Execute deterministically", text: "Every node runs the same code with the same inputs and reaches the same new state, so the result is agreed by the whole network." },
+      { title: "Compose", text: "A contract can call other contracts in the same transaction: swap, deposit and borrow can happen together, and if any step fails the whole transaction reverts." },
+      { title: "Upgrade, or not", text: "Code at an address cannot be edited, but many protocols use proxy contracts that let an admin key or a governance vote point users to new code." },
+    ],
+    visual: "contracts",
+    visualCaption: "Composability: one user transaction can flow through several contracts, here a lending market reading a price oracle.",
+    example: {
+      projects: ["aave", "chainlink"],
+      title: "Aave: a lending market built from other contracts",
+      paragraphs: [
+        "Aave is a set of smart contracts that take deposits and issue over-collateralised loans with no company in the middle. To decide when a loan must be liquidated, it reads asset prices from oracle contracts, Chainlink price feeds on most markets.",
+        "The Aave dossier lists this as a significant external dependency: a wrong price or a bug in one contract can spread to every protocol built on top of it. The Knowledge Graph maps these links between projects.",
+      ],
+    },
+    metrics: [
+      { label: "Audits and bug bounty", read: "Who audited the code, how recently, and how large the bounty is for finding a critical bug." },
+      { label: "Upgrade control", read: "Who can change the code (single key, multisig, timelock, DAO vote) and how long users have to exit before a change applies." },
+      { label: "Time and value at risk", read: "Code that has held large amounts for years without incident is battle-tested; new code is not, whatever its audits say." },
+      { label: "Dependencies", read: "Oracles, bridges and other protocols the contract relies on. Each one adds a way to fail." },
+    ],
+    misconceptions: [
+      { myth: "A smart contract is a legal contract.", reality: "It is a program. It does exactly what its code says, even when that differs from what its authors intended, and its legal status depends on the context." },
+      { myth: "Audited means safe.", reality: "Audits reduce risk but have missed critical bugs. They cover one version of the code at one point in time." },
+      { myth: "Immutable means nobody can change anything.", reality: "Many protocols are upgradeable through admin keys or governance. That control is a trust assumption worth checking." },
+    ],
+    risks: [
+      "Code bugs that let attackers drain funds.",
+      "Compromised or misused admin keys on upgradeable contracts.",
+      "Price oracle manipulation and failures in dependencies that spread through composability.",
+    ],
+    quiz: [
+      {
+        question: "What does deterministic execution mean for a smart contract?",
+        options: [
+          "Every node running it with the same inputs gets the same result",
+          "The contract runs only on the developer's server",
+          "The outcome is random to prevent manipulation",
+          "Only validators can call the contract",
+        ],
+        answer: 0,
+        explanation: "Determinism is what lets thousands of nodes agree on a contract's result without trusting each other.",
+      },
+      {
+        question: "What is composability?",
+        options: ["Compressing contract code to save gas", "Contracts calling each other so applications can be combined", "Splitting a token into smaller units", "Running the same contract on two chains"],
+        answer: 1,
+        explanation: "Composability lets protocols reuse each other like building blocks, in the same transaction.",
+      },
+      {
+        question: "A protocol is upgradeable through a 3-of-5 multisig. What does that imply?",
+        options: ["The code can never change", "Any user can propose new code", "Any three of five key holders can change the code", "Only a court can change the code"],
+        answer: 2,
+        explanation: "A 3-of-5 multisig means three signatures out of five keys are enough to approve an upgrade.",
+      },
+    ],
+    sources: [
+      { title: "Introduction to smart contracts", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/smart-contracts/" },
+      { title: "Smart contract composability", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/smart-contracts/composability/" },
+      { title: "Smart contract security", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/smart-contracts/security/" },
+      { title: "Ethereum Whitepaper", publisher: "ethereum.org", url: "https://ethereum.org/en/whitepaper/" },
+    ],
+  },
+
+  "gas-fees": {
+    minute:
+      "Every operation on a blockchain consumes resources, measured in gas. The fee is gas used × gas price. On Ethereum, since EIP-1559, the price has two parts: a base fee set by the protocol and burned, and an optional tip that goes to the validator.",
+    steps: [
+      { title: "Measure the work", text: "Each operation has a fixed gas cost. A simple ETH transfer uses 21,000 gas; a swap or a loan uses much more because it runs more code and touches more storage." },
+      {
+        title: "Set the base fee",
+        text: "The protocol sets a base fee per unit of gas for every block. It rises when the previous block was more than half full and falls when it was less, by up to 12.5% per block.",
+      },
+      { title: "Add a tip", text: "Users add a priority fee (tip) to be included faster. It goes to the validator that proposes the block." },
+      { title: "Burn and pay", text: "The base fee multiplied by the gas used is burned, removed from supply. The tip is paid to the validator. Gas reserved but not used is not charged." },
+      {
+        title: "Rollups pay for data",
+        text: "Layer 2 transactions also pay to publish their data on Ethereum. Since EIP-4844 (March 2024) that data mostly goes into cheaper blobs, which have their own fee market.",
+      },
+    ],
+    visual: "fee-calculator",
+    visualCaption: "Try it: change the gas used, base fee and tip to see the fee and how much of it is burned. Example values, not live network data.",
+    example: {
+      projects: ["ethereum"],
+      title: "Ethereum: fees, burn and supply",
+      paragraphs: [
+        "Because the base fee is burned, Ethereum's net supply depends on activity: issuance to validators adds ETH, burned fees remove it. In busy periods the burn can exceed issuance; in quiet periods supply grows.",
+        "The dossier flags a structural shift: since rollups moved their data to low-cost blobs, less fee has been burned on mainnet. Whether ETH's value accrual recovers depends on demand for the base layer and for blob space.",
+      ],
+    },
+    metrics: [
+      { label: "Base fee (gwei)", read: "The protocol price of block space. It is the most direct indicator of congestion." },
+      { label: "Burn versus issuance", read: "Whether net supply grows or shrinks over a period. It links network usage to the token's supply." },
+      { label: "Fees by layer", read: "How much users pay on Ethereum compared with rollups. It shows where activity actually happens." },
+      { label: "Blob usage and blob fee", read: "Demand from rollups for data space. Sustained full blobs would push blob fees up." },
+    ],
+    misconceptions: [
+      { myth: "Gas is a token.", reality: "Gas is a unit of computational work. Fees are paid in the network's token, ETH on Ethereum." },
+      { myth: "A failed transaction costs nothing.", reality: "A transaction that reverts still pays for the gas it consumed up to the point of failure." },
+      { myth: "High fees mean the network is broken.", reality: "Fees ration scarce block space. High fees signal demand above capacity, which rollups and blobs are designed to absorb." },
+    ],
+    risks: [
+      "Fee spikes that price ordinary users out during congestion.",
+      "Rollup costs that depend on Ethereum data fees.",
+      "Value extraction by block builders (MEV) on top of the visible fee.",
+    ],
+    quiz: [
+      {
+        question: "Under EIP-1559, what happens to the base fee?",
+        options: ["It goes to the validator", "It is burned", "It is sent to the Ethereum Foundation", "It is refunded after the block"],
+        answer: 1,
+        explanation: "The base fee is destroyed, which is why Ethereum's net supply depends on activity.",
+      },
+      {
+        question: "A transfer uses 21,000 gas with a base fee of 20 gwei and a tip of 2 gwei. What is the total fee?",
+        options: ["0.000462 ETH", "0.00042 ETH", "0.0462 ETH", "0.000021 ETH"],
+        answer: 0,
+        explanation: "21,000 × 22 gwei = 462,000 gwei = 0.000462 ETH, of which 0.00042 ETH is burned and 0.000042 ETH goes to the validator.",
+      },
+      {
+        question: "What did EIP-4844 introduce?",
+        options: ["A hard cap on ETH supply", "Blobs, a cheaper data space for rollups", "Fee-free transfers", "A second native token for gas"],
+        answer: 1,
+        explanation: "Blob-carrying transactions give rollups a dedicated, cheaper place to publish their data.",
+      },
+    ],
+    sources: [
+      { title: "Gas and fees", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/gas/" },
+      { title: "EIP-1559: Fee market change for ETH 1.0 chain", publisher: "Ethereum Improvement Proposals", url: "https://eips.ethereum.org/EIPS/eip-1559" },
+      { title: "EIP-4844: Shard Blob Transactions", publisher: "Ethereum Improvement Proposals", url: "https://eips.ethereum.org/EIPS/eip-4844" },
+      { title: "Transactions", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/transactions/" },
+    ],
+  },
+
+  halving: {
+    minute:
+      "A halving cuts the number of new coins created per block by half at fixed intervals. On Bitcoin it happens every 210,000 blocks, roughly every four years, so supply growth slows towards a hard cap just under 21 million BTC.",
+    steps: [
+      { title: "A fixed subsidy", text: "The first Bitcoin blocks, mined in 2009, paid 50 BTC to the miner who found them. This block subsidy is the only way new bitcoin is created." },
+      { title: "Halve every 210,000 blocks", text: "The subsidy halved to 25 BTC in 2012, 12.5 BTC in 2016, 6.25 BTC in 2020 and 3.125 BTC in April 2024." },
+      { title: "A converging supply", text: "The sum of all subsidies converges to just under 21 million BTC. The last fraction of subsidy is expected to be paid around 2140." },
+      { title: "Fees take over", text: "As the subsidy shrinks, transaction fees must pay a growing share of what miners earn, and therefore of the network's security." },
+      { title: "Rules, not discretion", text: "Every node enforces the schedule. Changing it would require users to adopt different software, which is why the schedule is considered credible." },
+    ],
+    visual: "halving",
+    visualCaption: "Bitcoin's block subsidy and modelled supply, computed from the protocol rules used in the Sensitor dossier. Past halvings use actual dates; future ones are projected.",
+    example: {
+      projects: ["bitcoin"],
+      title: "Bitcoin: the fourth halving and the next",
+      paragraphs: [
+        "The April 2024 halving cut the subsidy to 3.125 BTC, about 450 BTC issued per day. The dossier projects the next halving around 2028, at block 1,050,000.",
+        "Halvings are known years in advance and the newly issued amount is small compared with the coins already in circulation. Their effect therefore runs through miner economics and market expectations rather than a sudden change in supply.",
+      ],
+    },
+    metrics: [
+      { label: "Annual issuance rate", read: "New coins per year divided by circulating supply. It roughly halves at each halving." },
+      { label: "Fee share of miner revenue", read: "How much of miners' income no longer depends on new issuance. Key for long-term security." },
+      { label: "Hash rate around the halving", read: "Less efficient miners may switch off when revenue per block halves. A lasting drop would lower attack costs." },
+      { label: "Price models based on scarcity", read: "Models that project price from supply alone, such as stock-to-flow, ignore demand. Treat them with caution." },
+    ],
+    misconceptions: [
+      {
+        myth: "Halvings make the price double.",
+        reality: "Some past halvings were followed by rallies, but there have only been four, other forces such as liquidity and adoption weigh heavily, and a known event is partly anticipated by markets.",
+      },
+      { myth: "Exactly 21 million bitcoin will exist.", reality: "The cap is approached asymptotically and lands slightly below 21 million. Coins lost forever also reduce the usable supply." },
+      { myth: "Miners will stop when the subsidy ends.", reality: "By design, fees replace the subsidy. Whether fees will be high enough is the open question." },
+    ],
+    risks: [
+      "A falling security budget if fee demand does not grow.",
+      "Miner stress after a halving, which can concentrate hash power in the largest operators.",
+      "Investment narratives that overstate the halving's effect on price.",
+    ],
+    quiz: [
+      {
+        question: "How often does a Bitcoin halving occur?",
+        options: ["Every year", "Every 210,000 blocks", "Every 2,016 blocks", "When miners vote for it"],
+        answer: 1,
+        explanation: "The subsidy halves every 210,000 blocks, which takes about four years at ten minutes per block.",
+      },
+      {
+        question: "What has the block subsidy been since the April 2024 halving?",
+        options: ["6.25 BTC", "50 BTC", "3.125 BTC", "1.5625 BTC"],
+        answer: 2,
+        explanation: "It went from 6.25 BTC to 3.125 BTC in April 2024; the next halving will bring it to 1.5625 BTC.",
+      },
+      {
+        question: "Why is a halving not a sudden supply shock?",
+        options: [
+          "Because it is cancelled if the price falls",
+          "Because new issuance is small compared with existing supply and the date is known years ahead",
+          "Because miners stockpile coins in advance",
+          "Because the supply cap is raised at the same time",
+        ],
+        answer: 1,
+        explanation: "The schedule is public and only affects new issuance, a small flow compared with the coins already circulating.",
+      },
+    ],
+    sources: [
+      { title: "Bitcoin: A Peer-to-Peer Electronic Cash System", publisher: "Satoshi Nakamoto", url: "https://bitcoin.org/bitcoin.pdf" },
+      { title: "Controlled supply", publisher: "Bitcoin Wiki", url: "https://en.bitcoin.it/wiki/Controlled_supply" },
+      { title: "Block chain (developer guide)", publisher: "Bitcoin Project", url: "https://developer.bitcoin.org/devguide/block_chain.html" },
+    ],
+  },
+
+  stablecoins: {
+    minute:
+      "A stablecoin is a token designed to track the value of a reference asset, usually the US dollar. How it holds that value depends on what backs it: cash and government bonds held by an issuer, crypto collateral locked in smart contracts, or crypto hedged with derivatives.",
+    steps: [
+      {
+        title: "Fiat-backed",
+        text: "An issuer holds cash and short-term government bonds, mints tokens one for one for its clients and redeems them on request. Trust sits with the issuer, its banks and its published attestations.",
+      },
+      {
+        title: "Crypto-collateralised",
+        text: "Users lock more crypto than the stablecoins they mint (over-collateralisation). If the collateral falls too far, the position is liquidated to keep the system solvent.",
+      },
+      {
+        title: "Synthetic",
+        text: "Crypto collateral is paired with an opposite derivatives position, such as a short perpetual future, so that the combined value stays flat. Yield comes from the funding paid by derivatives traders.",
+      },
+      {
+        title: "Holding the peg",
+        text: "Arbitrage keeps the price near one dollar: below it, those who can redeem buy cheap tokens and redeem them at par; above it, they mint new tokens and sell them.",
+      },
+      {
+        title: "A cautionary model",
+        text: "Designs backed mainly by their own sister token are fragile. TerraUSD, the best-known example, lost its peg and collapsed in May 2022.",
+      },
+    ],
+    visual: "stablecoin-models",
+    visualCaption: "Three backing models compared: where the reserves sit, who you trust, and what can break the peg.",
+    example: {
+      projects: ["ethena", "ondo"],
+      title: "Ethena: the moving parts of a synthetic dollar",
+      paragraphs: [
+        "Ethena's USDe is backed by crypto assets hedged with short perpetual futures, plus stable assets. Holders who stake it receive sUSDe, which earns yield from funding rates and staking rewards. A reserve fund is designed to absorb periods when funding turns negative.",
+        "Compare it with the tokenised Treasury products in the Ondo dossier: one earns from derivatives markets, the other from government bonds. Both pay a yield, with very different risks.",
+      ],
+    },
+    metrics: [
+      { label: "Reserve composition and attestations", read: "What backs each token, who checks it and how often. Cash and short-term bonds are not the same as long bonds or loans." },
+      { label: "Peg deviation", read: "How far and how long the market price strays from one dollar, especially during market stress." },
+      { label: "Redemption access", read: "Who can redeem directly with the issuer, with what minimum and how fast. Only redeemers can arbitrage the peg." },
+      { label: "Total stablecoin supply", read: "A proxy for the dollars available on-chain. The Markets page tracks it over time." },
+    ],
+    misconceptions: [
+      { myth: "A stablecoin is always worth exactly one dollar.", reality: "It trades on markets and can lose its peg. USDC traded well below one dollar for a few days in March 2023 when part of its reserves sat at a failed US bank." },
+      { myth: "A yield-bearing stablecoin works like a bank deposit.", reality: "It carries protocol, counterparty and market risks and has no deposit insurance." },
+      { myth: "Decentralised stablecoins have no counterparty.", reality: "Many crypto-collateralised designs hold centralised stablecoins or real-world assets as part of their collateral." },
+    ],
+    risks: [
+      "Issuer, bank or custodian failure for fiat-backed coins.",
+      "Collateral crashes and liquidation cascades for crypto-collateralised coins.",
+      "Negative funding, exchange and hedging risks for synthetic dollars.",
+      "Regulation that restricts issuance or who may hold certain stablecoins.",
+    ],
+    quiz: [
+      {
+        question: "What backs a fiat-backed stablecoin?",
+        options: ["Its sister governance token", "Cash and short-term government bonds held by an issuer", "Short perpetual futures only", "The value of its blockchain"],
+        answer: 1,
+        explanation: "Fiat-backed coins rely on reserves held off-chain by an issuer, which is why attestations matter.",
+      },
+      {
+        question: "Why do crypto-collateralised stablecoins require over-collateralisation?",
+        options: ["To pay higher yields", "To absorb falls in the collateral's value before the debt is undercovered", "To reduce gas fees", "To avoid audits"],
+        answer: 1,
+        explanation: "Crypto collateral is volatile; the extra margin and liquidations protect the system when prices fall.",
+      },
+      {
+        question: "What mainly keeps a stablecoin's market price near one dollar?",
+        options: ["A fixed price set by the exchange", "Arbitrage through minting and redemption", "Daily votes by token holders", "Central bank intervention"],
+        answer: 1,
+        explanation: "When the price strays, those able to mint or redeem at par profit by pushing it back.",
+      },
+    ],
+    sources: [
+      { title: "Stablecoins", publisher: "ethereum.org", url: "https://ethereum.org/en/stablecoins/" },
+      { title: "USDC transparency and reserves", publisher: "Circle", url: "https://www.circle.com/transparency" },
+      { title: "How USDe works", publisher: "Ethena", url: "https://docs.ethena.fi/overview/how-usde-works" },
+      { title: "Reserve fund", publisher: "Ethena", url: "https://docs.ethena.fi/solution-design/reserve-fund" },
+    ],
+  },
+
+  amm: {
+    minute:
+      "An automated market maker replaces the order book with a pool of two tokens and a formula. Traders swap against the pool and the formula sets the price from the ratio of the two reserves. Liquidity providers deposit both tokens and earn the trading fees.",
+    steps: [
+      { title: "Deposit liquidity", text: "Liquidity providers add two tokens in the ratio of the current price and receive a share of the pool, which entitles them to part of the fees." },
+      { title: "Apply the formula", text: "In a constant-product pool, as popularised by Uniswap v2, the product of the two reserves stays constant during a swap, before fees: x × y = k." },
+      { title: "Swap", text: "A buyer adds one token and removes the other. The token being bought becomes scarcer in the pool, so its price rises; bigger trades move the price more (price impact)." },
+      { title: "Collect fees", text: "Each swap pays a fee, 0.30% in Uniswap v2, which stays in the pool and accrues to liquidity providers." },
+      { title: "Arbitrage", text: "When the pool price differs from other markets, arbitrageurs trade until it matches. That is how a pool with no oracle tracks the market price." },
+    ],
+    visual: "amm",
+    visualCaption: "Try it: move the slider to buy from an illustrative pool and see how the price moves along the x × y = k curve. Hypothetical pool, not market data.",
+    example: {
+      projects: ["uniswap"],
+      title: "Uniswap: from constant product to hooks",
+      paragraphs: [
+        "Uniswap popularised the constant-product pool (v2), then concentrated liquidity, where providers choose a price range (v3), and hooks, custom code that changes how a pool behaves (v4).",
+        "The Uniswap dossier focuses on value accrual: historically nearly all fees went to liquidity providers, not to UNI. The UNIfication proposal of November 2025 would turn on protocol fees and use them to burn UNI, the main change to monitor.",
+      ],
+    },
+    metrics: [
+      { label: "Volume to liquidity (turnover)", read: "Trading volume divided by pool liquidity. Higher turnover means more fees earned per dollar deposited." },
+      { label: "Fee tier", read: "The percentage charged per swap. Stable pairs use low tiers, volatile pairs higher ones." },
+      { label: "Fees versus impermanent loss", read: "Providers only gain over holding if fees exceed the loss caused by price divergence between the two tokens." },
+      { label: "Depth around the price", read: "How much can be traded before the price moves by a given percentage. It determines execution quality." },
+    ],
+    misconceptions: [
+      { myth: "Providing liquidity is passive income.", reality: "Providers earn fees but lose value relative to simply holding when prices diverge (impermanent loss), and that loss becomes final if they withdraw." },
+      { myth: "The protocol sets the pool price.", reality: "The formula derives the price from the reserves; arbitrageurs keep it aligned with other markets." },
+      { myth: "A big pool means no slippage.", reality: "Depth reduces price impact, but any trade still moves the price along the curve." },
+    ],
+    risks: [
+      "Impermanent loss for liquidity providers in volatile pairs.",
+      "Sandwich attacks and other MEV that worsen traders' prices.",
+      "Smart contract bugs, including in custom hooks.",
+    ],
+    quiz: [
+      {
+        question: "In a constant-product pool, what stays constant during a swap, before fees?",
+        options: ["The price", "The product of the two reserves", "The sum of the two reserves", "The number of liquidity providers"],
+        answer: 1,
+        explanation: "x × y = k: when one reserve goes up, the other must go down so that their product is unchanged.",
+      },
+      {
+        question: "Why does a large trade get a worse average price than a small one?",
+        options: ["Large traders pay a penalty fee", "Each additional unit bought moves the price further along the curve", "The pool closes after large trades", "Arbitrageurs front-run every trade"],
+        answer: 1,
+        explanation: "The more of a token you remove, the scarcer it becomes in the pool, so each extra unit costs more.",
+      },
+      {
+        question: "What is impermanent loss?",
+        options: [
+          "A fee charged when withdrawing",
+          "The underperformance of a liquidity position versus holding when prices diverge",
+          "A temporary pause in trading",
+          "Tokens lost in a hack",
+        ],
+        answer: 1,
+        explanation: "The pool automatically sells the rising token and buys the falling one, so providers end with less value than if they had just held.",
+      },
+    ],
+    sources: [
+      { title: "Uniswap v2 Core (whitepaper)", publisher: "Uniswap", url: "https://app.uniswap.org/whitepaper.pdf" },
+      { title: "How Uniswap works", publisher: "Uniswap Docs", url: "https://docs.uniswap.org/contracts/v2/concepts/protocol-overview/how-uniswap-works" },
+      { title: "Understanding returns", publisher: "Uniswap Docs", url: "https://docs.uniswap.org/contracts/v2/concepts/advanced-topics/understanding-returns" },
+      { title: "Uniswap v3 Core (whitepaper)", publisher: "Uniswap", url: "https://app.uniswap.org/whitepaper-v3.pdf" },
+    ],
+  },
+
+  "layer-2-rollups": {
+    minute:
+      "A rollup executes transactions away from the main chain, then publishes them in compressed form on Ethereum with a way to prove they were processed correctly. Users get lower fees while inheriting much of Ethereum's security, as long as the rollup's own trust assumptions hold.",
+    steps: [
+      { title: "Execute off-chain", text: "A sequencer orders users' transactions and executes them on the rollup, giving near-instant soft confirmations." },
+      { title: "Publish the data", text: "Batches of transaction data are posted to Ethereum, mostly in blobs since EIP-4844, so that anyone can reconstruct the rollup's state without trusting the operator." },
+      {
+        title: "Prove correctness",
+        text: "Optimistic rollups assume batches are valid unless someone submits a fraud proof during a challenge window, about seven days for withdrawals. ZK rollups attach a validity proof to each batch.",
+      },
+      { title: "Settle withdrawals", text: "Funds return to Ethereum through the rollup's bridge contract once a batch is final, after the challenge window or once the proof is verified." },
+      { title: "Keep an escape hatch", text: "Mature rollups let users force their transactions or exit through Ethereum if the sequencer censors them or goes offline." },
+    ],
+    visual: "rollup",
+    visualCaption: "How a rollup inherits Ethereum's security: transactions run on the rollup, data and proofs settle on Ethereum.",
+    example: {
+      projects: ["arbitrum", "optimism"],
+      title: "Arbitrum: an optimistic rollup and its trust assumptions",
+      paragraphs: [
+        "Arbitrum One posts its transaction batches to Ethereum and secures them with fraud proofs. Its BoLD dispute protocol lets anyone take part in validation rather than an allow-listed set.",
+        "Like most rollups it relies on a single sequencer, and a 12-member Security Council can perform emergency upgrades. These are exactly the trust assumptions that L2BEAT's stages measure, and the Arbitrum dossier tracks them.",
+      ],
+    },
+    metrics: [
+      { label: "Stage (L2BEAT)", read: "From 0 to 2: how much users still depend on the operators. Stage 0 means training wheels; Stage 2 means proofs and code rule, with only narrow emergency powers." },
+      { label: "Proof system", read: "Whether fraud or validity proofs are live, and whether anyone can submit them or only an allow-listed set." },
+      { label: "Sequencer and forced inclusion", read: "Who orders transactions and whether users can bypass the sequencer through Ethereum." },
+      { label: "Exit window", read: "How long users have to withdraw before an upgrade takes effect. Shorter than the withdrawal delay means users cannot escape an unwanted upgrade." },
+    ],
+    misconceptions: [
+      { myth: "All layer 2s are equally secure.", reality: "Security depends on proofs, upgrade keys and where the data is published. L2BEAT tracks these differences rollup by rollup." },
+      { myth: "Withdrawing from an optimistic rollup is instant.", reality: "Native withdrawals wait for the challenge window, about a week. Fast bridges pay liquidity providers to advance the funds and add their own risks." },
+      { myth: "The rollup's token secures the rollup.", reality: "Security comes from Ethereum and the proof system. Many rollup tokens are governance tokens with no role in validating transactions." },
+    ],
+    risks: [
+      "A centralised sequencer that can censor or go offline.",
+      "Upgrade keys or councils able to change the contracts that hold users' funds.",
+      "Bridge risk and liquidity fragmentation across many rollups.",
+    ],
+    quiz: [
+      {
+        question: "What does an optimistic rollup rely on to catch invalid batches?",
+        options: ["A validity proof attached to every batch", "Fraud proofs submitted during a challenge window", "A vote of token holders", "The sequencer's reputation"],
+        answer: 1,
+        explanation: "Optimistic rollups assume validity and let anyone challenge a wrong batch before it becomes final.",
+      },
+      {
+        question: "Why must a rollup publish its transaction data on Ethereum?",
+        options: ["To pay higher fees to validators", "So anyone can reconstruct the state, verify it and exit without the operator", "Because Ethereum stores all rollup tokens", "To make transactions private"],
+        answer: 1,
+        explanation: "Published data is what lets users and challengers act independently of the rollup operator.",
+      },
+      {
+        question: "What does a Stage 0 rating on L2BEAT indicate?",
+        options: ["The rollup is fully trustless", "The rollup has no users yet", "Users still depend heavily on the operators", "The rollup has been shut down"],
+        answer: 2,
+        explanation: "Stage 0 rollups still have training wheels: operators can, for example, upgrade contracts without a meaningful exit window.",
+      },
+    ],
+    sources: [
+      { title: "Layer 2", publisher: "ethereum.org", url: "https://ethereum.org/en/layer-2/" },
+      { title: "Optimistic rollups", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/scaling/optimistic-rollups/" },
+      { title: "Zero-knowledge rollups", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/scaling/zk-rollups/" },
+      { title: "Stages framework", publisher: "L2BEAT", url: "https://l2beat.com/stages" },
+    ],
+  },
+
+  "market-cap-vs-fdv": {
+    minute:
+      "Market cap values the tokens already circulating: price × circulating supply. Fully diluted valuation (FDV) values the full eventual supply at today's price: price × maximum supply, or total supply depending on the data provider. The gap shows how much future supply the market has yet to absorb.",
+    steps: [
+      { title: "Circulating supply", text: "Tokens that can trade freely today. Locked team, investor and treasury allocations are excluded." },
+      { title: "Market capitalisation", text: "Price × circulating supply. It is what the tradable part of the network is worth at the current price." },
+      { title: "Fully diluted valuation", text: "Price × maximum supply, or price × total supply created so far, depending on the data provider. CoinGecko, the provider used on Sensitor, reports the total-supply version, so check the definition before comparing figures." },
+      { title: "Float ratio", text: "Market cap divided by FDV. A low ratio means most of the eventual supply is still locked or not yet issued." },
+      { title: "Read it with the calendar", text: "The ratio only matters through the unlock schedule: how many tokens arrive, when, and in whose hands." },
+    ],
+    visual: "mcap-fdv",
+    visualCaption: "Live float ratio across Sensitor coverage: circulating market cap as a share of fully diluted valuation.",
+    example: {
+      projects: ["bitcoin", "arbitrum"],
+      title: "Across Sensitor coverage",
+      paragraphs: [
+        "Mature assets whose supply is mostly issued sit close to a 100% float ratio. Recent tokens with large allocations still locked for teams, investors or treasuries sit much lower, which means more supply is scheduled to enter the market.",
+        "Because the provider uses total supply, a capped asset still being mined, such as Bitcoin, shows an FDV equal to its market cap, and uncapped assets such as ETH or SOL have an FDV that moves with issuance and burns. The table is computed live from provider data.",
+      ],
+      live: "mcap-fdv",
+    },
+    metrics: [
+      { label: "Float ratio (market cap / FDV)", read: "The share of eventual supply already circulating. The lower it is, the larger the future dilution." },
+      { label: "Upcoming unlocks versus volume", read: "Size of the next unlocks compared with average daily trading volume. It indicates how easily new supply can be absorbed." },
+      { label: "Who receives the unlocks", read: "Team and early investors have different incentives from ecosystem grants or community programmes." },
+      { label: "Demand growth", read: "Whether usage, fees or staking grow fast enough to absorb the new tokens." },
+    ],
+    misconceptions: [
+      { myth: "A low price per token means the token is cheap.", reality: "The price of one token means nothing without the supply. Compare market caps and FDVs, not unit prices." },
+      { myth: "FDV is the real valuation.", reality: "FDV assumes every future token is worth today's price. Actual dilution depends on timing and on demand." },
+      { myth: "A low float is always bearish.", reality: "It signals future supply, but the outcome depends on who receives it and whether demand grows. It is a risk factor, not a verdict." },
+    ],
+    risks: [
+      "Dilution overhang from large locked allocations.",
+      "Inconsistent circulating supply figures between data providers.",
+      "Treasury or ecosystem tokens that are counted as circulating but rarely sold, or the opposite.",
+    ],
+    quiz: [
+      {
+        question: "A token trades at $2 with 500 million circulating and a 2 billion maximum supply. What are its market cap and FDV?",
+        options: ["$1 billion and $4 billion", "$4 billion and $1 billion", "$500 million and $2 billion", "$1 billion and $2 billion"],
+        answer: 0,
+        explanation: "Market cap = 2 × 500M = $1B. FDV = 2 × 2B = $4B. The float ratio is 25%.",
+      },
+      {
+        question: "What does a float ratio of 25% mean?",
+        options: ["25% of holders are whales", "75% of the eventual supply is not yet circulating", "The token is 25% undervalued", "25% of tokens have been burned"],
+        answer: 1,
+        explanation: "Only a quarter of the supply counted in FDV is tradable today; the rest is locked or not yet issued.",
+      },
+      {
+        question: "One token costs $0.10 and another $100. Which is cheaper?",
+        options: ["The $0.10 token", "The $100 token", "You cannot tell without knowing their supplies", "They are equally priced"],
+        answer: 2,
+        explanation: "Valuation is price × supply. A $0.10 token with a huge supply can be worth far more than a $100 token.",
+      },
+    ],
+    sources: [
+      { title: "Coins List with Market Data (field definitions)", publisher: "CoinGecko API", url: "https://docs.coingecko.com/reference/coins-markets" },
+      { title: "Coin Data by ID", publisher: "CoinGecko API", url: "https://docs.coingecko.com/reference/coins-id" },
+      { title: "ARB token distribution", publisher: "Arbitrum Foundation", url: "https://docs.arbitrum.foundation/airdrop-eligibility-distribution" },
+    ],
+  },
+
+  "token-unlocks": {
+    minute:
+      "Most tokens launch with large allocations locked for the team, investors and treasury. Vesting schedules release them over time, often after a cliff. Unlocks add supply to the market, so they are a key input when judging dilution.",
+    steps: [
+      { title: "Allocation", text: "At launch, supply is split between the community, the ecosystem fund, the team, investors and the treasury." },
+      { title: "Cliff", text: "Locked allocations release nothing during an initial period, often twelve months, so insiders cannot sell right after launch." },
+      { title: "Linear vesting", text: "After the cliff, tokens unlock gradually, monthly or block by block, until the allocation is fully vested." },
+      { title: "Unlock event", text: "Newly vested tokens become transferable. Recipients may hold, stake, use them in governance or sell them." },
+      { title: "Absorption", text: "The market impact depends on the size of the unlock relative to trading volume, and on the recipients' incentives." },
+    ],
+    visual: "vesting",
+    visualCaption: "An illustrative schedule: a four-year vesting with a one-year cliff. Hypothetical numbers, not a real token.",
+    example: {
+      projects: ["arbitrum", "ethena"],
+      title: "Supply schedules in Sensitor dossiers",
+      paragraphs: [
+        "Arbitrum's team and investor allocations unlocked nothing for a year after the March 2023 launch. Releases started in March 2024 and continue monthly until March 2027. Several other covered projects follow similar patterns.",
+        "The calendar below lists the schedules documented in the dossiers. Exact amounts per event require a licensed data feed, planned for a later phase.",
+      ],
+      live: "key-dates",
+    },
+    metrics: [
+      { label: "Unlock size versus daily volume", read: "An unlock worth a large multiple of daily trading volume is harder for the market to absorb." },
+      { label: "Recipient type", read: "Early investors with a low entry price have different incentives from an ecosystem fund paying out grants over years." },
+      { label: "Cumulative share unlocked", read: "How much of the eventual supply is already liquid. It is closely related to the float ratio." },
+      { label: "Supply growth over the next twelve months", read: "Unlocks plus issuance, minus burns. It frames how much demand must grow just to keep the price stable." },
+    ],
+    misconceptions: [
+      { myth: "Unlocks always make the price fall.", reality: "Schedules are public and partly anticipated. The impact varies with size, recipients and demand at the time." },
+      { myth: "Unlocked tokens are sold.", reality: "Unlocked tokens become transferable. Many are held, staked or used in governance; on-chain flows to exchanges are a better signal of selling." },
+      { myth: "Circulating supply only grows through unlocks.", reality: "Issuance to validators, burns and buybacks also change supply." },
+    ],
+    risks: [
+      "A supply overhang that weighs on the market for years.",
+      "Insiders selling into community demand.",
+      "Opaque schedules, or schedules changed later by governance.",
+    ],
+    quiz: [
+      {
+        question: "What is a cliff in a vesting schedule?",
+        options: ["The date all tokens unlock at once", "An initial period during which nothing unlocks", "A sudden price drop after an unlock", "The maximum supply of a token"],
+        answer: 1,
+        explanation: "During the cliff no tokens vest; vesting usually starts, or catches up, when it ends.",
+      },
+      {
+        question: "A team allocation of 200 million tokens vests linearly over 36 months after a one-year cliff, with nothing released at the cliff. How much unlocks each month?",
+        options: ["About 5.56 million", "About 16.7 million", "200 million", "About 2.78 million"],
+        answer: 0,
+        explanation: "200 million divided by 36 months is about 5.56 million tokens per month.",
+      },
+      {
+        question: "What is the most useful first check on an upcoming unlock?",
+        options: ["The token's all-time high", "Its size relative to daily trading volume, and who receives it", "The number of social media followers", "The colour of the project's logo"],
+        answer: 1,
+        explanation: "Size relative to liquidity and the recipients' incentives say most about how the market may absorb it.",
+      },
+    ],
+    sources: [
+      { title: "ARB token distribution", publisher: "Arbitrum Foundation", url: "https://docs.arbitrum.foundation/airdrop-eligibility-distribution" },
+      { title: "OP token overview", publisher: "Optimism Collective", url: "https://community.optimism.io/op-token/op-token-overview" },
+      { title: "ENA tokenomics", publisher: "Ethena", url: "https://docs.ethena.fi/overview/ena/tokenomics" },
+    ],
+  },
+};

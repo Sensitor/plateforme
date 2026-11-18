@@ -46,7 +46,7 @@ invité (données dans le navigateur) ; sans OpenAI, le Copilot l'indique ; sans
 | Comptes `/login`, `/account` | ✅ | Supabase Auth : mot de passe, lien magique, réinitialisation ; profil, langue des e-mails, opt-in e-mail |
 | Markets `/markets` | ✅ | Graphiques 1D→ALL, sentiment 90 j, régime, intelligence sectorielle, stablecoins, DeFi |
 | Research `/research` + méthodologie | ✅ | Bibliothèque des dossiers, statistiques éditoriales, framework documenté |
-| Academy `/academy` | ✅ (concepts) | 32 concepts, liés depuis les dossiers et inversement |
+| Academy `/academy` | ✅ | 32 concepts, dont 10 leçons approfondies (en une minute, étapes, schéma ou simulateur interactif, exemple tiré d'un dossier, métriques à suivre, idées reçues, risques, quiz de 3 questions, sources vérifiées) ; progression enregistrée dans le navigateur |
 | Recherche ⌘K | ✅ | Projets, secteurs, pages, concepts |
 | Community, Research Club, Private Program | 🕒 | Pages de roadmap explicitement « non disponible » (aucun faux bouton) |
 

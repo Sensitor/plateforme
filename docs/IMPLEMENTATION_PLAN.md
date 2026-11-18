@@ -42,7 +42,7 @@ unlocks à venir sur les positions, dépendances entre protocoles. Jamais de tra
 
 ## Phase 4, Ecosystem
 
-Academy complète (parcours, quiz, progression, badges), Community, Founder Research, Stripe (Free / Pro 29 € / Research Club 79 €),
+Academy complète (parcours, exercices, badges, progression synchronisée ; 10 leçons approfondies avec quiz et progression locale déjà livrées, 22 concepts restent à approfondir), Community, Founder Research, Stripe (Free / Pro 29 € / Research Club 79 €),
 connexions read-only, accompagnement, périmètre réglementaire à valider avant le Private Program.
 
 ## Points d'attention

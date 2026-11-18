@@ -2,7 +2,8 @@
 /**
  * Checks that every research source URL is reachable.
  * Usage: npm run check:sources
- * Extracts URLs from src/content/projects/*.ts (no TS build needed) and
+ * Extracts URLs from src/content/projects/*.ts and the Academy lessons
+ * (src/content/academy-deep.ts), no TS build needed, and
  * reports HTTP status. Some sites block automated requests (403/429): those
  * are reported as "blocked" and must be checked manually.
  */
@@ -11,8 +12,10 @@ import { join } from "node:path";
 
 const dir = join(process.cwd(), "src/content/projects");
 const urls = new Map();
-for (const file of readdirSync(dir).filter((f) => f.endsWith(".ts") && f !== "index.ts")) {
-  const text = readFileSync(join(dir, file), "utf8");
+const files = [...readdirSync(dir).filter((f) => f.endsWith(".ts") && f !== "index.ts").map((f) => join(dir, f)), join(process.cwd(), "src/content/academy-deep.ts")];
+for (const path of files) {
+  const file = path.split("/").pop();
+  const text = readFileSync(path, "utf8");
   for (const m of text.matchAll(/"(https:\/\/[^"\s]+)"/g)) {
     if (!urls.has(m[1])) urls.set(m[1], file);
   }

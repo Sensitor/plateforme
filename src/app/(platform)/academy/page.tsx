@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Award, BookMarked, ClipboardCheck, Route, Video } from "lucide-react";
+import { CONCEPT_DEEP } from "@/content/academy-deep";
+import { lessonMinutes } from "@/lib/academy/lesson";
+import { LessonPath, type PathLesson } from "@/components/academy/lesson-path";
 import { ACADEMY_CATEGORIES, CONCEPTS } from "@/content/concepts";
 import { PROJECTS } from "@/content/projects";
 import { ACADEMY_COLORS, tint } from "@/lib/brand";
@@ -12,33 +15,36 @@ export const metadata: Metadata = { title: "Academy", description: "Learn the co
 const COMING = [
   { icon: Route, t: "Learning paths", d: "Sequenced courses such as Crypto fundamentals or Analysing a DeFi protocol.", color: "#7C93FF" },
   { icon: Video, t: "Videos & illustrations", d: "Visual explanations of how mechanisms work.", color: "#EC7BB5" },
-  { icon: ClipboardCheck, t: "Quizzes & exercises", d: "Check what you learned with case-based exercises.", color: "#5FCB86" },
+  { icon: ClipboardCheck, t: "Case-based exercises", d: "Apply a lesson to a real dossier: read the data, answer, compare with the analysis.", color: "#5FCB86" },
   { icon: BookMarked, t: "Case studies", d: "Historical events analysed step by step.", color: "#E8B04B" },
-  { icon: Award, t: "Progress & badges", d: "Completion tracking, badges and recommended next lessons.", color: "#A487F0" },
+  { icon: Award, t: "Badges and synced progress", d: "Badges per track, and progress saved to your account across devices.", color: "#A487F0" },
 ];
 
 export default function AcademyPage() {
   const usage: Record<string, number> = {};
   for (const p of PROJECTS) for (const c of p.dossier.concepts) usage[c] = (usage[c] ?? 0) + 1;
+  const path: PathLesson[] = Object.keys(CONCEPT_DEEP)
+    .map((slug) => CONCEPTS.find((c) => c.slug === slug)!)
+    .map((c) => ({ slug: c.slug, title: c.title, summary: c.summary, category: c.category, categoryLabel: ACADEMY_CATEGORIES.find((x) => x.id === c.category)!.label, minutes: lessonMinutes(c) }));
   const counts = Object.fromEntries(ACADEMY_CATEGORIES.map((c) => [c.id, CONCEPTS.filter((x) => x.category === c.id).length]));
   return (
     <div className="space-y-14">
       <header className="relative overflow-hidden rounded-2xl border border-line bg-surface px-6 py-10 md:px-10">
-        <div className="pointer-events-none absolute right-8 top-1/2 hidden -translate-y-1/2 grid-cols-4 gap-2.5 lg:grid" aria-hidden>
+        <div className="pointer-events-none absolute right-8 top-1/2 hidden -translate-y-1/2 grid-cols-4 gap-2.5 xl:grid" aria-hidden>
           {ACADEMY_CATEGORIES.map((c) => (
             <div key={c.id} className="h-[74px] w-[112px] overflow-hidden rounded-lg border border-line" style={{ backgroundColor: tint(ACADEMY_COLORS[c.id], 0.1) }}>
               <TrackArt category={c.id} className="h-full w-full" />
             </div>
           ))}
         </div>
-        <div className="relative max-w-2xl">
+        <div className="relative max-w-2xl xl:max-w-[calc(100%-520px)]">
           <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-accent">Understand</div>
           <h1 className="serif-display mt-3 text-[44px] leading-[1.02] text-fg md:text-[60px]">
             Academy, <span className="italic text-violet">learn by research.</span>
           </h1>
           <p className="mt-4 text-[16px] leading-relaxed text-fg-2">
             Every dossier links to the concepts it relies on. Read an analysis, open the concept you need, come back with the right vocabulary. {CONCEPTS.length} explainers
-            are available today across eight tracks.
+            across eight tracks, {path.length} of them as in-depth lessons with step-by-step mechanics, worked examples from our research and a quiz.
           </p>
         </div>
       </header>
@@ -70,12 +76,17 @@ export default function AcademyPage() {
       </section>
 
       <section>
-        <SectionTitle title="Concept library" description="Search or filter by track. Each concept shows where it is used in our research." />
-        <ConceptBrowser concepts={CONCEPTS} usage={usage} />
+        <SectionTitle title="Start here: in-depth lessons" description="The fundamentals, in a suggested order. Each lesson ends with a three-question quiz; passing it marks the lesson as completed." />
+        <LessonPath lessons={path} />
       </section>
 
       <section>
-        <SectionTitle title="Coming to the Academy" description="Structured courses and progress tracking are planned for Phase 4." />
+        <SectionTitle title="Concept library" description="Search or filter by track. Each concept shows where it is used in our research." />
+        <ConceptBrowser concepts={CONCEPTS} usage={usage} deep={Object.keys(CONCEPT_DEEP)} />
+      </section>
+
+      <section>
+        <SectionTitle title="Coming to the Academy" description="Structured courses, exercises and synced progress are planned for Phase 4." />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
           {COMING.map((x) => (
             <div key={x.t} className="rounded-xl border border-dashed border-line-strong p-4">
