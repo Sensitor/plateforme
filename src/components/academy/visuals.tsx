@@ -14,7 +14,7 @@ interface FlowNode {
   loop?: string;
 }
 
-function Flow({ nodes, color, end }: { nodes: FlowNode[]; color: string; end?: React.ReactNode }) {
+export function Flow({ nodes, color, end }: { nodes: FlowNode[]; color: string; end?: React.ReactNode }) {
   return (
     <div>
       <ol className="flex flex-col items-stretch gap-2 md:flex-row md:items-stretch">
@@ -56,6 +56,60 @@ export function PowDiagram({ color }: { color: string }) {
         { title: "Chain extends", text: "Everyone builds on the new block; the next race begins." },
       ]}
     />
+  );
+}
+
+export function Outcomes({ positive, negative }: { positive: React.ReactNode; negative: React.ReactNode }) {
+  return (
+    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+      <div className="flex items-start gap-2.5 rounded-lg border border-positive/30 bg-positive-soft px-3.5 py-2.5 text-[12.5px] text-fg-2">
+        <Check className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden />
+        <span>{positive}</span>
+      </div>
+      <div className="flex items-start gap-2.5 rounded-lg border border-negative/30 bg-negative-soft px-3.5 py-2.5 text-[12.5px] text-fg-2">
+        <X className="mt-0.5 size-4 shrink-0 text-negative" aria-hidden />
+        <span>{negative}</span>
+      </div>
+    </div>
+  );
+}
+
+/** Flow diagram described in lesson content. */
+export function FlowFromSpec({ spec, color }: { spec: { nodes: FlowNode[]; outcomes?: { positive: string; negative: string } }; color: string }) {
+  return <Flow nodes={spec.nodes} color={color} end={spec.outcomes ? <Outcomes positive={spec.outcomes.positive} negative={spec.outcomes.negative} /> : undefined} />;
+}
+
+/** Comparison table described in lesson content. */
+export function ComparisonTable({ spec }: { spec: { columns: string[]; rows: { label: string; values: string[] }[] } }) {
+  return (
+    <div className="relative overflow-x-auto rounded-xl border border-line">
+      <table className="w-full min-w-[560px] border-collapse text-left text-[12.5px]">
+        <thead>
+          <tr className="bg-bg-elevated">
+            <th scope="col" className="w-[130px] px-3.5 py-2.5" />
+            {spec.columns.map((h) => (
+              <th key={h} scope="col" className="px-3.5 py-2.5 text-[13px] font-semibold text-fg">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {spec.rows.map((r) => (
+            <tr key={r.label} className="border-t border-line align-top">
+              <th scope="row" className="px-3.5 py-2.5 text-[11px] font-medium uppercase tracking-[0.1em] text-muted">
+                {r.label}
+              </th>
+              {r.values.map((v, i) => (
+                <td key={`${r.label}-${i}`} className="px-3.5 py-2.5 leading-relaxed text-fg-2">
+                  {v}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

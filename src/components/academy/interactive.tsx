@@ -171,3 +171,176 @@ export function AmmSimulator({ color }: { color: string }) {
     </div>
   );
 }
+
+function Slider({ label, value, min, max, step, onChange, format, color }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void; format: (v: number) => string; color: string }) {
+  const id = useId();
+  return (
+    <div>
+      <label htmlFor={id} className="flex items-center justify-between text-[12.5px] text-muted">
+        <span>{label}</span>
+        <span className="num text-[13.5px] text-fg">{format(value)}</span>
+      </label>
+      <input id={id} type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="mt-1.5 w-full" style={{ accentColor: color }} />
+    </div>
+  );
+}
+
+/** Lending health factor with example parameters (Aave-style definition). */
+export function HealthFactorCalculator({ color }: { color: string }) {
+  const [amount, setAmount] = useState(10);
+  const [price, setPrice] = useState(2_000);
+  const [lt, setLt] = useState(80);
+  const [debt, setDebt] = useState(10_000);
+  const collateral = amount * price;
+  const hf = debt > 0 ? (collateral * (lt / 100)) / debt : Infinity;
+  const liqPrice = amount > 0 && lt > 0 ? debt / (amount * (lt / 100)) : 0;
+  const distance = price > 0 ? (liqPrice / price - 1) * 100 : 0;
+  const state = !Number.isFinite(hf) ? "No debt" : hf < 1 ? "Liquidatable" : hf < 1.2 ? "At risk" : "Healthy";
+  const tone = state === "Liquidatable" ? "text-negative" : state === "At risk" ? "text-warning" : "text-positive";
+  return (
+    <div className="rounded-xl border border-line p-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Slider label="Collateral (TKN)" value={amount} min={1} max={50} step={1} onChange={setAmount} format={(v) => `${nf(v, 0)} TKN`} color={color} />
+        <Slider label="Collateral price" value={price} min={200} max={4_000} step={50} onChange={setPrice} format={(v) => `$${nf(v, 0)}`} color={color} />
+        <Slider label="Liquidation threshold" value={lt} min={50} max={90} step={1} onChange={setLt} format={(v) => `${v}%`} color={color} />
+        <Slider label="Debt (stablecoins)" value={debt} min={0} max={40_000} step={500} onChange={setDebt} format={(v) => `$${nf(v, 0)}`} color={color} />
+      </div>
+      <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4 sm:grid-cols-4">
+        <div>
+          <dt className="text-[12px] text-muted">Collateral value</dt>
+          <dd className="num text-[16px] text-fg">${nf(collateral, 0)}</dd>
+        </div>
+        <div>
+          <dt className="text-[12px] text-muted">Health factor</dt>
+          <dd className={cn("num text-[16px]", tone)}>{Number.isFinite(hf) ? nf(hf, 2) : "n/a"}</dd>
+          <dd className={cn("text-[11.5px]", tone)}>{state}</dd>
+        </div>
+        <div>
+          <dt className="text-[12px] text-muted">Liquidation price</dt>
+          <dd className="num text-[16px] text-fg">{debt > 0 ? `$${nf(liqPrice, 0)}` : "n/a"}</dd>
+        </div>
+        <div>
+          <dt className="text-[12px] text-muted">Distance</dt>
+          <dd className="num text-[16px] text-fg">{debt > 0 ? `${nf(distance, 1)}%` : "n/a"}</dd>
+          <dd className="text-[11.5px] text-subtle">price move to liquidation</dd>
+        </div>
+      </dl>
+      <p className="mt-3 text-[11.5px] text-subtle">Health factor = collateral value × liquidation threshold ÷ debt. Below 1, the position can be liquidated. Example parameters: real thresholds are set per asset and market.</p>
+    </div>
+  );
+}
+
+/** Perpetual funding payments with example inputs. */
+export function FundingCalculator({ color }: { color: string }) {
+  const [notional, setNotional] = useState(10_000);
+  const [rate, setRate] = useState(0.01);
+  const [perDay, setPerDay] = useState(3);
+  const [days, setDays] = useState(30);
+  const perInterval = notional * (rate / 100);
+  const total = perInterval * perDay * days;
+  const annual = rate * perDay * 365;
+  return (
+    <div className="rounded-xl border border-line p-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Slider label="Position size (notional)" value={notional} min={1_000} max={100_000} step={1_000} onChange={setNotional} format={(v) => `$${nf(v, 0)}`} color={color} />
+        <Slider label="Funding rate per interval" value={rate} min={-0.05} max={0.1} step={0.005} onChange={setRate} format={(v) => `${v > 0 ? "+" : ""}${nf(v, 3)}%`} color={color} />
+        <Slider label="Holding period" value={days} min={1} max={365} step={1} onChange={setDays} format={(v) => `${v} days`} color={color} />
+        <div>
+          <span className="text-[12.5px] text-muted">Funding interval</span>
+          <div className="mt-2 flex gap-1.5">
+            {[
+              [3, "Every 8 hours"],
+              [24, "Every hour"],
+            ].map(([v, l]) => (
+              <button key={l} onClick={() => setPerDay(v as number)} className={cn("rounded-md border px-2.5 py-1 text-[12px]", perDay === v ? "border-accent/50 text-fg" : "border-line text-muted hover:text-fg-2")}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4 sm:grid-cols-3">
+        <div>
+          <dt className="text-[12px] text-muted">Per interval</dt>
+          <dd className="num text-[16px] text-fg">${nf(Math.abs(perInterval), 2)}</dd>
+        </div>
+        <div>
+          <dt className="text-[12px] text-muted">Over {days} days</dt>
+          <dd className="num text-[16px] text-fg">${nf(Math.abs(total), 2)}</dd>
+          <dd className="text-[11.5px] text-subtle">{rate === 0 ? "No payment" : rate > 0 ? "Longs pay shorts" : "Shorts pay longs"}</dd>
+        </div>
+        <div>
+          <dt className="text-[12px] text-muted">Annualised rate</dt>
+          <dd className="num text-[16px] text-fg">{nf(annual, 1)}%</dd>
+        </div>
+      </dl>
+      <p className="mt-3 text-[11.5px] text-subtle">Payment = position size × funding rate, at every interval. Venues differ on intervals and caps. Example values, not live rates.</p>
+    </div>
+  );
+}
+
+/** Gain needed to recover from a loss. */
+export function RecoveryCalculator({ color }: { color: string }) {
+  const [loss, setLoss] = useState(50);
+  const need = (1 / (1 - loss / 100) - 1) * 100;
+  const marks = [10, 25, 50, 75, 90];
+  return (
+    <div className="rounded-xl border border-line p-4">
+      <Slider label="Loss from the peak" value={loss} min={5} max={95} step={1} onChange={setLoss} format={(v) => `-${v}%`} color={color} />
+      <p className="mt-4 text-[15px] text-fg">
+        A <span className="num text-negative">-{loss}%</span> drawdown needs a <span className="num text-positive">+{nf(need, need > 100 ? 0 : 1)}%</span> gain just to get back to the peak.
+      </p>
+      <div className="mt-4 grid grid-cols-5 gap-2 text-center">
+        {marks.map((m) => (
+          <div key={m} className="rounded-lg border border-line px-1 py-2">
+            <div className="num text-[12px] text-negative">-{m}%</div>
+            <div className="num mt-0.5 text-[12.5px] text-fg">+{nf((1 / (1 - m / 100) - 1) * 100, 0)}%</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[11.5px] text-subtle">Required gain = 1 ÷ (1 - loss) - 1. Pure arithmetic, it applies to any asset.</p>
+    </div>
+  );
+}
+
+/** Two-asset portfolio volatility as a function of correlation (illustrative). */
+export function DiversificationSimulator({ color }: { color: string }) {
+  const [w, setW] = useState(50);
+  const [va, setVa] = useState(60);
+  const [vb, setVb] = useState(80);
+  const [rho, setRho] = useState(0.7);
+  const wa = w / 100;
+  const wb = 1 - wa;
+  const port = Math.sqrt(wa * wa * va * va + wb * wb * vb * vb + 2 * wa * wb * rho * va * vb);
+  const avg = wa * va + wb * vb;
+  return (
+    <div className="rounded-xl border border-line p-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Slider label="Weight of asset A" value={w} min={0} max={100} step={5} onChange={setW} format={(v) => `${v}% A / ${100 - v}% B`} color={color} />
+        <Slider label="Correlation between A and B" value={rho} min={-1} max={1} step={0.05} onChange={setRho} format={(v) => nf(v, 2)} color={color} />
+        <Slider label="Volatility of A (annual)" value={va} min={10} max={120} step={5} onChange={setVa} format={(v) => `${v}%`} color={color} />
+        <Slider label="Volatility of B (annual)" value={vb} min={10} max={120} step={5} onChange={setVb} format={(v) => `${v}%`} color={color} />
+      </div>
+      <div className="mt-5 space-y-2.5 border-t border-line pt-4">
+        {[
+          ["Weighted average of the two", avg, "#9299A8"],
+          ["Portfolio volatility", port, color],
+        ].map(([l, v, c]) => (
+          <div key={l as string}>
+            <div className="flex justify-between text-[12.5px]">
+              <span className="text-muted">{l}</span>
+              <span className="num text-fg">{nf(v as number, 1)}%</span>
+            </div>
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-3" aria-hidden>
+              <div className="h-full rounded-full" style={{ width: `${Math.min(100, ((v as number) / 120) * 100)}%`, backgroundColor: c as string }} />
+            </div>
+          </div>
+        ))}
+        <p className="pt-1 text-[13px] text-fg-2">
+          Diversification removes <span className="num text-fg">{nf(avg - port, 1)}</span> points of volatility here. With a correlation of 1 it removes nothing; the lower the correlation, the larger the benefit.
+        </p>
+      </div>
+      <p className="mt-3 text-[11.5px] text-subtle">Two-asset formula with illustrative inputs. Correlations between crypto assets often rise in sell-offs, exactly when diversification is needed.</p>
+    </div>
+  );
+}

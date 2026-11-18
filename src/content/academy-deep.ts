@@ -714,4 +714,584 @@ export const CONCEPT_DEEP: Record<string, ConceptDeep> = {
       { title: "ENA tokenomics", publisher: "Ethena", url: "https://docs.ethena.fi/overview/ena/tokenomics" },
     ],
   },
+
+  oracles: {
+    minute:
+      "Blockchains cannot see the outside world. An oracle fetches data such as asset prices from external sources, agrees on a value and publishes it on-chain so smart contracts can use it. Most of DeFi, from lending to derivatives, depends on those prices being right.",
+    steps: [
+      { title: "Collect data", text: "Independent node operators fetch the same data, for example the ETH/USD price, from many sources such as exchanges and market data aggregators." },
+      { title: "Agree off-chain", text: "Nodes combine their observations, typically by taking the median so that a few bad values cannot move the result, and sign a single report. Chainlink's Off-Chain Reporting works this way." },
+      {
+        title: "Publish on-chain",
+        text: "The report is written to a feed contract. Push-based feeds update when the price moves by more than a deviation threshold or when a heartbeat interval has passed; pull-based oracles let an application fetch a signed price at the moment it needs it.",
+      },
+      { title: "Consume", text: "Lending markets, perpetual exchanges and stablecoins read the feed to value collateral, trigger liquidations or settle trades." },
+      { title: "Check freshness", text: "Well-designed protocols check how recent the data is and pause or switch to a fallback when a feed stops updating." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Data sources", text: "Exchanges and aggregators publish prices." },
+        { title: "Node operators", text: "Each node fetches and signs its observation." },
+        { title: "Aggregation", text: "The median of observations, in one signed report." },
+        { title: "On-chain feed", text: "Updated on a price deviation or a heartbeat." },
+        { title: "Applications", text: "Lending, perps and stablecoins read the price." },
+      ],
+      outcomes: { positive: "Many independent sources and operators: one wrong value cannot move the price.", negative: "One source or a thin market: an attacker can move the input and drain a protocol." },
+    },
+    visualCaption: "How a price reaches a smart contract, and what makes it robust.",
+    example: {
+      projects: ["chainlink", "aave"],
+      title: "Chainlink, and the protocols that depend on it",
+      paragraphs: [
+        "Chainlink Data Feeds aggregate prices from multiple independent node operators and data sources into on-chain reference contracts. The node set of each feed is curated rather than open, so its decentralisation is real but bounded, as the dossier notes.",
+        "Aave relies on Chainlink price feeds for most of its markets. A wrong price would hit Aave's liquidations directly, which is why the Aave dossier lists it as a significant external dependency and the Knowledge Graph maps the link.",
+      ],
+    },
+    metrics: [
+      { label: "Value secured", read: "The value of the protocols relying on a feed. The more value depends on it, the larger the reward for attacking it." },
+      { label: "Operators and sources", read: "How many independent node operators and data sources contribute, and who they are." },
+      { label: "Update rules", read: "The deviation threshold and heartbeat. Stale data in a fast-moving market is how many liquidations go wrong." },
+      { label: "Track record", read: "Past incidents and mispricings, and how quickly they were detected and handled." },
+    ],
+    misconceptions: [
+      { myth: "An oracle is a price taken from one exchange.", reality: "Robust oracles aggregate many sources and operators. Single-source price feeds are precisely the ones attackers target." },
+      { myth: "A decentralised oracle makes the protocol safe.", reality: "A correct price for an illiquid asset can still be manipulated at the source. Protocols also need borrowing caps and liquid collateral." },
+      { myth: "Oracles only provide prices.", reality: "They also deliver verifiable randomness, proof of reserves, cross-chain messages and off-chain computation." },
+    ],
+    risks: [
+      "Manipulation of the underlying market, for example with a flash loan on a thin pool.",
+      "Stale prices during extreme volatility or network congestion.",
+      "Many protocols depending on the same oracle network, which concentrates risk.",
+    ],
+    quiz: [
+      {
+        question: "Why do blockchains need oracles?",
+        options: ["To make transactions faster", "Because smart contracts cannot read data from outside their own chain", "To store private keys safely", "To mine new blocks"],
+        answer: 1,
+        explanation: "A blockchain only knows its own state; prices and other external facts must be brought on-chain by an oracle.",
+      },
+      {
+        question: "Why do oracle networks often use the median of many observations?",
+        options: ["It is cheaper to compute than an average", "So that a few wrong or manipulated values cannot move the result", "Because exchanges require it", "To hide the data sources"],
+        answer: 1,
+        explanation: "With a median, an attacker would need to corrupt most observations, not just one, to shift the reported price.",
+      },
+      {
+        question: "A push-based feed updates on deviation or heartbeat. What does that mean?",
+        options: [
+          "It updates only when users vote",
+          "It publishes a new value when the price moves by more than a set percentage, or when a maximum time has passed",
+          "It updates once a week",
+          "It updates every block whatever happens",
+        ],
+        answer: 1,
+        explanation: "Deviation thresholds catch fast moves; the heartbeat guarantees a fresh value even in quiet markets.",
+      },
+    ],
+    sources: [
+      { title: "Oracles", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/oracles/" },
+      { title: "Data Feeds", publisher: "Chainlink Docs", url: "https://docs.chain.link/data-feeds" },
+      { title: "Off-Chain Reporting", publisher: "Chainlink Docs", url: "https://docs.chain.link/architecture-overview/off-chain-reporting" },
+      { title: "Price Feeds (pull oracle model)", publisher: "Pyth Network Docs", url: "https://docs.pyth.network/price-feeds" },
+    ],
+  },
+
+  "lending-protocols": {
+    minute:
+      "A lending protocol pools deposits from suppliers and lends them to borrowers who post more collateral than they borrow. Interest rates move with demand, and if a borrower's collateral falls too far in value, anyone can liquidate the position to keep the pool solvent.",
+    steps: [
+      { title: "Supply", text: "Suppliers deposit assets and receive a token that represents their claim plus accrued interest (aTokens on Aave)." },
+      { title: "Borrow against collateral", text: "Borrowers deposit collateral and can borrow up to a loan-to-value limit set for each asset." },
+      { title: "Rates follow utilisation", text: "The larger the share of a pool that is borrowed, the higher the borrow and supply rates. Higher rates attract deposits and discourage further borrowing." },
+      { title: "Health factor", text: "Each position has a health factor: collateral value weighted by its liquidation threshold, divided by the debt. Below 1, the position can be liquidated." },
+      { title: "Liquidation", text: "A liquidator repays part of the debt and receives collateral at a discount, the liquidation bonus, which brings the position back to health." },
+    ],
+    visual: "health-factor",
+    visualCaption: "Try it: move the collateral price down and watch the health factor approach the liquidation line. Example parameters.",
+    example: {
+      projects: ["aave"],
+      title: "Aave: the reference money market",
+      paragraphs: [
+        "Aave pools liquidity and lets borrowers draw from it against collateral. Loan-to-value ratios, liquidation thresholds and caps are set per asset, curated by specialised risk service providers. Version 3 added an efficiency mode for correlated assets and an isolation mode for riskier ones.",
+        "The dossier names the main risk vectors: oracle failures, collateral that becomes illiquid during a crash, and bad debt when liquidations cannot keep up. Over-collateralisation limits capital efficiency; it is the price of lending without credit checks.",
+      ],
+    },
+    metrics: [
+      { label: "Utilisation", read: "The share of deposits that is borrowed. Near 100%, suppliers may not be able to withdraw until loans are repaid." },
+      { label: "Protocol revenue (reserve factor)", read: "The share of interest the protocol keeps. It is its main business line, alongside liquidation fees." },
+      { label: "Bad debt", read: "Positions whose debt exceeds their collateral because liquidation failed. It is a direct loss for the pool." },
+      { label: "Collateral concentration", read: "How much borrowing is backed by one asset or a few large positions. Concentration makes liquidations harder in a crash." },
+    ],
+    misconceptions: [
+      { myth: "Deposits can always be withdrawn instantly.", reality: "When utilisation reaches 100%, suppliers must wait for borrowers to repay or be liquidated." },
+      { myth: "Liquidations are a penalty imposed by the team.", reality: "Third-party bots perform them under public rules; the discount rewards them for restoring the pool's solvency." },
+      { myth: "The supply rate is a guaranteed return.", reality: "It floats with utilisation and can fall quickly when demand for borrowing drops." },
+    ],
+    risks: [
+      "Oracle errors that trigger wrongful liquidations or allow over-borrowing.",
+      "Liquidation cascades and bad debt when collateral prices gap down.",
+      "Mistakes in risk parameters set by governance, and smart contract bugs.",
+    ],
+    quiz: [
+      {
+        question: "What happens when a position's health factor falls below 1?",
+        options: ["The interest rate is frozen", "The position can be liquidated", "The collateral is returned to the user", "Nothing until the loan matures"],
+        answer: 1,
+        explanation: "A health factor below 1 means the weighted collateral no longer covers the debt; liquidators can step in.",
+      },
+      {
+        question: "Why do borrowing rates rise when utilisation is high?",
+        options: ["To reward the developers", "To attract deposits and discourage borrowing so that liquidity remains available", "Because the token price rises", "Rates never change"],
+        answer: 1,
+        explanation: "The rate curve is the protocol's way of balancing supply and demand for each asset.",
+      },
+      {
+        question: "Collateral worth $20,000, a liquidation threshold of 80% and a debt of $10,000. What is the health factor?",
+        options: ["2.0", "1.6", "0.5", "1.25"],
+        answer: 1,
+        explanation: "20,000 × 0.80 ÷ 10,000 = 1.6. The collateral can lose about 37.5% of its value before liquidation.",
+      },
+    ],
+    sources: [
+      { title: "Aave documentation", publisher: "Aave", url: "https://aave.com/docs" },
+      { title: "Liquidations", publisher: "Aave Help Center", url: "https://aave.com/help/borrowing/liquidations" },
+      { title: "Compound III documentation", publisher: "Compound", url: "https://docs.compound.finance/" },
+      { title: "Decentralized finance (DeFi)", publisher: "ethereum.org", url: "https://ethereum.org/en/defi/" },
+    ],
+  },
+
+  "liquid-staking": {
+    minute:
+      "Liquid staking lets you stake without locking your tokens. A protocol pools deposits, stakes them through professional node operators and gives you a liquid token, such as stETH, that tracks your stake plus rewards and can be traded or used as collateral.",
+    steps: [
+      { title: "Deposit", text: "Users deposit ETH in any amount, without running a validator or holding the 32 ETH needed to activate one." },
+      { title: "Allocate to operators", text: "The protocol distributes deposits to node operators who run validators. Lido's Staking Router supports curated operators, a permissionless community module and distributed validator technology." },
+      { title: "Mint the liquid token", text: "Depositors receive a liquid staking token. The stETH balance grows daily as oracles report validator rewards; wrapped versions such as wstETH grow in value per token instead." },
+      { title: "Use it", text: "The token can be held, traded or posted as collateral in DeFi while the underlying ETH keeps earning staking rewards." },
+      { title: "Exit", text: "Holders redeem through the protocol's withdrawal queue, or sell on the market, sometimes at a discount when many want to leave at once." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Deposit ETH", text: "Any amount, no validator to run." },
+        { title: "Protocol pool", text: "Deposits allocated by the staking router." },
+        { title: "Node operators", text: "Run validators and earn rewards." },
+        { title: "Liquid token", text: "Tracks the stake plus rewards." },
+        { title: "Use or exit", text: "Collateral, trading, or the withdrawal queue." },
+      ],
+      outcomes: {
+        positive: "Staking rewards without locking capital, usable across DeFi.",
+        negative: "Extra layers of risk: contracts, operators, oracle reports, and a market price that can slip below the underlying ETH.",
+      },
+    },
+    visualCaption: "From a deposit to a liquid token: each box is also a layer of risk.",
+    example: {
+      projects: ["lido", "ethereum"],
+      title: "Lido: network effects and concentration",
+      paragraphs: [
+        "Lido is the largest Ethereum liquid staking protocol. Its token, held as stETH or wrapped as wstETH, is the most integrated liquid staking token as DeFi collateral, a network effect the dossier identifies as Lido's main advantage.",
+        "The same success raises a decentralisation question: Lido's large share of staked ETH concentrates consensus weight. Lido mitigates it with many independent operators, permissionless modules and a Dual Governance design meant to let stETH holders delay DAO decisions.",
+      ],
+    },
+    metrics: [
+      { label: "Share of staked ETH", read: "Market share of the protocol. Above one third of all stake, a single system could disrupt finality if it failed or misbehaved." },
+      { label: "Market price versus redemption value", read: "A discount signals exit pressure or doubts. It matters most for positions that use the token as collateral." },
+      { label: "Withdrawal queue", read: "How long redemptions take. A long queue pushes impatient holders to sell on the market." },
+      { label: "Operator set", read: "Number and independence of node operators, and the share open to permissionless operators." },
+    ],
+    misconceptions: [
+      { myth: "One stETH is always worth exactly one ETH.", reality: "It is redeemable through the protocol, but on the market it can trade at a discount when exits pile up or confidence drops." },
+      { myth: "Liquid staking removes staking risk.", reality: "Slashing, operator failures and contract bugs still apply, plus the risks of the liquid token itself." },
+      { myth: "LDO holders receive the staking fees.", reality: "The protocol's share of fees goes to the DAO treasury; LDO gives voting rights, not a direct claim on revenue." },
+    ],
+    risks: [
+      "Concentration of a network's stake in one protocol.",
+      "Discounts and forced liquidations when the token is used in leveraged loops.",
+      "Governance upgrades, oracle reporting errors and operator slashing.",
+    ],
+    quiz: [
+      {
+        question: "What does a liquid staking token represent?",
+        options: ["A governance vote in Ethereum", "A transferable claim on staked tokens plus accrued rewards", "A loan from the protocol", "A share of the protocol's company"],
+        answer: 1,
+        explanation: "The token stands for your share of the staked pool, including rewards, and can move freely while the stake stays locked.",
+      },
+      {
+        question: "Why can stETH trade below ETH on the market?",
+        options: ["Because it pays no rewards", "When many holders want to exit faster than the withdrawal queue allows", "Because it is not backed by ETH", "Because Ethereum caps its price"],
+        answer: 1,
+        explanation: "Market sellers accept a discount to avoid waiting in the queue, especially during stress.",
+      },
+      {
+        question: "Why is a dominant liquid staking protocol a concern for Ethereum?",
+        options: ["It raises gas fees", "It concentrates a large share of consensus weight in one system", "It mints new ETH", "It prevents withdrawals"],
+        answer: 1,
+        explanation: "If one system controls a large share of stake, its failure or capture could affect the whole network's consensus.",
+      },
+    ],
+    sources: [
+      { title: "Lido documentation", publisher: "Lido", url: "https://docs.lido.fi" },
+      { title: "Lido tokens integration guide", publisher: "Lido", url: "https://docs.lido.fi/guides/lido-tokens-integration-guide" },
+      { title: "Staking Router", publisher: "Lido", url: "https://docs.lido.fi/contracts/staking-router" },
+      { title: "Pooled staking", publisher: "ethereum.org", url: "https://ethereum.org/en/staking/pools/" },
+    ],
+  },
+
+  mev: {
+    minute:
+      "Whoever orders the transactions in a block can profit from that order. MEV, maximal extractable value, is the value captured by including, excluding or reordering transactions: arbitrage between markets, liquidations, and sometimes trades placed around yours to worsen your price.",
+    steps: [
+      { title: "A public waiting room", text: "Pending transactions sit in a public mempool, visible to anyone before they are included in a block." },
+      { title: "Searchers", text: "Specialised bots scan pending transactions and market states for profitable opportunities, then prepare bundles of transactions in a precise order." },
+      { title: "Builders", text: "Block builders assemble the most profitable block from users' transactions and searchers' bundles, and bid for it to be proposed." },
+      { title: "Proposers", text: "On Ethereum most validators use MEV-Boost to receive blocks from builders through relays and pick the highest bid, which separates building a block from proposing it." },
+      { title: "Who keeps the value", text: "Value flows from users to searchers, builders and validators. Some applications and rollups now auction ordering rights to keep part of it themselves." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Your swap", text: "Sent to the public mempool." },
+        { title: "Searcher", text: "Spots it and prepares a buy before and a sell after." },
+        { title: "Bundle", text: "Ordered transactions plus a payment to the builder." },
+        { title: "Builder", text: "Packs the most profitable block." },
+        { title: "Proposer", text: "Picks the highest-paying block." },
+      ],
+      outcomes: { positive: "Arbitrage and liquidations keep prices aligned across venues and loans solvent.", negative: "Sandwich attacks and front-running worsen users' execution, a hidden cost." },
+    },
+    visualCaption: "A sandwich attack, step by step, and the supply chain that makes it possible.",
+    example: {
+      projects: ["ethereum", "arbitrum"],
+      title: "Who captures the value of ordering?",
+      paragraphs: [
+        "On Ethereum, priority fees and MEV go to validators, as the dossier notes. A small number of specialised builders produce most blocks, which raises concerns about concentration in block building.",
+        "Rollups face the same question with their sequencer. Arbitrum's Timeboost auctions a short time advantage in transaction ordering, and its revenue accrues to the DAO treasury: an explicit attempt to capture MEV at the protocol level.",
+      ],
+    },
+    metrics: [
+      { label: "Slippage tolerance", read: "The maximum price move you accept on a swap. It caps how much a sandwich can take from you." },
+      { label: "Builder concentration", read: "The share of blocks produced by the largest builders. High concentration creates censorship and dependency risks." },
+      { label: "Private order flow", read: "Transactions sent through private channels or intent systems never appear in the public mempool." },
+      { label: "MEV returned to users or protocols", read: "Rebates, auctions and redistribution show how much value is recaptured rather than extracted." },
+    ],
+    misconceptions: [
+      { myth: "MEV is simply theft by block producers.", reality: "Some MEV, such as arbitrage and liquidations, keeps markets efficient. The harmful part extracts value from users' own trades." },
+      { myth: "Paying a higher fee protects my trade.", reality: "A higher tip buys priority, not protection: a searcher can still place transactions around yours. Private submission and tight slippage limits help more." },
+      { myth: "MEV only exists on Ethereum.", reality: "Any system where someone orders transactions has MEV, including rollups with a single sequencer." },
+    ],
+    risks: [
+      "Hidden costs for users through worse execution.",
+      "Concentration of block building in a few builders and relays.",
+      "Incentives to censor or reorder transactions when extractable value is large.",
+    ],
+    quiz: [
+      {
+        question: "What gives rise to MEV?",
+        options: ["High token prices", "The power to choose and order transactions in a block", "Smart contract audits", "Low network fees"],
+        answer: 1,
+        explanation: "Ordering power lets the block producer, or those paying it, capture value from the sequence of transactions.",
+      },
+      {
+        question: "How does a sandwich attack work?",
+        options: [
+          "It splits a trade across two exchanges",
+          "The attacker buys right before a user's trade and sells right after it, profiting from the price move the user causes",
+          "It delays a transaction until fees fall",
+          "It cancels a user's transaction",
+        ],
+        answer: 1,
+        explanation: "The user's own trade pushes the price; the attacker positions before and exits after, at the user's expense.",
+      },
+      {
+        question: "Which setting most directly limits how much a sandwich can take from your swap?",
+        options: ["A higher gas limit", "A tight slippage tolerance", "A larger trade", "Using a hardware wallet"],
+        answer: 1,
+        explanation: "With low slippage tolerance, a trade reverts if the price is pushed too far, which removes most of the attacker's profit.",
+      },
+    ],
+    sources: [
+      { title: "Maximal extractable value (MEV)", publisher: "ethereum.org", url: "https://ethereum.org/en/developers/docs/mev/" },
+      { title: "Proposer-builder separation", publisher: "ethereum.org", url: "https://ethereum.org/en/roadmap/pbs/" },
+      { title: "Flashbots documentation", publisher: "Flashbots", url: "https://docs.flashbots.net/" },
+      { title: "A gentle introduction to Timeboost", publisher: "Arbitrum Docs", url: "https://docs.arbitrum.io/how-arbitrum-works/timeboost/gentle-introduction" },
+    ],
+  },
+
+  tvl: {
+    minute:
+      "Total value locked is the market value of the assets deposited in a protocol's smart contracts, or across all DeFi protocols on a chain. It is the most quoted DeFi metric and one of the easiest to misread, because it moves with token prices and can count the same dollar twice.",
+    steps: [
+      { title: "Count the assets", text: "Data providers such as DefiLlama read the token balances held by a protocol's contracts." },
+      { title: "Price them", text: "Each balance is multiplied by its current market price, and the results are added up." },
+      { title: "Decide what counts", text: "Methodologies exclude or separate items such as the protocol's own token, borrowed amounts or assets already counted in another protocol, to limit double counting." },
+      { title: "Aggregate by chain", text: "Chain TVL adds up the DeFi protocols deployed on a chain. It is not the value of the chain's own token." },
+      { title: "Read the trend correctly", text: "Because TVL is in dollars, a price fall shrinks it even if nobody withdraws. Tracking token quantities tells the two effects apart." },
+    ],
+    visual: "tvl-table",
+    visualCaption: "Live TVL across Sensitor coverage, with market cap divided by TVL where both are available.",
+    example: {
+      projects: ["aave", "lido"],
+      title: "Reading TVL across the coverage",
+      paragraphs: [
+        "Lending markets and liquid staking protocols typically hold the largest deposits in Sensitor's coverage. Exchanges need less capital relative to the volume they handle, so a lower TVL does not mean a smaller business.",
+        "TVL alone says little about economics: an exchange can earn more fees on smaller deposits than a protocol with large idle balances. The table compares market cap with TVL, a rough measure of how the market values each dollar deposited.",
+      ],
+    },
+    metrics: [
+      { label: "TVL in tokens and in dollars", read: "Separates real deposits and withdrawals from simple price moves." },
+      { label: "Fees divided by TVL", read: "How productively deposits are used. Low ratios mean idle capital." },
+      { label: "Market cap divided by TVL", read: "How the market values deposits. Comparable only between protocols with similar business models." },
+      { label: "Share attracted by incentives", read: "Deposits farmed with token rewards tend to leave when the rewards stop." },
+    ],
+    misconceptions: [
+      { myth: "TVL is the protocol's money.", reality: "TVL belongs to depositors. The protocol earns only the fees charged on it." },
+      { myth: "Rising TVL means users are joining.", reality: "TVL can rise purely because the deposited tokens went up in price." },
+      { myth: "Chain TVL measures the value of the chain's token.", reality: "It adds up the DeFi deposits on that chain; the token's market cap is a different number." },
+    ],
+    risks: [
+      "Double counting when the same assets are deposited, borrowed and redeposited across protocols.",
+      "Mercenary capital that leaves as soon as incentives end.",
+      "TVL inflated by the protocol's own token or by price rallies.",
+    ],
+    quiz: [
+      {
+        question: "A protocol's TVL falls 40% in a week with no withdrawals. What is the most likely cause?",
+        options: ["A hack", "The deposited tokens fell in price", "A change of data provider", "Higher fees"],
+        answer: 1,
+        explanation: "TVL is quoted in dollars, so a price fall reduces it even when the number of tokens deposited is unchanged.",
+      },
+      {
+        question: "Why can adding up TVL across protocols overstate the size of DeFi?",
+        options: ["Because some protocols are on several chains", "Because the same assets can be deposited, borrowed and redeposited in several protocols", "Because TVL includes token market caps", "It never overstates it"],
+        answer: 1,
+        explanation: "Each redeposit is counted again, so the same dollar can appear several times in the total.",
+      },
+      {
+        question: "What does a low ratio of fees to TVL suggest?",
+        options: ["Very efficient use of deposits", "Deposits earn little: capital is largely idle", "The protocol is about to be hacked", "Fees are paid in another token"],
+        answer: 1,
+        explanation: "A protocol that holds large deposits but generates few fees is not putting that capital to productive use.",
+      },
+    ],
+    sources: [
+      { title: "What to include as TVL", publisher: "DefiLlama Docs", url: "https://docs.llama.fi/list-your-project/what-to-include-as-tvl" },
+      { title: "DefiLlama documentation", publisher: "DefiLlama", url: "https://docs.llama.fi/" },
+      { title: "DefiLlama dashboard", publisher: "DefiLlama", url: "https://defillama.com" },
+    ],
+  },
+
+  "protocol-revenue": {
+    minute:
+      "Fees are what users pay to use a protocol. Revenue is the part the protocol keeps after paying the people who supply the service, such as liquidity providers, lenders or validators. Only revenue, and what governance does with it, can create value for token holders.",
+    steps: [
+      { title: "Users pay fees", text: "Trading fees, borrowing interest, gas: whatever users pay to use the service." },
+      { title: "The supply side is paid", text: "Most fees usually go to those providing capital or work: liquidity providers on an exchange, suppliers in a lending market, validators on a chain." },
+      { title: "The protocol keeps revenue", text: "A share is retained by the protocol treasury, through a protocol fee or a reserve factor." },
+      { title: "Holders may receive value", text: "Revenue reaches token holders only if governance directs it there: buybacks, burns, distributions, or staking rewards funded by fees." },
+      { title: "Subtract incentives", text: "Token rewards paid to attract users are a cost. Revenue minus incentives shows whether the protocol earns or buys its growth." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Fees", text: "Everything users pay." },
+        { title: "Supply side", text: "Liquidity providers, lenders, validators." },
+        { title: "Revenue", text: "The share kept by the protocol." },
+        { title: "Token holders", text: "Buybacks, burns or distributions, if governance decides." },
+      ],
+      outcomes: { positive: "Revenue above incentives: the protocol funds itself and can reward holders.", negative: "Incentives above revenue: growth is bought with dilution." },
+    },
+    visualCaption: "The fee waterfall: each step keeps a smaller share than the one before.",
+    example: {
+      projects: ["uniswap", "hyperliquid", "lido"],
+      title: "Three paths from fees to holders",
+      paragraphs: [
+        "Historically nearly all Uniswap fees went to liquidity providers, so UNI captured no cash flow. The UNIfication proposal of November 2025 would turn on protocol fees and use them to burn UNI.",
+        "Hyperliquid directs protocol fees to an Assistance Fund that buys HYPE on the market, while Lido's share of staking fees goes to the DAO treasury rather than to LDO holders directly. Same metric, three very different paths.",
+      ],
+    },
+    metrics: [
+      { label: "Take rate", read: "Revenue divided by fees: how much of what users pay the protocol keeps." },
+      { label: "Revenue minus incentives", read: "The closest thing to earnings. Negative means growth is subsidised by token emissions." },
+      { label: "Holder value capture", read: "Buybacks, burns or distributions actually funded by revenue." },
+      { label: "Price to revenue", read: "Market cap divided by annualised revenue. Useful between similar protocols, misleading across business models." },
+    ],
+    misconceptions: [
+      { myth: "High fees mean a profitable protocol.", reality: "Most fees may go to the supply side. What matters is the share retained and what it costs to attract users." },
+      { myth: "A buyback always benefits holders.", reality: "Only when it is funded by real revenue rather than treasury reserves or new emissions, and done at sensible prices." },
+      { myth: "Revenue figures are standard across sources.", reality: "Providers define fees and revenue differently. Check the methodology before comparing." },
+    ],
+    risks: [
+      "Revenue driven by speculative activity that disappears in quiet markets.",
+      "Fee policies changed by governance, or constrained by regulation.",
+      "Incentive spending that hides weak underlying economics.",
+    ],
+    quiz: [
+      {
+        question: "On a decentralised exchange, where do most trading fees usually go?",
+        options: ["To the founding team", "To liquidity providers", "To the token holders", "They are burned"],
+        answer: 1,
+        explanation: "Liquidity providers supply the capital traders use, so they receive most of the fees.",
+      },
+      {
+        question: "A protocol earns $10 million of revenue a year and pays $25 million in token incentives. What does this indicate?",
+        options: ["It is very profitable", "It is buying growth: its net economics are negative", "Its token must rise", "Incentives do not matter"],
+        answer: 1,
+        explanation: "Spending more on incentives than it earns means the protocol subsidises usage with dilution.",
+      },
+      {
+        question: "When does protocol revenue reach token holders?",
+        options: ["Always, automatically", "Only when governance directs it through buybacks, burns or distributions", "When the price rises", "Never"],
+        answer: 1,
+        explanation: "Revenue sits with the protocol unless a mechanism or a governance decision passes it on.",
+      },
+    ],
+    sources: [
+      { title: "Fees and revenue dashboard", publisher: "DefiLlama", url: "https://defillama.com/fees" },
+      { title: "UNIfication", publisher: "Uniswap Labs blog", url: "https://blog.uniswap.org/unification" },
+      { title: "Lido fee", publisher: "Lido Docs", url: "https://docs.lido.fi/contracts/lido#fee" },
+      { title: "Hyperliquid documentation", publisher: "Hyperliquid", url: "https://hyperliquid.gitbook.io/hyperliquid-docs" },
+    ],
+  },
+
+  restaking: {
+    minute:
+      "Restaking lets stakers reuse the same staked collateral to secure additional services, such as data availability layers or oracles, in exchange for extra rewards. New services rent existing economic security instead of building their own, but each additional service adds a new way to be slashed.",
+    steps: [
+      { title: "Start from staked ETH", text: "Restakers use ETH that is already staked, natively or through a liquid staking token." },
+      { title: "Opt in", text: "They deposit it in a restaking protocol such as EigenLayer and accept additional conditions." },
+      { title: "Delegate", text: "They choose an operator who runs the software of the services to secure, called AVSs (actively validated services)." },
+      { title: "Secure services", text: "Operators perform tasks for the AVSs they opt into. Each AVS defines its own tasks, rewards and slashing conditions." },
+      { title: "Earn or be slashed", text: "Rewards come from the AVSs; provable faults can be slashed. Since 2025 on EigenLayer, each AVS can only slash the stake allocated to it." },
+    ],
+    visual: "flow",
+    flow: {
+      nodes: [
+        { title: "Staked ETH", text: "Native stake or a liquid staking token." },
+        { title: "Restaking protocol", text: "Accepts additional slashing conditions." },
+        { title: "Operator", text: "Runs the services' software." },
+        { title: "Services (AVSs)", text: "Data availability, oracles, bridges and more." },
+      ],
+      outcomes: {
+        positive: "New services launch with borrowed security instead of bootstrapping their own validator set.",
+        negative: "The same stake backs several obligations: a fault or bug in one service can cost restakers more than they earn.",
+      },
+    },
+    visualCaption: "One stake, several obligations: restaking stacks rewards and risks.",
+    example: {
+      projects: ["eigenlayer"],
+      title: "EigenLayer: shared security in practice",
+      paragraphs: [
+        "EigenLayer pioneered restaking. Restakers delegate to operators, who opt into AVSs; EigenDA, a data availability service built by Eigen Labs, is the flagship. Slashing went live on mainnet in 2025 with operator sets and unique stake allocation.",
+        "The dossier flags two open questions: AVS rewards have often been paid in tokens rather than fees, so real demand for economic security is still emerging, and the complexity of stacked conditions makes risk hard to assess for end users.",
+      ],
+    },
+    metrics: [
+      { label: "Source of rewards", read: "Fees paid by services that need security, or token emissions. Only the first is durable." },
+      { label: "Slashing conditions", read: "Whether they are defined, audited and live, and who decides that a fault occurred." },
+      { label: "Operator concentration", read: "How much restaked value is delegated to the largest operators." },
+      { label: "Stake allocation per service", read: "How much of the stake each service can slash. It bounds the loss from any single failure." },
+    ],
+    misconceptions: [
+      { myth: "Restaking multiplies yield at no extra risk.", reality: "Each service adds slashing conditions and contract risk; the extra yield is payment for that risk." },
+      { myth: "Restaked ETH makes Ethereum more secure.", reality: "It secures additional services. Ethereum's own security comes from the underlying stake." },
+      { myth: "Liquid restaking tokens are as liquid as ETH.", reality: "Their market depth can be thin, and exits pass through several protocols and queues." },
+    ],
+    risks: [
+      "Cascading slashing when one stake backs many services.",
+      "Complexity that hides the true risk from end users.",
+      "Rewards funded by emissions that may not last.",
+    ],
+    quiz: [
+      {
+        question: "What does restaking allow a new service to do?",
+        options: ["Mint ETH", "Use existing staked collateral as its security instead of building its own validator set", "Avoid smart contracts", "Skip audits"],
+        answer: 1,
+        explanation: "Shared security lets a service rent the economic weight of existing stake.",
+      },
+      {
+        question: "Why does restaking add risk for stakers?",
+        options: ["It lowers Ethereum's rewards", "The same stake can be slashed under each additional service's rules", "It locks ETH forever", "It removes withdrawal rights"],
+        answer: 1,
+        explanation: "Every service a stake secures adds its own conditions for losing part of that stake.",
+      },
+      {
+        question: "Which question best reveals whether restaking demand is sustainable?",
+        options: ["How many followers the project has", "Are rewards paid from real fees or from token emissions?", "What is the token's all-time high?", "How many chains it supports"],
+        answer: 1,
+        explanation: "Fees show that services genuinely pay for security; emissions only show that someone is subsidising it.",
+      },
+    ],
+    sources: [
+      { title: "Restaking", publisher: "ethereum.org", url: "https://ethereum.org/en/restaking/" },
+      { title: "Ethereum staking", publisher: "ethereum.org", url: "https://ethereum.org/en/staking/" },
+      { title: "EigenLayer", publisher: "Eigen Labs", url: "https://www.eigenlayer.xyz" },
+    ],
+  },
+
+  "perpetual-futures": {
+    minute:
+      "A perpetual future is a leveraged contract on an asset's price that never expires. To keep its price close to the spot price, longs and shorts pay each other a funding rate at regular intervals. Perpetuals are among the most traded instruments in crypto, and their liquidations can amplify market moves.",
+    steps: [
+      { title: "Open a position", text: "A trader deposits margin and goes long or short with leverage on an index price." },
+      { title: "Margin and liquidation", text: "Profit and loss are tracked against a mark price. If losses reduce the margin to the maintenance level, the position is liquidated." },
+      {
+        title: "Funding",
+        text: "When the perpetual trades above spot, longs pay shorts; below spot, shorts pay longs. Payments happen at fixed intervals, every hour or every eight hours depending on the venue.",
+      },
+      { title: "Open interest", text: "The total size of open positions. Rising open interest with high funding signals crowded leverage on one side." },
+      { title: "Cascades and backstops", text: "Forced closures push the price further and trigger more liquidations. Insurance funds or backstop vaults absorb losses when a position's margin runs out." },
+    ],
+    visual: "funding",
+    visualCaption: "Try it: see how a funding rate turns into payments over time, and who pays whom. Example values, not live rates.",
+    example: {
+      projects: ["hyperliquid", "ethena"],
+      title: "Perpetuals on-chain, and funding as a yield",
+      paragraphs: [
+        "Hyperliquid runs a fully on-chain order book for perpetuals with one-block finality. The dossier notes that stress events in 2025, including large liquidation losses for its HLP vault, showed both the system's resilience and the discretionary power of its validators.",
+        "Funding is also a source of yield. Ethena's USDe holds short perpetual positions against its collateral and earns funding when it is positive; when funding turns negative, its reserve fund is designed to absorb the cost.",
+      ],
+    },
+    metrics: [
+      { label: "Annualised funding rate", read: "The cost of holding leverage. Persistently high positive funding shows crowded long positioning." },
+      { label: "Open interest", read: "Total leverage in the system. Compare it with market cap and with its own history." },
+      { label: "Liquidation volume", read: "Spikes mark forced selling or buying that moved the market." },
+      { label: "Basis", read: "The gap between the perpetual and spot prices. Large gaps signal stress or one-sided demand." },
+    ],
+    misconceptions: [
+      { myth: "Positive funding means the price will rise.", reality: "It means longs are paying for leverage. Crowded positioning can just as well precede a sharp drop." },
+      { myth: "Perpetuals track the spot price exactly.", reality: "Funding pulls them towards spot, but they can trade at a premium or discount, especially during stress." },
+      { myth: "Low leverage makes liquidation impossible.", reality: "It makes it less likely. A large enough move, or a gap in a thin market, can still wipe out the margin." },
+    ],
+    risks: [
+      "Liquidation of leveraged positions during fast moves.",
+      "Venue risk: exchange failure, manipulation of the mark price, auto-deleveraging.",
+      "Funding costs that quietly erode returns over long holding periods.",
+    ],
+    quiz: [
+      {
+        question: "What is the purpose of the funding rate?",
+        options: ["To pay the exchange", "To keep the perpetual's price close to the spot price", "To set the leverage limit", "To reward liquidity providers"],
+        answer: 1,
+        explanation: "Funding makes the crowded side pay the other, which pulls the perpetual's price back towards spot.",
+      },
+      {
+        question: "Funding is +0.01% every eight hours on a $10,000 long position. How much does the long pay per day?",
+        options: ["$3", "$1", "$30", "$0.30"],
+        answer: 0,
+        explanation: "$10,000 × 0.0001 = $1 per interval, three intervals per day: $3, about 11% a year.",
+      },
+      {
+        question: "What is a liquidation cascade?",
+        options: ["A series of new listings", "Forced closures that push the price further and trigger more liquidations", "A drop in trading fees", "A governance vote"],
+        answer: 1,
+        explanation: "Each liquidation is a forced trade in the direction of the move, which can knock out the next layer of leveraged positions.",
+      },
+    ],
+    sources: [
+      { title: "Perpetual contracts guide", publisher: "BitMEX", url: "https://www.bitmex.com/app/perpetualContractsGuide" },
+      { title: "Funding", publisher: "Hyperliquid Docs", url: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding" },
+      { title: "Liquidations", publisher: "Hyperliquid Docs", url: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations" },
+      { title: "How USDe works", publisher: "Ethena", url: "https://docs.ethena.fi/overview/how-usde-works" },
+    ],
+  },
 };

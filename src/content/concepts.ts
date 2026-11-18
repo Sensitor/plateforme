@@ -37,7 +37,39 @@ export interface Concept {
 }
 
 /** Visuals available to in-depth concept pages (see components/academy/diagrams). */
-export type ConceptVisual = "pow" | "pos" | "contracts" | "fee-calculator" | "halving" | "stablecoin-models" | "amm" | "rollup" | "mcap-fdv" | "vesting";
+export type ConceptVisual =
+  | "pow"
+  | "pos"
+  | "contracts"
+  | "fee-calculator"
+  | "halving"
+  | "stablecoin-models"
+  | "amm"
+  | "rollup"
+  | "mcap-fdv"
+  | "vesting"
+  /** Data-driven flow diagram from `flow`. */
+  | "flow"
+  /** Data-driven comparison table from `table`. */
+  | "table"
+  | "health-factor"
+  | "funding"
+  | "tvl-table"
+  | "recovery"
+  | "diversification"
+  | "fear-greed-live"
+  | "btc-drawdown"
+  | "regime-live";
+
+export interface FlowSpec {
+  nodes: { title: string; text: string; loop?: string }[];
+  outcomes?: { positive: string; negative: string };
+}
+
+export interface TableSpec {
+  columns: string[];
+  rows: { label: string; values: string[] }[];
+}
 
 export interface QuizQuestion {
   question: string;
@@ -58,6 +90,8 @@ export interface ConceptDeep {
   steps: { title: string; text: string }[];
   visual?: ConceptVisual;
   visualCaption?: string;
+  flow?: FlowSpec;
+  table?: TableSpec;
   example: { projects: string[]; title: string; paragraphs: string[]; live?: "mcap-fdv" | "key-dates" };
   metrics: { label: string; read: string }[];
   misconceptions: { myth: string; reality: string }[];

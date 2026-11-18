@@ -12,9 +12,9 @@ import { TrackArt } from "@/components/academy/track-art";
 import { LevelDots } from "@/components/academy/concept-browser";
 import { ConceptQuiz } from "@/components/academy/concept-quiz";
 import { LessonStatus } from "@/components/academy/lesson-status";
-import { ContractsDiagram, HalvingChart, PosDiagram, PowDiagram, RollupDiagram, StablecoinModels, VestingChart } from "@/components/academy/visuals";
-import { AmmSimulator, FeeCalculator } from "@/components/academy/interactive";
-import { KeyDatesTable, McapFdvSkeleton, McapFdvTable } from "@/components/academy/live";
+import { ComparisonTable, ContractsDiagram, FlowFromSpec, HalvingChart, PosDiagram, PowDiagram, RollupDiagram, StablecoinModels, VestingChart } from "@/components/academy/visuals";
+import { AmmSimulator, DiversificationSimulator, FeeCalculator, FundingCalculator, HealthFactorCalculator, RecoveryCalculator } from "@/components/academy/interactive";
+import { KeyDatesTable, McapFdvSkeleton, McapFdvTable, TvlTable } from "@/components/academy/live";
 import { Toc, type TocItem } from "@/components/research/toc";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TokenLogo } from "@/components/ui/token-logo";
@@ -37,8 +37,30 @@ export default function ConceptPage({ params }: PageProps<"/academy/concepts/[sl
   );
 }
 
-function Visual({ kind, color }: { kind: ConceptVisual; color: string }) {
+function Visual({ kind, deep, color }: { kind: ConceptVisual; deep: ConceptDeep; color: string }) {
   switch (kind) {
+    case "flow":
+      return deep.flow ? <FlowFromSpec spec={deep.flow} color={color} /> : null;
+    case "table":
+      return deep.table ? <ComparisonTable spec={deep.table} /> : null;
+    case "health-factor":
+      return <HealthFactorCalculator color={color} />;
+    case "funding":
+      return <FundingCalculator color={color} />;
+    case "recovery":
+      return <RecoveryCalculator color={color} />;
+    case "diversification":
+      return <DiversificationSimulator color={color} />;
+    case "tvl-table":
+      return (
+        <Suspense fallback={<McapFdvSkeleton />}>
+          <TvlTable color={color} />
+        </Suspense>
+      );
+    case "fear-greed-live":
+    case "btc-drawdown":
+    case "regime-live":
+      return null;
     case "pow":
       return <PowDiagram color={color} />;
     case "pos":
@@ -250,7 +272,7 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
           </ol>
           {deep.visual ? (
             <figure className="mt-8">
-              <Visual kind={deep.visual} color={color} />
+              <Visual kind={deep.visual} deep={deep} color={color} />
               {deep.visualCaption ? <figcaption className="mt-2.5 text-[12px] leading-relaxed text-muted">{deep.visualCaption}</figcaption> : null}
             </figure>
           ) : null}
