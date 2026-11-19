@@ -104,7 +104,7 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
                 key={k}
                 onClick={() => toggleKind(k)}
                 aria-pressed={on}
-                className={cn("inline-flex h-8 items-center gap-2 rounded-full border px-3 text-[12.5px] transition-colors", on ? "text-fg" : "border-line text-subtle line-through")}
+                className={cn("inline-flex h-7 items-center gap-2 rounded-md border px-2.5 text-[12.5px] transition-colors", on ? "text-fg" : "border-line text-subtle line-through")}
                 style={on ? { borderColor: tint(m.color, 0.5), backgroundColor: tint(m.color, 0.12) } : undefined}
               >
                 <svg width="18" height="6" aria-hidden>
@@ -158,9 +158,9 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
       {view === "list" ? (
         <RelationshipTable edges={visibleEdges} bySlug={bySlug} />
       ) : (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-8 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
           {/* Graph */}
-          <div className="relative overflow-hidden rounded-2xl border border-line bg-bg-elevated">
+          <div className="relative overflow-hidden rounded-lg border border-line bg-bg-elevated">
             <div className="absolute left-4 top-3 z-10 hidden text-[11.5px] text-subtle sm:block">Click a project to see its environment. Node size follows market cap.</div>
             <div className="absolute bottom-3 left-4 z-10 hidden flex-wrap gap-x-4 gap-y-1 text-[11.5px] text-muted sm:flex">
               {halos.map((h) => (
@@ -280,7 +280,7 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
           </div>
 
           {/* Side panel */}
-          <aside className="rounded-2xl border border-line bg-surface p-5 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7.5rem)] xl:overflow-y-auto">
+          <aside className="border-t border-line pt-5 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7.5rem)] xl:overflow-y-auto xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0">
             {selectedNode ? (
               <div className="space-y-5">
                 <div className="flex items-start gap-3">
@@ -294,14 +294,14 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
                   </div>
                 </div>
                 <p className="text-[13.5px] leading-relaxed text-fg-2">{selectedNode.oneLiner}</p>
-                <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line text-[12px]">
-                  <div className="bg-bg-elevated px-3 py-2">
+                <dl className="grid grid-cols-2 gap-4 border-y border-line py-3 text-[12px]">
+                  <div>
                     <dt className="text-subtle">Price</dt>
                     <dd className="num mt-0.5 text-[14px] text-fg">
                       {formatPrice(selectedNode.price)} <Delta value={selectedNode.change24h} className="text-[11.5px]" />
                     </dd>
                   </div>
-                  <div className="bg-bg-elevated px-3 py-2">
+                  <div>
                     <dt className="text-subtle">Market cap</dt>
                     <dd className="num mt-0.5 text-[14px] text-fg">{formatUsdCompact(selectedNode.marketCap)}</dd>
                   </div>
@@ -360,16 +360,16 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
                   <li>Click it to open its environment on the right.</li>
                   <li>Toggle relationship types above to simplify the map.</li>
                 </ul>
-                <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line text-center">
-                  <div className="bg-bg-elevated py-3">
-                    <div className="num text-xl text-fg">{nodes.length}</div>
-                    <div className="text-[11.5px] text-subtle">projects</div>
+                <dl className="grid grid-cols-2 gap-4 border-y border-line py-3">
+                  <div>
+                    <dd className="num text-xl text-fg">{nodes.length}</dd>
+                    <dt className="text-[11.5px] text-subtle">projects</dt>
                   </div>
-                  <div className="bg-bg-elevated py-3">
-                    <div className="num text-xl text-fg">{edges.length}</div>
-                    <div className="text-[11.5px] text-subtle">relationships</div>
+                  <div>
+                    <dd className="num text-xl text-fg">{edges.length}</dd>
+                    <dt className="text-[11.5px] text-subtle">relationships</dt>
                   </div>
-                </div>
+                </dl>
                 <p className="text-[11.5px] leading-relaxed text-subtle">
                   Every relationship links to the dossier section or official documentation that supports it. Announced partnerships are not shown unless they correspond to a
                   live integration.
@@ -385,16 +385,16 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
 
 function RelationshipTable({ edges, bySlug }: { edges: GraphEdge[]; bySlug: Map<string, GraphNode> }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-surface">
+    <div>
       <div className="relative overflow-x-auto">
-        <table className="w-full min-w-[760px] text-[13px]">
+        <table className="w-full min-w-[760px] border-y border-line text-[13px]">
           <thead>
-            <tr className="border-b border-line text-left text-[11px] uppercase tracking-wide text-subtle">
-              <th scope="col" className="py-2.5 pl-4 font-medium">From</th>
+            <tr className="border-b border-line text-left text-[10.5px] uppercase tracking-[0.1em] text-subtle">
+              <th scope="col" className="py-2.5 font-medium">From</th>
               <th scope="col" className="px-3 py-2.5 font-medium">Relationship</th>
               <th scope="col" className="px-3 py-2.5 font-medium">To</th>
               <th scope="col" className="px-3 py-2.5 font-medium">Detail</th>
-              <th scope="col" className="px-3 py-2.5 pr-4 font-medium">Evidence</th>
+              <th scope="col" className="py-2.5 pl-3 font-medium">Evidence</th>
             </tr>
           </thead>
           <tbody>
@@ -404,8 +404,8 @@ function RelationshipTable({ edges, bySlug }: { edges: GraphEdge[]; bySlug: Map<
               const m = RELATION_META[e.kind];
               const ev = evidenceHref(e.evidence);
               return (
-                <tr key={i} className="border-b border-line/70 align-top last:border-0">
-                  <td className="py-3 pl-4">
+                <tr key={i} className="border-b border-line/60 align-top last:border-0">
+                  <td className="py-3">
                     <Link href={`/projects/${a.slug}`} className="inline-flex items-center gap-2 text-fg hover:text-accent-strong">
                       <TokenLogo src={a.logo} name={a.name} size={18} /> {a.name}
                     </Link>
@@ -421,7 +421,7 @@ function RelationshipTable({ edges, bySlug }: { edges: GraphEdge[]; bySlug: Map<
                     </Link>
                   </td>
                   <td className="px-3 py-3 leading-relaxed text-fg-2">{e.note}</td>
-                  <td className="px-3 py-3 pr-4">
+                  <td className="py-3 pl-3">
                     {ev.external ? (
                       <a href={ev.href} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-strong">
                         {ev.label}

@@ -10,7 +10,8 @@ import { computePositions, holdingsAt, returnCorrelation, STABLE_ASSET, toCsv, t
 import { buildInsights, type HoldingView } from "@/lib/portfolio/insights";
 import { usePortfolio } from "@/lib/portfolio/store";
 import type { ChartRange, SeriesPoint } from "@/lib/market/types";
-import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { Stat, StatStrip } from "@/components/ui/stat-strip";
+import { SectionHeader } from "@/components/overview/section-header";
 import { Delta } from "@/components/ui/delta";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -229,7 +230,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       </div>
 
       {example ? (
-        <div className="flex flex-col gap-2 rounded-xl border border-violet/30 bg-violet-soft px-4 py-3 text-[13px] text-fg-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 rounded-xl border border-violet/30 bg-violet-soft px-4 py-2.5 text-[13px] text-fg-2 sm:flex-row sm:items-center sm:justify-between">
           <span>
             <strong className="text-violet">Example portfolio.</strong> Hypothetical positions, bought at the real historical price of each date (DefiLlama). Adding your own
             transaction replaces it.
@@ -241,7 +242,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       ) : null}
 
       {issues.length ? (
-        <div className="rounded-xl border border-warning/30 bg-warning-soft px-4 py-3 text-[13px] text-warning" role="status">
+        <div className="rounded-xl border border-warning/30 bg-warning-soft px-4 py-2.5 text-[13px] text-warning" role="status">
           {issues.map((i) => (
             <div key={i.id}>{i.message}</div>
           ))}
@@ -249,36 +250,46 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       ) : null}
 
       {/* Summary */}
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-5">
-        <SummaryCell label="Portfolio value" value={formatPrice(totals.value)} big sub={<><Delta value={totals.change24hPct} className="text-[12px]" /> <span className="text-subtle">24h</span></>} />
-        <SummaryCell label="Unrealised P&L" value={<span className={pnlClass(totals.unrealized)}>{signedUsd(totals.unrealized)}</span>} sub={<span className={pnlClass(totals.unrealized)}>{totals.cost ? formatPercent((totals.unrealized / totals.cost) * 100) : "n/a"}</span>} />
-        <SummaryCell label="Realised P&L" value={<span className={pnlClass(totals.realized)}>{signedUsd(totals.realized)}</span>} sub={<span className="text-subtle">from sales</span>} />
-        <SummaryCell label="Cost basis" value={formatPrice(totals.cost)} sub={<span className="text-subtle">average cost method</span>} />
-        <SummaryCell label="Positions" value={formatNumber(rows.length)} sub={<span className="text-subtle">{transactions.length} transactions</span>} />
+      <div>
+        <StatStrip columns={5}>
+          <Stat label="Portfolio value" value={formatPrice(totals.value)}>
+            <Delta value={totals.change24hPct} className="text-[12.5px]" /> 24h
+          </Stat>
+          <Stat label="Unrealised P&L" value={<span className={pnlClass(totals.unrealized)}>{signedUsd(totals.unrealized)}</span>}>
+            <span className={pnlClass(totals.unrealized)}>{totals.cost ? formatPercent((totals.unrealized / totals.cost) * 100) : "n/a"}</span>
+          </Stat>
+          <Stat label="Realised P&L" value={<span className={pnlClass(totals.realized)}>{signedUsd(totals.realized)}</span>}>
+            From sales
+          </Stat>
+          <Stat label="Cost basis" value={formatPrice(totals.cost)}>
+            Average cost method
+          </Stat>
+          <Stat label="Positions" value={formatNumber(rows.length)}>
+            {transactions.length} transactions
+          </Stat>
+        </StatStrip>
+        <div className="mt-2 flex justify-end">{quoteSource}</div>
       </div>
-      <div className="-mt-3">{quoteSource}</div>
 
       {/* Holdings */}
-      <Card>
-        <CardHeader title="Holdings" subtitle="Valued with live prices; stablecoins at $1.00" />
-        <CardBody className="px-0 pb-2">
+      <Panel title="Holdings" subtitle="Valued with live prices; stablecoins at $1.00">
           <div className="relative overflow-x-auto">
-            <table className="w-full min-w-[780px] text-[13.5px]">
+            <table className="w-full min-w-[780px] border-y border-line text-[13.5px]">
               <thead>
-                <tr className="border-b border-line text-left text-[11px] uppercase tracking-wide text-subtle">
-                  <th scope="col" className="py-2.5 pl-5 font-medium">Asset</th>
+                <tr className="border-b border-line text-left text-[10.5px] uppercase tracking-[0.1em] text-subtle">
+                  <th scope="col" className="py-2.5 font-medium">Asset</th>
                   <th scope="col" className="px-3 py-2.5 text-right font-medium">Quantity</th>
                   <th scope="col" className="px-3 py-2.5 text-right font-medium">Avg cost</th>
                   <th scope="col" className="px-3 py-2.5 text-right font-medium">Price</th>
                   <th scope="col" className="px-3 py-2.5 text-right font-medium">Value</th>
                   <th scope="col" className="px-3 py-2.5 text-right font-medium">Unrealised P&L</th>
-                  <th scope="col" className="px-3 py-2.5 pr-5 font-medium">Weight</th>
+                  <th scope="col" className="py-2.5 pl-3 font-medium">Weight</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r, i) => (
-                  <tr key={r.asset} className="border-b border-line/70 last:border-0">
-                    <td className="py-3 pl-5">
+                  <tr key={r.asset} className="border-b border-line/60 last:border-0">
+                    <td className="py-2.5">
                       {r.asset === STABLE_ASSET ? (
                         <span className="flex items-center gap-3">
                           <span className="flex size-7 items-center justify-center rounded-full bg-positive-soft text-[11px] font-semibold text-positive">$</span>
@@ -294,18 +305,18 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
                         </Link>
                       )}
                     </td>
-                    <td className="num px-3 py-3 text-right text-fg-2">{formatNumber(r.quantity, 6)}</td>
-                    <td className="num px-3 py-3 text-right text-fg-2">{formatPrice(r.avgCost)}</td>
-                    <td className="px-3 py-3 text-right">
+                    <td className="num px-3 py-2.5 text-right text-fg-2">{formatNumber(r.quantity, 6)}</td>
+                    <td className="num px-3 py-2.5 text-right text-fg-2">{formatPrice(r.avgCost)}</td>
+                    <td className="px-3 py-2.5 text-right">
                       <div className="num text-fg">{formatPrice(r.price)}</div>
                       {r.asset !== STABLE_ASSET ? <Delta value={r.meta?.change24h} className="text-[11.5px]" /> : null}
                     </td>
-                    <td className="num px-3 py-3 text-right text-fg">{formatPrice(r.value)}</td>
-                    <td className="px-3 py-3 text-right">
+                    <td className="num px-3 py-2.5 text-right text-fg">{formatPrice(r.value)}</td>
+                    <td className="px-3 py-2.5 text-right">
                       <div className={cn("num", pnlClass(r.unrealized))}>{r.unrealized != null ? signedUsd(r.unrealized) : "n/a"}</div>
                       <div className={cn("num text-[11.5px]", pnlClass(r.unrealized))}>{r.unrealized != null && r.costBasis ? formatPercent((r.unrealized / r.costBasis) * 100) : ""}</div>
                     </td>
-                    <td className="px-3 py-3 pr-5">
+                    <td className="py-2.5 pl-3">
                       <div className="flex items-center gap-2">
                         <div className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-3">
                           <div className="h-full rounded-full" style={{ width: `${Math.max(2, r.weight * 100)}%`, backgroundColor: CATEGORICAL[Math.min(i, 6)] }} />
@@ -318,13 +329,11 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
               </tbody>
             </table>
           </div>
-        </CardBody>
-      </Card>
+      </Panel>
 
       {/* Performance + allocation */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">
-        <Card>
-          <CardHeader
+      <div className="grid grid-cols-1 gap-x-10 gap-y-12 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">
+        <Panel
             title="Performance"
             subtitle="Portfolio value versus cost basis, from your transactions and daily prices"
             action={
@@ -336,8 +345,8 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
                 ))}
               </div>
             }
-          />
-          <CardBody>
+          >
+          <div>
             {performance && performance.value.length > 2 ? (
               <MultiLineChart
                 label="Portfolio value versus cost basis"
@@ -354,12 +363,11 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
               <p className="flex h-[200px] items-center justify-center text-center text-[13px] text-muted">Not enough history in this range yet. Try a longer range.</p>
             )}
             <p className="mt-2 text-[11px] text-subtle">Daily closes from DefiLlama. Stablecoins counted at $1.00. Fees are included in the cost basis.</p>
-          </CardBody>
-        </Card>
+          </div>
+        </Panel>
 
-        <Card>
-          <CardHeader title="Allocation" subtitle="By asset, sector and blockchain" />
-          <CardBody className="space-y-6">
+        <Panel title="Allocation" subtitle="By asset, sector and blockchain">
+          <div className="space-y-6">
             <Donut
               data={(() => {
                 const top = rows.slice(0, 6).map((r) => ({ label: r.asset === STABLE_ASSET ? "Stablecoins" : (r.meta?.name ?? r.asset), value: Math.round(r.weight * 10000) / 100 }));
@@ -371,20 +379,18 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
             />
             <Breakdown title="Sector" rows={rows} keyOf={(r) => (r.asset === STABLE_ASSET ? "Stablecoins (cash)" : (r.meta?.sectorLabel ?? "Other"))} colorOf={(r) => (r.meta?.sector ? SECTOR_COLORS[r.meta.sector] : "#5FCB86")} />
             <Breakdown title="Blockchain" rows={rows} keyOf={(r) => (r.asset === STABLE_ASSET ? "Stablecoins (cash)" : (r.meta?.chainLabel ?? "Other"))} />
-          </CardBody>
-        </Card>
+          </div>
+        </Panel>
       </div>
 
       {/* Intelligence */}
       <section aria-labelledby="intel-title">
-        <h2 id="intel-title" className="serif-display mb-1 text-[28px] text-fg">
-          Portfolio intelligence
-        </h2>
-        <p className="mb-4 text-[13px] text-muted">Informative observations about your exposures. They describe, they do not recommend.</p>
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-start">
-          <ul className="space-y-2.5">
+        <SectionHeader id="intel-title" title="Portfolio intelligence" />
+        <p className="-mt-2 mb-5 text-[13px] text-muted">Informative observations about your exposures. They describe, they do not recommend.</p>
+        <div className="grid grid-cols-1 gap-x-10 gap-y-12 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-start">
+          <ul className="divide-y divide-line border-y border-line">
             {insights.map((ins) => (
-              <li key={ins.id} className={cn("rounded-xl border bg-surface p-4", ins.tone === "watch" ? "border-warning/30" : "border-line")}>
+              <li key={ins.id} className="py-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
@@ -402,7 +408,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
               </li>
             ))}
             {correlations?.average != null ? (
-              <li className={cn("rounded-xl border bg-surface p-4", correlations.average > 0.7 ? "border-warning/30" : "border-line")}>
+              <li className="py-3.5">
                 <div className="flex items-center gap-2">
                   <span className={cn("text-[10.5px] font-semibold uppercase tracking-[0.12em]", correlations.average > 0.7 ? "text-warning" : "text-accent-strong")}>{correlations.average > 0.7 ? "Watch" : "Note"}</span>
                   <span className="text-[14px] font-medium text-fg">Average correlation between positions: {correlations.average.toFixed(2)}</span>
@@ -416,16 +422,14 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
               </li>
             ) : null}
           </ul>
-          <Card>
-            <CardHeader title="Correlation matrix" subtitle={`Daily returns over ${range}`} />
-            <CardBody>{correlations ? <CorrelationMatrix data={correlations} meta={meta} /> : <p className="text-[13px] text-muted">Needs at least two crypto positions with price history.</p>}</CardBody>
-          </Card>
+          <Panel title="Correlation matrix" subtitle={`Daily returns over ${range}`} className="xl:border-t-0 xl:pt-0">
+            {correlations ? <CorrelationMatrix data={correlations} meta={meta} /> : <p className="text-[13px] text-muted">{historiesLoading ? "Loading price history…" : "Needs at least two crypto positions with price history."}</p>}
+          </Panel>
         </div>
       </section>
 
       {/* Ledger */}
-      <Card>
-        <CardHeader
+      <Panel
           title="Transactions"
           subtitle={`${transactions.length} recorded ${storageWord}`}
           action={
@@ -433,32 +437,32 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
               {showLedger ? "Hide" : "Show"}
             </button>
           }
-        />
+        >
         {showLedger ? (
-          <CardBody className="px-0 pb-2">
+          <div>
             <div className="relative overflow-x-auto">
-              <table className="w-full min-w-[640px] text-[13px]">
+              <table className="w-full min-w-[640px] border-y border-line text-[13px]">
                 <thead>
-                  <tr className="border-b border-line text-left text-[11px] uppercase tracking-wide text-subtle">
-                    <th scope="col" className="py-2.5 pl-5 font-medium">Date</th>
+                  <tr className="border-b border-line text-left text-[10.5px] uppercase tracking-[0.1em] text-subtle">
+                    <th scope="col" className="py-2.5 font-medium">Date</th>
                     <th scope="col" className="px-3 py-2.5 font-medium">Asset</th>
                     <th scope="col" className="px-3 py-2.5 font-medium">Side</th>
                     <th scope="col" className="px-3 py-2.5 text-right font-medium">Quantity</th>
                     <th scope="col" className="px-3 py-2.5 text-right font-medium">Price</th>
                     <th scope="col" className="px-3 py-2.5 text-right font-medium">Fee</th>
-                    <th scope="col" className="py-2.5 pr-5"><span className="sr-only">Delete</span></th>
+                    <th scope="col" className="py-2.5"><span className="sr-only">Delete</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {[...transactions].sort((a, b) => b.date.localeCompare(a.date)).map((t) => (
-                    <tr key={t.id} className="border-b border-line/70 last:border-0">
-                      <td className="num py-2.5 pl-5 text-fg-2">{t.date}</td>
+                    <tr key={t.id} className="border-b border-line/60 last:border-0">
+                      <td className="num py-2.5 text-fg-2">{t.date}</td>
                       <td className="px-3 py-2.5 text-fg">{t.asset === STABLE_ASSET ? "Stablecoins" : (meta.get(t.asset)?.name ?? t.asset)}</td>
                       <td className={cn("px-3 py-2.5 capitalize", t.side === "buy" ? "text-positive" : "text-negative")}>{t.side}</td>
                       <td className="num px-3 py-2.5 text-right text-fg-2">{formatNumber(t.quantity, 6)}</td>
                       <td className="num px-3 py-2.5 text-right text-fg-2">{formatPrice(t.price)}</td>
                       <td className="num px-3 py-2.5 text-right text-fg-2">{formatPrice(t.fee)}</td>
-                      <td className="py-2.5 pr-5 text-right">
+                      <td className="py-2.5 text-right">
                         <button onClick={() => remove(t.id)} className="inline-flex size-7 items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-negative" aria-label="Delete transaction">
                           <Trash2 className="size-3.5" />
                         </button>
@@ -468,21 +472,27 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
                 </tbody>
               </table>
             </div>
-          </CardBody>
+          </div>
         ) : null}
-      </Card>
+      </Panel>
       {dialogs}
     </div>
   );
 }
 
-function SummaryCell({ label, value, sub, big }: { label: string; value: React.ReactNode; sub?: React.ReactNode; big?: boolean }) {
+/** Section of the portfolio dashboard: hairline rule, serif title, optional action. */
+function Panel({ title, subtitle, action, className, children }: { title: string; subtitle?: string; action?: React.ReactNode; className?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-surface px-5 py-4">
-      <div className="text-[12px] text-muted">{label}</div>
-      <div className={cn("num mt-1 text-fg", big ? "text-[26px]" : "text-[19px]")}>{value}</div>
-      {sub ? <div className="mt-0.5 text-[12px]">{sub}</div> : null}
-    </div>
+    <section className={cn("border-t border-line pt-5", className)}>
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <h2 className="serif-display text-[24px] leading-tight text-fg">{title}</h2>
+          {subtitle ? <p className="mt-1 text-[12.5px] text-muted">{subtitle}</p> : null}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
   );
 }
 
