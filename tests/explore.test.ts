@@ -71,3 +71,23 @@ describe("explore sorting", () => {
     expect(sortRows(rows, "name", "asc").map((r) => r.name)).toEqual(["Alpha", "Beta", "Gamma"]);
   });
 });
+
+describe("coverage summary", async () => {
+  const { coverageSummary } = await import("@/lib/explore");
+  const row = (slug: string, marketCap: number | null, change24h: number | null) => ({ slug, name: slug.toUpperCase(), marketCap, change24h }) as never;
+  it("weights by market cap and finds the extremes", () => {
+    const s = coverageSummary([row("a", 300, 2), row("b", 100, -6), row("c", null, 10), row("d", 100, null)]);
+    expect(s.totalMarketCap).toBe(500);
+    expect(s.weightedChange24h).toBeCloseTo((300 * 2 + 100 * -6) / 400);
+    expect(s.up).toBe(2);
+    expect(s.down).toBe(1);
+    expect(s.best?.slug).toBe("c");
+    expect(s.worst?.slug).toBe("b");
+  });
+  it("handles missing data", () => {
+    const s = coverageSummary([row("a", null, null)]);
+    expect(s.totalMarketCap).toBeNull();
+    expect(s.weightedChange24h).toBeNull();
+    expect(s.best).toBeNull();
+  });
+});

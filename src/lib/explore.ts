@@ -120,3 +120,33 @@ export function sortRows(rows: ExploreRow[], key: SortKey, dir: SortDir): Explor
 export function activeFilterCount(f: ExploreFilters): number {
   return (Object.keys(DEFAULT_FILTERS) as (keyof ExploreFilters)[]).filter((k) => k !== "q" && k !== "sector" && f[k] !== DEFAULT_FILTERS[k]).length;
 }
+
+export interface CoverageSummary {
+  count: number;
+  totalMarketCap: number | null;
+  /** Market-cap-weighted 24h change across covered projects. */
+  weightedChange24h: number | null;
+  up: number;
+  down: number;
+  best: { slug: string; name: string; change: number } | null;
+  worst: { slug: string; name: string; change: number } | null;
+}
+
+/** Headline figures for the covered universe (not the whole market). */
+export function coverageSummary(rows: ExploreRow[]): CoverageSummary {
+  const capped = rows.filter((r) => r.marketCap != null && r.marketCap > 0);
+  const total = capped.reduce((s, r) => s + r.marketCap!, 0);
+  const weighted = capped.filter((r) => r.change24h != null);
+  const wTotal = weighted.reduce((s, r) => s + r.marketCap!, 0);
+  const moves = rows.filter((r) => r.change24h != null).sort((a, b) => b.change24h! - a.change24h!);
+  const pick = (r: ExploreRow | undefined) => (r ? { slug: r.slug, name: r.name, change: r.change24h! } : null);
+  return {
+    count: rows.length,
+    totalMarketCap: capped.length ? total : null,
+    weightedChange24h: wTotal ? weighted.reduce((s, r) => s + r.marketCap! * r.change24h!, 0) / wTotal : null,
+    up: moves.filter((r) => r.change24h! > 0).length,
+    down: moves.filter((r) => r.change24h! < 0).length,
+    best: pick(moves[0]),
+    worst: pick(moves[moves.length - 1]),
+  };
+}

@@ -1,7 +1,6 @@
 "use client";
 
-import { SectorBadge } from "@/components/ui/sector-badge";
-import { SECTOR_COLORS, tint } from "@/lib/brand";
+import { SECTOR_COLORS } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -126,22 +125,18 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
 
   return (
     <div className="space-y-4">
-      {/* Sector chips */}
-      <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0" role="tablist" aria-label="Sectors">
-        <div className="flex w-max gap-2 md:w-auto md:flex-wrap">
+      {/* Sector tabs */}
+      <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0" role="tablist" aria-label="Sectors">
+        <div className="flex w-max gap-x-5 gap-y-1 border-b border-line md:w-auto md:flex-wrap md:border-b-0">
           <button
             role="tab"
             aria-selected={filters.sector === "all"}
             onClick={() => update({ sector: "all" })}
-            className={cn(
-              "h-8 rounded-full border px-3.5 text-[13px] transition-colors",
-              filters.sector === "all" ? "border-accent/50 bg-accent-soft text-fg" : "border-line text-fg-2 hover:border-line-strong",
-            )}
+            className={cn("-mb-px whitespace-nowrap border-b-2 pb-2 pt-1 text-[13px] transition-colors", filters.sector === "all" ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg-2")}
           >
-            All <span className="ml-1 text-subtle">{rows.length}</span>
+            All <span className="num ml-1 text-subtle">{rows.length}</span>
           </button>
-          {SECTORS.map((s) => {
-            const color = SECTOR_COLORS[s.id];
+          {SECTORS.filter((s) => sectorCounts[s.id]).map((s) => {
             const active = filters.sector === s.id;
             return (
               <button
@@ -150,15 +145,11 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                 aria-selected={active}
                 onClick={() => update({ sector: active ? "all" : s.id })}
                 title={s.description}
-                className={cn(
-                  "inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 text-[13px] transition-colors",
-                  active ? "text-fg" : "border-line text-fg-2 hover:border-line-strong",
-                  !sectorCounts[s.id] && "opacity-50",
-                )}
-                style={active ? { borderColor: tint(color, 0.6), backgroundColor: tint(color, 0.16) } : undefined}
+                className={cn("-mb-px inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 pb-2 pt-1 text-[13px] transition-colors", active ? "text-fg" : "border-transparent text-muted hover:text-fg-2")}
+                style={active ? { borderColor: SECTOR_COLORS[s.id] } : undefined}
               >
-                <span className="size-2 rounded-full" style={{ backgroundColor: color }} aria-hidden />
-                {s.label} <span className="text-subtle">{sectorCounts[s.id] ?? 0}</span>
+                <span className="size-1.5 rounded-full" style={{ backgroundColor: SECTOR_COLORS[s.id] }} aria-hidden />
+                {s.label} <span className="num text-subtle">{sectorCounts[s.id]}</span>
               </button>
             );
           })}
@@ -174,7 +165,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
             onChange={(e) => update({ q: e.target.value })}
             placeholder="Filter by name, ticker or theme…"
             aria-label="Filter projects"
-            className="h-10 w-full rounded-lg border border-line bg-surface pl-9 pr-9 text-sm text-fg placeholder:text-subtle focus:border-accent/60 focus:outline-none"
+            className="h-9 w-full rounded-lg border border-line bg-surface pl-9 pr-9 text-[13.5px] text-fg placeholder:text-subtle focus:border-accent/60 focus:outline-none"
           />
           {filters.q ? (
             <button onClick={() => update({ q: "" })} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-subtle hover:text-fg" aria-label="Clear search">
@@ -187,7 +178,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
             onClick={() => setPanelOpen((v) => !v)}
             aria-expanded={panelOpen}
             className={cn(
-              "inline-flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm transition-colors",
+              "inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] transition-colors",
               panelOpen || extraFilters ? "border-accent/50 bg-accent-soft text-fg" : "border-line-strong bg-surface-2 text-fg-2 hover:bg-surface-3",
             )}
           >
@@ -199,7 +190,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
             onClick={() => update({ watchlistOnly: !filters.watchlistOnly })}
             aria-pressed={filters.watchlistOnly}
             className={cn(
-              "inline-flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm transition-colors",
+              "inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-[13px] transition-colors",
               filters.watchlistOnly ? "border-accent/50 bg-accent-soft text-fg" : "border-line-strong bg-surface-2 text-fg-2 hover:bg-surface-3",
             )}
           >
@@ -209,7 +200,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
       </div>
 
       {panelOpen ? (
-        <div className="grid animate-fade-in grid-cols-2 gap-3 rounded-xl border border-line bg-surface p-4 md:grid-cols-4 xl:grid-cols-7">
+        <div className="grid animate-fade-in grid-cols-2 gap-3 border-y border-line py-4 md:grid-cols-4 xl:grid-cols-7">
           <Select label="Blockchain" value={filters.chain} onChange={(v) => update({ chain: v })} options={[{ value: "all", label: "All chains" }, ...chainOptions.map((c) => ({ value: c, label: CHAINS[c].label }))]} />
           <Select
             label="Market cap"
@@ -272,8 +263,8 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
       ) : null}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-line bg-surface">
-        <div className="flex items-center justify-between border-b border-line px-4 py-2.5 text-[12.5px] text-muted">
+      <div>
+        <div className="flex items-center justify-between pb-2.5 text-[12.5px] text-muted">
           <span>
             <span className="num text-fg">{visible.length}</span> of {rows.length} projects
           </span>
@@ -311,13 +302,13 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
           />
         ) : (
           <div className="relative overflow-x-auto">
-            <table className="w-full min-w-[760px] border-collapse text-sm">
+            <table className="w-full min-w-[760px] border-collapse border-y border-line text-sm">
               <thead>
-                <tr className="border-b border-line text-[11.5px] uppercase tracking-wide text-subtle">
-                  <th scope="col" className="w-10 py-2.5 pl-4 pr-1 text-left font-medium">
+                <tr className="border-b border-line text-[10.5px] uppercase tracking-[0.1em] text-subtle">
+                  <th scope="col" className="w-9 py-2.5 pl-1 pr-1 text-left font-medium">
                     <span className="sr-only">Select</span>
                   </th>
-                  <th scope="col" className="sticky left-0 z-10 bg-surface py-2.5 pr-3 text-left font-medium">
+                  <th scope="col" className="sticky left-0 z-10 bg-bg py-2.5 pr-3 text-left font-medium">
                     <SortButton label="Project" active={sort.key === "name"} dir={sort.dir} onClick={() => toggleSort("name")} />
                   </th>
                   {COLUMNS.map((c) => (
@@ -326,7 +317,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                     </th>
                   ))}
                   <th scope="col" className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium xl:table-cell">
-                    Sector · Chain
+                    Sector, chain
                   </th>
                   <th scope="col" className="px-3 py-2.5 text-right font-medium">
                     <SortButton label="Score" active={sort.key === "score"} dir={sort.dir} onClick={() => toggleSort("score")} align="right" />
@@ -334,7 +325,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                   <th scope="col" className="hidden px-3 py-2.5 text-right font-medium min-[1700px]:table-cell">
                     7d trend
                   </th>
-                  <th scope="col" className="py-2.5 pl-2 pr-4">
+                  <th scope="col" className="py-2.5 pl-2 pr-1">
                     <span className="sr-only">Actions</span>
                   </th>
                 </tr>
@@ -343,10 +334,10 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                 {visible.map((r) => (
                   <tr
                     key={r.slug}
-                    className="group cursor-pointer border-b border-line/70 transition-colors last:border-0 hover:bg-surface-2"
+                    className="group cursor-pointer border-b border-line/60 transition-colors last:border-0 hover:bg-surface/70"
                     onClick={() => router.push(`/projects/${r.slug}`)}
                   >
-                    <td className="py-3 pl-4 pr-1" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-2.5 pl-1 pr-1" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
                         checked={selected.includes(r.slug)}
@@ -356,42 +347,45 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                         className="size-3.5 accent-[#7896ff]"
                       />
                     </td>
-                    <td className="sticky left-0 z-10 bg-surface py-3 pr-3 transition-colors group-hover:bg-surface-2">
+                    <td className="sticky left-0 z-10 bg-bg py-2.5 pr-3 transition-colors group-hover:bg-surface">
                       <Link href={`/projects/${r.slug}`} className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                        <TokenLogo src={r.logo} name={r.name} size={30} />
+                        <TokenLogo src={r.logo} name={r.name} size={26} />
                         <span className="min-w-0">
                           <span className="flex items-center gap-2">
-                            <span className="truncate font-medium text-fg">{r.name}</span>
-                            <span className="text-xs text-subtle">{r.ticker}</span>
+                            <span className="truncate text-[14px] font-medium text-fg group-hover:text-accent-strong">{r.name}</span>
+                            <span className="num text-[11px] text-subtle">{r.ticker}</span>
                           </span>
-                          <span className="block max-w-[190px] truncate text-xs text-muted">{r.oneLiner}</span>
+                          <span className="hidden max-w-[210px] truncate text-[11.5px] text-muted sm:block">{r.oneLiner}</span>
                         </span>
                       </Link>
                     </td>
-                    <td className="num px-3 py-3 text-right text-fg">{formatPrice(r.price)}</td>
-                    <td className="px-3 py-3 text-right">
+                    <td className="num px-3 py-2.5 text-right text-fg">{formatPrice(r.price)}</td>
+                    <td className="px-3 py-2.5 text-right">
                       <Delta value={r.change24h} />
                     </td>
-                    <td className="px-3 py-3 text-right">
+                    <td className="px-3 py-2.5 text-right">
                       <Delta value={r.change7d} />
                     </td>
-                    <td className="num px-3 py-3 text-right text-fg-2">{formatUsdCompact(r.marketCap)}</td>
-                    <td className="num hidden px-3 py-3 text-right text-fg-2 md:table-cell">{formatUsdCompact(r.fdv)}</td>
-                    <td className="num hidden px-3 py-3 text-right text-fg-2 md:table-cell">{formatUsdCompact(r.tvl)}</td>
-                    <td className="num hidden px-3 py-3 text-right text-fg-2 2xl:table-cell">{formatUsdCompact(r.volume24h)}</td>
-                    <td className="hidden px-3 py-3 xl:table-cell">
-                      <div className="flex flex-col items-start gap-1">
-                        <SectorBadge sector={r.sector} />
-                        <span className="text-xs text-muted">{r.chainLabel}</span>
+                    <td className="num px-3 py-2.5 text-right text-fg-2">{formatUsdCompact(r.marketCap)}</td>
+                    <td className="num hidden px-3 py-2.5 text-right text-fg-2 md:table-cell">{formatUsdCompact(r.fdv)}</td>
+                    <td className="num hidden px-3 py-2.5 text-right text-fg-2 md:table-cell">{formatUsdCompact(r.tvl)}</td>
+                    <td className="num hidden px-3 py-2.5 text-right text-fg-2 2xl:table-cell">{formatUsdCompact(r.volume24h)}</td>
+                    <td className="hidden px-3 py-2.5 xl:table-cell">
+                      <div className="flex flex-col items-start gap-0.5">
+                        <span className="inline-flex items-center gap-1.5 text-[12.5px] text-fg-2">
+                          <span className="size-1.5 rounded-full" style={{ backgroundColor: SECTOR_COLORS[r.sector] }} aria-hidden />
+                          {r.sectorLabel}
+                        </span>
+                        <span className="pl-3 text-[11.5px] text-muted">{r.chainLabel}</span>
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-right">
+                    <td className="px-3 py-2.5 text-right">
                       <ScorePill score={r.score} note={r.scoreNote} />
                     </td>
-                    <td className="hidden px-3 py-3 text-right min-[1700px]:table-cell">
+                    <td className="hidden px-3 py-2.5 text-right min-[1700px]:table-cell">
                       <Sparkline values={r.sparkline} width={88} height={26} className="ml-auto" />
                     </td>
-                    <td className="py-3 pl-2 pr-4" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-2.5 pl-2 pr-1" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
                         <WatchlistButton slug={r.slug} name={r.name} />
                         <Link

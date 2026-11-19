@@ -3,25 +3,10 @@ import { getFearGreed, getGlobalMarket, getMarketRegime } from "@/lib/market/ser
 import { formatPercent, formatUsdCompact } from "@/lib/format";
 import { marketContext } from "@/lib/overview";
 import { Delta } from "@/components/ui/delta";
-import { InfoTip } from "@/components/ui/info-tip";
+import { Stat, StatStrip } from "@/components/ui/stat-strip";
 import { SourceTag } from "@/components/ui/source-tag";
 import { Skeleton } from "@/components/ui/skeleton";
 import { zoneColor } from "./gauge";
-
-function Stat({ label, tip, value, children }: { label: string; tip: string; value: React.ReactNode; children?: React.ReactNode }) {
-  return (
-    <div className="min-w-0 lg:px-6 lg:first:pl-0">
-      <dt className="flex items-center gap-1.5 text-[12px] text-muted">
-        {label}
-        <InfoTip label={`About ${label}`} align="start">
-          {tip}
-        </InfoTip>
-      </dt>
-      <dd className="num mt-2 text-[26px] leading-none tracking-tight text-fg">{value}</dd>
-      <dd className="mt-2 text-[12.5px] text-muted">{children}</dd>
-    </div>
-  );
-}
 
 function SentimentScale({ value }: { value: number }) {
   return (
@@ -51,7 +36,7 @@ export async function MarketPulse() {
       </p>
       {context ? <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-fg-2">{context}</p> : null}
 
-      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-6 border-y border-line py-5 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-line">
+      <StatStrip className="mt-6">
         <Stat label="Total market cap" tip="Sum of the market capitalisation of all tracked crypto assets (CoinGecko)." value={formatUsdCompact(g?.totalMarketCap)}>
           <Delta value={g?.marketCapChange24h} className="text-[12.5px]" /> 24h
         </Stat>
@@ -72,7 +57,7 @@ export async function MarketPulse() {
             "n/a"
           )}
         </Stat>
-      </dl>
+      </StatStrip>
       <div className="mt-2 flex flex-wrap justify-end gap-x-4 gap-y-1">
         {global.status === "unavailable" ? <span className="text-[11px] text-subtle">{global.note}</span> : <SourceTag result={global} label="Market" />}
         <SourceTag result={fng} label="Sentiment" />
