@@ -1,9 +1,10 @@
-import { SectorBadge } from "@/components/ui/sector-badge";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarDays, Percent } from "lucide-react";
+import { KEY_DATES } from "@/content/key-dates";
+import { PROJECT_BY_SLUG } from "@/content/projects";
+import { SECTOR_COLORS } from "@/lib/brand";
 import {
   getCoverageQuotes,
   getDefiOverview,
@@ -18,38 +19,42 @@ import {
 import { sectorPerformance } from "@/lib/sectors";
 import { formatNumber, formatPercent, formatPrice, formatUsdCompact } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { PageHeader, SectionTitle } from "@/components/ui/section-heading";
-import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { CardSkeleton } from "@/components/ui/skeleton";
+import { CardSkeleton, Skeleton } from "@/components/ui/skeleton";
+import { Stat, StatStrip } from "@/components/ui/stat-strip";
+import { TokenLogo } from "@/components/ui/token-logo";
+import { SectionHeader } from "@/components/overview/section-header";
 import { Delta } from "@/components/ui/delta";
 import { SourceTag } from "@/components/ui/source-tag";
 import { DataNotice } from "@/components/ui/data-notice";
-import { Badge } from "@/components/ui/badge";
 import { BarList } from "@/components/charts/bar-list";
 import { PriceChartCard, type ChartAsset } from "@/components/charts/price-chart-card";
 import { CompactUsdArea } from "@/components/overview/compact-area";
 import { Gauge } from "@/components/overview/gauge";
 import { RegimeChart } from "@/components/markets/regime-chart";
 import { FearGreedChart } from "@/components/markets/fear-greed-chart";
-import { KeyDatesCard } from "@/components/overview/key-dates-card";
 
 export const metadata: Metadata = { title: "Markets", description: "Market intelligence: capitalisation, dominance, sentiment, sectors, stablecoins and DeFi." };
 
 export default function MarketsPage() {
   return (
-    <div className="space-y-10">
-      <PageHeader
-        eyebrow="Discover"
-        title="Market Intelligence"
-        description="The state of the digital-asset market from open data sources. Indicators describe the current environment, they are not forecasts."
-      />
-      <Suspense fallback={<CardSkeleton lines={2} />}>
-        <GlobalStrip />
-      </Suspense>
-      <Suspense fallback={<CardSkeleton className="h-[360px]" lines={6} />}>
+    <div className="space-y-14">
+      <header>
+        <h1 className="serif-display text-[38px] leading-none text-fg md:text-[44px]">Market intelligence</h1>
+        <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg-2">
+          The state of the digital-asset market from open data sources. Every indicator describes the current environment; none of them is a forecast.
+        </p>
+        <div className="mt-6">
+          <Suspense fallback={<StripSkeleton />}>
+            <GlobalStrip />
+          </Suspense>
+        </div>
+      </header>
+
+      <Suspense fallback={<Skeleton className="h-[340px] w-full rounded-lg" />}>
         <MarketChart />
       </Suspense>
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+
+      <div className="grid grid-cols-1 gap-x-10 gap-y-14 xl:grid-cols-2">
         <Suspense fallback={<CardSkeleton lines={6} />}>
           <Sentiment />
         </Suspense>
@@ -57,10 +62,12 @@ export default function MarketsPage() {
           <Regime />
         </Suspense>
       </div>
+
       <Suspense fallback={<CardSkeleton lines={8} />}>
         <SectorIntelligence />
       </Suspense>
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+
+      <div className="grid grid-cols-1 gap-x-10 gap-y-14 xl:grid-cols-2">
         <Suspense fallback={<CardSkeleton lines={6} />}>
           <Stablecoins />
         </Suspense>
@@ -68,19 +75,21 @@ export default function MarketsPage() {
           <Defi />
         </Suspense>
       </div>
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <NotYetAvailable
-          icon={<Percent className="size-4" />}
-          title="Funding rates & derivatives"
-          text="Perpetual funding rates, open interest and liquidations require a derivatives data provider. Planned for Phase 2 (Intelligence)."
-        />
-        <NotYetAvailable
-          icon={<CalendarDays className="size-4" />}
-          title="Economic & crypto events calendar"
-          text="Macro releases (CPI, FOMC) and protocol events need a licensed calendar feed. Planned for Phase 2. Known supply schedules from our dossiers are listed alongside."
-        />
-        <KeyDatesCard />
-      </div>
+
+      <SupplyCalendar />
+    </div>
+  );
+}
+
+function StripSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-6 border-y border-line py-5 lg:grid-cols-5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i}>
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="mt-3 h-7 w-28" />
+        </div>
+      ))}
     </div>
   );
 }
@@ -89,26 +98,30 @@ async function GlobalStrip() {
   await connection(); // market data is request-time: never fetched at build
   const g = await getGlobalMarket();
   const d = g.data;
-  const items = [
-    { label: "Total market cap", value: formatUsdCompact(d?.totalMarketCap), sub: <Delta value={d?.marketCapChange24h} className="text-[12px]" /> },
-    { label: "24h volume", value: formatUsdCompact(d?.totalVolume24h) },
-    { label: "BTC dominance", value: formatPercent(d?.btcDominance, { signed: false, digits: 1 }) },
-    { label: "ETH dominance", value: formatPercent(d?.ethDominance, { signed: false, digits: 1 }) },
-    { label: "Tracked assets", value: formatNumber(d?.activeCryptocurrencies) },
-  ];
+  const turnover = d?.totalVolume24h != null && d.totalMarketCap ? (d.totalVolume24h / d.totalMarketCap) * 100 : null;
   return (
     <div className="space-y-2">
       <DataNotice result={g} />
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-5">
-        {items.map((i) => (
-          <div key={i.label} className="bg-surface px-4 py-3.5">
-            <div className="text-[12px] text-muted">{i.label}</div>
-            <div className="num mt-1 text-xl text-fg">{i.value}</div>
-            {i.sub ? <div className="mt-0.5">{i.sub} <span className="text-[11px] text-subtle">24h</span></div> : null}
-          </div>
-        ))}
+      <StatStrip columns={5}>
+        <Stat label="Total market cap" value={formatUsdCompact(d?.totalMarketCap)}>
+          <Delta value={d?.marketCapChange24h} className="text-[12.5px]" /> 24h
+        </Stat>
+        <Stat label="24h volume" value={formatUsdCompact(d?.totalVolume24h)}>
+          {turnover != null ? `${formatPercent(turnover, { signed: false, digits: 1 })} of market cap` : "n/a"}
+        </Stat>
+        <Stat label="BTC dominance" value={formatPercent(d?.btcDominance, { signed: false, digits: 1 })}>
+          Share of total market cap
+        </Stat>
+        <Stat label="ETH dominance" value={formatPercent(d?.ethDominance, { signed: false, digits: 1 })}>
+          Share of total market cap
+        </Stat>
+        <Stat label="Tracked assets" value={formatNumber(d?.activeCryptocurrencies)}>
+          Listed by CoinGecko
+        </Stat>
+      </StatStrip>
+      <div className="flex justify-end">
+        <SourceTag result={g} />
       </div>
-      <SourceTag result={g} />
     </div>
   );
 }
@@ -124,10 +137,10 @@ async function MarketChart() {
   ];
   const initial = pro ? await getTotalMarketCapHistory("1Y") : await getPriceHistory("bitcoin", "1Y");
   return (
-    <Card className="p-5">
+    <div>
       <PriceChartCard assets={assets} initialAsset={assets[0].key} initialData={initial} height={280} />
-      {!pro ? <p className="mt-2 text-[11px] text-subtle">Historical total market cap requires a CoinGecko Pro plan (set COINGECKO_PRO_API_KEY).</p> : null}
-    </Card>
+      {!pro ? <p className="mt-2 text-[11px] text-subtle">Total market cap history is a CoinGecko Pro dataset, so asset prices are shown.</p> : null}
+    </div>
   );
 }
 
@@ -137,9 +150,10 @@ async function Sentiment() {
   const now = fng.data?.[0];
   const ago = (n: number) => fng.data?.[n];
   return (
-    <Card id="sentiment" className="scroll-mt-24">
-      <CardHeader title="Market sentiment" subtitle="Crypto Fear & Greed Index, 90 days" />
-      <CardBody>
+    <section id="sentiment" className="scroll-mt-24">
+      <SectionHeader title="Sentiment" href="/academy/concepts/fear-and-greed" linkLabel="Lesson" />
+      <p className="-mt-2 mb-5 text-[13px] text-muted">Crypto Fear & Greed Index, last 90 days.</p>
+      <div>
         {fng.data ? (
           <>
             <div className="flex flex-wrap items-end gap-6">
@@ -167,18 +181,15 @@ async function Sentiment() {
               <FearGreedChart points={fng.data} />
             </div>
             <p className="mt-2 text-[11.5px] text-subtle">
-              0-24 extreme fear · 25-49 fear · 50-74 greed · 75-100 extreme greed. Sentiment can stay extreme for long periods.{" "}
-              <Link href="/academy/concepts/fear-and-greed" className="text-accent hover:text-accent-strong">
-                Learn more
-              </Link>
+              0-24 extreme fear · 25-49 fear · 50-74 greed · 75-100 extreme greed. Sentiment can stay extreme for long periods.
             </p>
           </>
         ) : (
           <DataNotice result={fng} />
         )}
         <SourceTag result={fng} className="mt-2" />
-      </CardBody>
-    </Card>
+      </div>
+    </section>
   );
 }
 
@@ -187,9 +198,10 @@ async function Regime() {
   const r = await getMarketRegime();
   const d = r.data;
   return (
-    <Card id="regime" className="scroll-mt-24">
-      <CardHeader title="Market regime" subtitle="Bitcoin vs its 200-day moving average" />
-      <CardBody>
+    <section id="regime" className="scroll-mt-24">
+      <SectionHeader title="Market regime" href="/academy/concepts/market-cycles" linkLabel="Lesson" />
+      <p className="-mt-2 mb-5 text-[13px] text-muted">Bitcoin versus its 200-day moving average.</p>
+      <div>
         {d ? (
           <>
             <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
@@ -210,8 +222,8 @@ async function Regime() {
           <DataNotice result={r} />
         )}
         <SourceTag result={r} className="mt-2" />
-      </CardBody>
-    </Card>
+      </div>
+    </section>
   );
 }
 
@@ -221,34 +233,38 @@ async function SectorIntelligence() {
   const rows = quotes.data ? sectorPerformance(quotes.data) : [];
   return (
     <section id="sectors" className="scroll-mt-24">
-      <SectionTitle title="Sector intelligence" description="Market-cap-weighted performance of the projects covered by Sensitor in each sector, not the whole sector." />
+      <SectionHeader title="Sector intelligence" href="/explore" linkLabel="Explore projects" />
+      <p className="-mt-2 mb-5 text-[13px] text-muted">Market-cap-weighted performance of the projects covered by Sensitor in each sector, not the whole sector.</p>
       <DataNotice result={quotes} className="mb-3" />
-      <div className="overflow-hidden rounded-xl border border-line bg-surface">
+      <div>
         <div className="relative overflow-x-auto">
-          <table className="w-full min-w-[640px] text-[13px]">
+          <table className="w-full min-w-[640px] border-y border-line text-[13px]">
             <thead>
-              <tr className="border-b border-line text-left text-[11px] uppercase tracking-wide text-subtle">
-                <th scope="col" className="py-2.5 pl-4 font-medium">Sector</th>
+              <tr className="border-b border-line text-left text-[10.5px] uppercase tracking-[0.1em] text-subtle">
+                <th scope="col" className="py-2.5 font-medium">Sector</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-medium">Covered</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-medium">Market cap</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-medium">24h</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-medium">7d</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-medium">30d</th>
-                <th scope="col" className="px-3 py-2.5 pr-4 font-medium">Best 7d in coverage</th>
+                <th scope="col" className="py-2.5 pl-6 font-medium">Best 7d in coverage</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.sector} className="border-b border-line/70 last:border-0 hover:bg-surface-2">
-                  <td className="py-3 pl-4">
-                    <SectorBadge sector={r.sector} href={`/explore?sector=${r.sector}`} size="md" />
+                <tr key={r.sector} className="border-b border-line/60 last:border-0 hover:bg-surface/70">
+                  <td className="py-2.5">
+                    <Link href={`/explore?sector=${r.sector}`} className="inline-flex items-center gap-2 text-fg hover:text-accent-strong">
+                      <span className="size-2 rounded-full" style={{ backgroundColor: SECTOR_COLORS[r.sector] }} aria-hidden />
+                      {r.label}
+                    </Link>
                   </td>
-                  <td className="num px-3 py-3 text-right text-muted">{r.count}</td>
-                  <td className="num px-3 py-3 text-right text-fg-2">{formatUsdCompact(r.marketCap)}</td>
-                  <td className="px-3 py-3 text-right"><Delta value={r.change24h} /></td>
-                  <td className="px-3 py-3 text-right"><Delta value={r.change7d} /></td>
-                  <td className="px-3 py-3 text-right"><Delta value={r.change30d} /></td>
-                  <td className="px-3 py-3 pr-4">
+                  <td className="num px-3 py-2.5 text-right text-muted">{r.count}</td>
+                  <td className="num px-3 py-2.5 text-right text-fg-2">{formatUsdCompact(r.marketCap)}</td>
+                  <td className="px-3 py-2.5 text-right"><Delta value={r.change24h} digits={1} /></td>
+                  <td className="px-3 py-2.5 text-right"><Delta value={r.change7d} digits={1} /></td>
+                  <td className="px-3 py-2.5 text-right"><Delta value={r.change30d} digits={1} /></td>
+                  <td className="py-2.5 pl-6">
                     {r.leader ? (
                       <Link href={`/projects/${r.leader.slug}`} className="text-fg-2 hover:text-fg">
                         {r.leader.name} <Delta value={r.leader.change7d} className="ml-1 text-[12px]" />
@@ -273,9 +289,10 @@ async function Stablecoins() {
   const s = await getStablecoinOverview();
   const d = s.data;
   return (
-    <Card id="stablecoins" className="scroll-mt-24">
-      <CardHeader title="Stablecoin market" subtitle="USD-pegged supply, 3 years" />
-      <CardBody>
+    <section id="stablecoins" className="scroll-mt-24">
+      <SectionHeader title="Stablecoins" href="/academy/concepts/stablecoins" linkLabel="Lesson" />
+      <p className="-mt-2 mb-5 text-[13px] text-muted">USD-pegged supply over three years.</p>
+      <div>
         {d ? (
           <>
             <div className="flex items-baseline gap-3">
@@ -301,9 +318,7 @@ async function Stablecoins() {
                     <td className="py-2 text-fg">
                       {t.name} <span className="text-subtle">{t.symbol}</span>
                     </td>
-                    <td className="py-2">
-                      <Badge tone="outline">{t.pegMechanism ?? "n/a"}</Badge>
-                    </td>
+                    <td className="py-2 text-muted">{t.pegMechanism ?? "n/a"}</td>
                     <td className="num py-2 text-right text-fg-2">{formatUsdCompact(t.circulating)}</td>
                     <td className="num py-2 text-right text-muted">{formatPercent((t.circulating / d.totalCirculating) * 100, { signed: false, digits: 1 })}</td>
                   </tr>
@@ -315,8 +330,8 @@ async function Stablecoins() {
           <DataNotice result={s} />
         )}
         <SourceTag result={s} className="mt-3" />
-      </CardBody>
-    </Card>
+      </div>
+    </section>
   );
 }
 
@@ -325,9 +340,10 @@ async function Defi() {
   const r = await getDefiOverview();
   const d = r.data;
   return (
-    <Card id="defi" className="scroll-mt-24">
-      <CardHeader title="DeFi market" subtitle="Total value locked, 3 years" />
-      <CardBody>
+    <section id="defi" className="scroll-mt-24">
+      <SectionHeader title="DeFi" href="/academy/concepts/tvl" linkLabel="Lesson" />
+      <p className="-mt-2 mb-5 text-[13px] text-muted">Total value locked over three years, and by chain.</p>
+      <div>
         {d ? (
           <>
             <div className="flex items-baseline gap-3">
@@ -345,18 +361,55 @@ async function Defi() {
           <DataNotice result={r} />
         )}
         <SourceTag result={r} className="mt-3" />
-      </CardBody>
-    </Card>
+      </div>
+    </section>
   );
 }
 
-function NotYetAvailable({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+const KIND = { unlock: "Unlock", halving: "Halving", "vesting-end": "Vesting end" } as const;
+
+/** Supply schedules from the dossiers, and the data sets not covered yet. */
+function SupplyCalendar() {
   return (
-    <Card className="border-dashed">
-      <CardHeader title={title} icon={icon} action={<Badge tone="outline">Phase 2</Badge>} />
-      <CardBody>
-        <p className="text-[13px] leading-relaxed text-muted">{text}</p>
-      </CardBody>
-    </Card>
+    <section>
+      <SectionHeader title="Supply calendar" href="/academy/concepts/token-unlocks" linkLabel="Lesson" />
+      <div className="grid grid-cols-1 gap-x-10 gap-y-10 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div>
+          <ul className="divide-y divide-line border-y border-line">
+            {KEY_DATES.map((d) => {
+              const p = PROJECT_BY_SLUG[d.slug];
+              return (
+                <li key={`${d.slug}-${d.title}`}>
+                  <Link href={`/projects/${d.slug}#tokenomics`} className="group grid grid-cols-[22px_minmax(0,1fr)_auto] items-center gap-3 py-3">
+                    <TokenLogo src={p?.logo} name={p?.name ?? d.slug} size={22} />
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13.5px] text-fg group-hover:text-accent-strong">
+                        {p?.name}: {d.title}
+                      </span>
+                      <span className="block text-[12px] text-muted">{d.when}</span>
+                    </span>
+                    <span className="text-[11.5px] text-subtle">{KIND[d.kind]}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="mt-2 text-[11.5px] text-subtle">Schedules documented in the dossiers. Exact amounts per event require a licensed data feed.</p>
+        </div>
+        <aside>
+          <h3 className="border-b border-line pb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Not covered yet</h3>
+          <dl className="divide-y divide-line/70">
+            <div className="py-3.5">
+              <dt className="text-[13.5px] text-fg">Funding rates and derivatives</dt>
+              <dd className="mt-1 text-[12.5px] leading-relaxed text-muted">Perpetual funding, open interest and liquidations need a derivatives data provider. Planned for Phase 2.</dd>
+            </div>
+            <div className="py-3.5">
+              <dt className="text-[13.5px] text-fg">Economic and crypto events</dt>
+              <dd className="mt-1 text-[12.5px] leading-relaxed text-muted">Macro releases and protocol events need a licensed calendar feed. Planned for Phase 2.</dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+    </section>
   );
 }

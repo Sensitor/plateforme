@@ -3,7 +3,7 @@ import { deltaTone, formatPercent } from "@/lib/format";
 
 /** Signed percentage change, coloured by direction. Neutral when unavailable. */
 export function Delta({ value, className, digits = 2 }: { value: number | null | undefined; className?: string; digits?: number }) {
-  const tone = deltaTone(value);
+  const tone = deltaTone(value, digits);
   return (
     <span
       className={cn(

@@ -54,8 +54,10 @@ export function formatPrice(value: number | null | undefined): string {
 export function formatPercent(value: number | null | undefined, opts: { signed?: boolean; digits?: number } = {}): string {
   if (value == null || !Number.isFinite(value)) return "n/a";
   const { signed = true, digits = 2 } = opts;
-  const sign = signed && value > 0 ? "+" : "";
-  return `${sign}${value.toFixed(digits)}%`;
+  // Values that round to zero print as an unsigned zero, never "-0.0%".
+  const v = Math.abs(value) < 0.5 * 10 ** -digits ? 0 : value;
+  const sign = signed && v > 0 ? "+" : "";
+  return `${sign}${v.toFixed(digits)}%`;
 }
 
 export function formatNumberCompact(value: number | null | undefined): string {
@@ -105,7 +107,7 @@ export function formatRelative(iso: string | number, now: number): string {
   return `${d} days ago`;
 }
 
-export function deltaTone(value: number | null | undefined): "positive" | "negative" | "neutral" {
-  if (value == null || !Number.isFinite(value) || value === 0) return "neutral";
+export function deltaTone(value: number | null | undefined, digits = 2): "positive" | "negative" | "neutral" {
+  if (value == null || !Number.isFinite(value) || Math.abs(value) < 0.5 * 10 ** -digits) return "neutral";
   return value > 0 ? "positive" : "negative";
 }

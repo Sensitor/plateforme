@@ -69,3 +69,14 @@ describe("search", () => {
     expect(searchEntries(entries, "synthetic").map((e) => e.id)).toEqual(["2"]);
   });
 });
+
+describe("percent rounding", async () => {
+  const { formatPercent, deltaTone } = await import("@/lib/format");
+  it("prints values that round to zero as an unsigned zero", () => {
+    expect(formatPercent(-0.04, { digits: 1 })).toBe("0.0%");
+    expect(formatPercent(0.04, { digits: 1 })).toBe("0.0%");
+    expect(formatPercent(-0.05, { digits: 1 })).toBe("-0.1%");
+    expect(deltaTone(-0.04, 1)).toBe("neutral");
+    expect(deltaTone(-0.06, 1)).toBe("negative");
+  });
+});
