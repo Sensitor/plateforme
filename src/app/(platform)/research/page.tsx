@@ -1,25 +1,27 @@
-import { SECTOR_COLORS, tint } from "@/lib/brand";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpenCheck, CalendarRange, FileSearch, Layers, NotebookPen, Sigma } from "lucide-react";
+import { BookOpenCheck } from "lucide-react";
 import { PROJECTS } from "@/content/projects";
+import { SECTOR_COLORS } from "@/lib/brand";
 import { claimStats, compositeScore, dossierCoverage } from "@/lib/research/framework";
-import { SECTORS, SECTOR_BY_ID } from "@/lib/research/taxonomy";
+import { dossierTitle, readingMinutes } from "@/lib/research/editorial";
+import { SECTORS } from "@/lib/research/taxonomy";
 import { formatDate } from "@/lib/format";
-import { PageHeader, SectionTitle } from "@/components/ui/section-heading";
+import { PageHeader } from "@/components/ui/section-heading";
 import { ButtonLink } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Stat, StatStrip } from "@/components/ui/stat-strip";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { CoveragePill, ScorePill } from "@/components/research/pills";
+import { SectionHeader } from "@/components/overview/section-header";
 
 export const metadata: Metadata = { title: "Research", description: "Sensitor research library: project dossiers, methodology and editorial formats." };
 
 const FORMATS = [
-  { icon: CalendarRange, title: "Weekly Market Intelligence", text: "A weekly read of market structure, flows and sentiment.", phase: "Research Club · Phase 4" },
-  { icon: FileSearch, title: "Project Deep Dives", text: "Long-form dossiers extending the project pages with original analysis.", phase: "Research Club · Phase 4" },
-  { icon: Layers, title: "Sector Intelligence", text: "Sector-level reports comparing business models and leaders.", phase: "Phase 2" },
-  { icon: NotebookPen, title: "Founder Notes", text: "Publications and frameworks from the founder.", phase: "Research Club · Phase 4" },
-  { icon: Sigma, title: "Investment Frameworks", text: "Reusable methods for analysis and risk management.", phase: "Phase 4" },
+  { title: "Weekly Market Intelligence", text: "A weekly read of market structure, flows and sentiment.", phase: "Research Club, Phase 4" },
+  { title: "Project Deep Dives", text: "Long-form dossiers extending the project pages with original analysis.", phase: "Research Club, Phase 4" },
+  { title: "Sector Intelligence", text: "Sector-level reports comparing business models and leaders.", phase: "Phase 2" },
+  { title: "Founder Notes", text: "Publications and frameworks from the founder.", phase: "Research Club, Phase 4" },
+  { title: "Investment Frameworks", text: "Reusable methods for analysis and risk management.", phase: "Phase 4" },
 ];
 
 export default function ResearchPage() {
@@ -37,91 +39,100 @@ export default function ResearchPage() {
   const bySector = SECTORS.map((s) => ({ sector: s, projects: PROJECTS.filter((p) => p.sector === s.id) })).filter((g) => g.projects.length);
 
   return (
-    <div className="space-y-10">
-      <PageHeader
-        eyebrow="Understand"
-        title="Research library"
-        description="Every dossier separates verified facts, analyst interpretations and hypotheses, and links each fact to its sources."
-        actions={
-          <ButtonLink href="/research/methodology" variant="secondary">
-            <BookOpenCheck className="size-4" aria-hidden /> Methodology
-          </ButtonLink>
-        }
-      />
+    <div className="space-y-12">
+      <div className="space-y-6">
+        <PageHeader
+          title="Research library"
+          description="Every dossier separates verified facts, analyst interpretations and hypotheses, and links each fact to its sources."
+          actions={
+            <ButtonLink href="/research/methodology" variant="secondary" size="sm">
+              <BookOpenCheck className="size-4" aria-hidden /> Methodology
+            </ButtonLink>
+          }
+        />
+        <StatStrip>
+          <Stat label="Dossiers" value={PROJECTS.length}>
+            Across {bySector.length} sectors
+          </Stat>
+          <Stat label="Typed claims" value={totals.claims}>
+            Facts, analysis and hypotheses
+          </Stat>
+          <Stat label="Facts with a source" value={`${totals.sourced} / ${totals.facts}`}>
+            Unsourced facts are flagged
+          </Stat>
+          <Stat label="Sources cited" value={totals.sources}>
+            Links checked automatically
+          </Stat>
+        </StatStrip>
+        <p className="flex items-start gap-2.5 text-[13px] leading-relaxed text-fg-2">
+          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-warning" aria-hidden />
+          <span>
+            <span className="font-medium text-warning">All dossiers in this release are drafts:</span> prepared from public documentation and data, with every source link
+            checked, but not yet peer-reviewed by the Sensitor editorial team.
+          </span>
+        </p>
+      </div>
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line md:grid-cols-4">
-        {[
-          ["Dossiers", PROJECTS.length],
-          ["Typed claims", totals.claims],
-          ["Facts with a source", `${totals.sourced} / ${totals.facts}`],
-          ["Sources cited", totals.sources],
-        ].map(([l, v]) => (
-          <div key={l as string} className="bg-surface px-4 py-4">
-            <div className="text-[12px] text-muted">{l}</div>
-            <div className="num mt-1 text-2xl text-fg">{v}</div>
+      <section aria-label="Dossiers by sector" className="divide-y divide-line border-y border-line">
+        {bySector.map(({ sector, projects }) => (
+          <div key={sector.id} id={`sec-${sector.id}`} className="grid scroll-mt-24 grid-cols-1 gap-4 py-6 lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-10">
+            <div>
+              <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
+                <span className="size-2 rounded-full" style={{ backgroundColor: SECTOR_COLORS[sector.id] }} aria-hidden />
+                {sector.label}
+                <span className="num text-[12px] font-normal text-subtle">{projects.length}</span>
+              </h2>
+              <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{sector.description}</p>
+            </div>
+            <ul className="divide-y divide-line/60">
+              {projects.map((p) => {
+                const stats = claimStats(p);
+                const c = compositeScore(p.dossier.framework);
+                return (
+                  <li key={p.slug}>
+                    <Link href={`/projects/${p.slug}`} className="group grid grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-4 py-3.5 first:pt-0">
+                      <TokenLogo src={p.logo} name={p.name} size={32} />
+                      <span className="min-w-0">
+                        <span className="flex items-baseline gap-2 text-[12px]">
+                          <span className="font-medium text-fg-2">{p.name}</span>
+                          <span className="num text-subtle">{p.ticker}</span>
+                        </span>
+                        <span className="mt-0.5 block text-[15.5px] font-medium leading-snug text-fg group-hover:text-accent-strong">{dossierTitle(p)}</span>
+                        <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted">
+                          <time dateTime={p.editorial.lastUpdated}>{formatDate(p.editorial.lastUpdated)}</time>
+                          <span aria-hidden>·</span>
+                          <span>{readingMinutes(p)} min read</span>
+                          <span aria-hidden>·</span>
+                          <span>{p.dossier.sources.length} sources</span>
+                          <span aria-hidden>·</span>
+                          <span>
+                            {stats.sourcedFacts}/{stats.facts} facts sourced
+                          </span>
+                          <span className="text-warning">Draft v{p.editorial.version}</span>
+                          <CoveragePill level={dossierCoverage(p).level} />
+                        </span>
+                      </span>
+                      <ScorePill score={c.score} note={c.withheldReason} />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         ))}
-      </div>
-
-      <div className="rounded-xl border border-warning/25 bg-warning-soft px-4 py-3 text-[13px] leading-relaxed text-warning">
-        All dossiers in this release are <strong>drafts</strong>: prepared from public documentation and data, with every source link checked, but not yet peer-reviewed by the
-        Sensitor editorial team. Facts without a source are explicitly flagged in each dossier.
-      </div>
-
-      {bySector.map(({ sector, projects }) => (
-        <section key={sector.id} aria-labelledby={`sec-${sector.id}`}>
-          <div className="mb-1.5 h-[3px] w-10 rounded-full" style={{ backgroundColor: SECTOR_COLORS[sector.id] }} aria-hidden />
-          <SectionTitle id={`sec-${sector.id}`} title={sector.label} description={sector.description} />
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {projects.map((p) => {
-              const stats = claimStats(p);
-              const c = compositeScore(p.dossier.framework);
-              return (
-                <Link
-                  key={p.slug}
-                  href={`/projects/${p.slug}`}
-                  className="group relative overflow-hidden rounded-xl border border-line bg-surface p-4 transition-colors hover:border-line-strong"
-                  style={{ backgroundImage: `radial-gradient(110% 80% at 100% 0%, ${tint(p.accent, 0.12)}, transparent 60%)` }}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <TokenLogo src={p.logo} name={p.name} size={36} />
-                      <div>
-                        <div className="serif-display text-[22px] leading-tight text-fg">{p.name}</div>
-                        <div className="text-xs text-muted">
-                          {p.ticker} · {SECTOR_BY_ID[p.sector].label}
-                        </div>
-                      </div>
-                    </div>
-                    <ScorePill score={c.score} note={c.withheldReason} />
-                  </div>
-                  <p className="mt-3 line-clamp-2 text-[13px] leading-relaxed text-fg-2">{p.oneLiner}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <Badge tone="warning">Draft v{p.editorial.version}</Badge>
-                    <CoveragePill level={dossierCoverage(p).level} />
-                  </div>
-                  <div className="mt-3 border-t border-line pt-3 text-[11.5px] text-subtle">
-                    {formatDate(p.editorial.lastUpdated)} · {stats.total} claims · {p.dossier.sources.length} sources · {stats.sourcedFacts}/{stats.facts} facts sourced
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      ))}
+      </section>
 
       <section>
-        <SectionTitle title="Editorial formats" description="Research formats planned for the platform and the Research Club." />
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <SectionHeader title="Coming formats" />
+        <dl className="grid grid-cols-1 gap-x-8 sm:grid-cols-2 xl:grid-cols-5">
           {FORMATS.map((f) => (
-            <div key={f.title} className="rounded-xl border border-dashed border-line-strong p-4">
-              <f.icon className="size-4 text-muted" aria-hidden />
-              <div className="mt-3 text-[14px] font-medium text-fg">{f.title}</div>
-              <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{f.text}</p>
-              <Badge tone="outline" className="mt-3">{f.phase}</Badge>
+            <div key={f.title} className="border-t border-line py-4">
+              <dt className="text-[14px] font-medium text-fg">{f.title}</dt>
+              <dd className="mt-1 text-[12.5px] leading-relaxed text-muted">{f.text}</dd>
+              <dd className="mt-2 text-[11px] uppercase tracking-[0.12em] text-subtle">{f.phase}</dd>
             </div>
           ))}
-        </div>
+        </dl>
       </section>
     </div>
   );
