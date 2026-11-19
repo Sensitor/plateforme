@@ -7,13 +7,12 @@ import { BookOpen, ChevronRight, CodeXml, ExternalLink, FileText, Globe, Message
 import { PROJECTS, getProject } from "@/content/projects";
 import { ACADEMY_CATEGORIES, CONCEPT_BY_SLUG } from "@/content/concepts";
 import { ACADEMY_COLORS, SECTOR_COLORS } from "@/lib/brand";
-import { SectorBadge } from "@/components/ui/sector-badge";
 import { getPriceHistory } from "@/lib/market/service";
 import { claimStats, dossierCoverage } from "@/lib/research/framework";
 import { CHAINS, MATURITY, SECTOR_BY_ID, TECH_TOPICS } from "@/lib/research/taxonomy";
 import { formatDate } from "@/lib/format";
+import { readingMinutes } from "@/lib/research/editorial";
 import type { Project } from "@/lib/research/types";
-import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -86,6 +85,9 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
   const coverage = dossierCoverage(project);
   const stats = claimStats(project);
   const sectorColor = SECTOR_COLORS[project.sector];
+  const headline = project.editorial.headline;
+  const rawQuestion = headline && headline.includes(": ") ? headline.slice(headline.indexOf(": ") + 2) : null;
+  const question = rawQuestion ? rawQuestion.charAt(0).toUpperCase() + rawQuestion.slice(1) : null;
 
   return (
     <article className="space-y-6">
@@ -101,54 +103,61 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
         <span className="text-fg-2">{project.name}</span>
       </nav>
 
-      {/* Header: report cover */}
-      <header className="relative overflow-hidden rounded-2xl border border-line bg-surface">
-        <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${project.accent}, ${sectorColor})` }} aria-hidden />
-        <ProjectArtwork accent={project.accent} />
-        <div className="relative p-5 md:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:gap-5">
-              <TokenLogo src={project.logo} name={project.name} size={64} className="ring-1 ring-line-strong" />
-              <div className="min-w-0">
-                <div className="mb-1 text-[11.5px] font-semibold uppercase tracking-[0.16em]" style={{ color: sectorColor }}>
-                  Research dossier
-                </div>
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h1 className="serif-display text-[44px] leading-none text-fg md:text-[54px]">{project.name}</h1>
-                  <span className="num text-lg text-muted">{project.ticker}</span>
-                </div>
-                <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-fg-2">{project.oneLiner}</p>
-                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] text-muted">
-                  <SectorBadge sector={project.sector} href={`/explore?sector=${project.sector}`} size="md" />
-                  <span>{project.chains.map((c) => CHAINS[c].label).join(", ")}</span>
-                  <span className="hidden text-line-strong sm:inline" aria-hidden>|</span>
-                  <span>{MATURITY[project.maturity]}</span>
-                  <span className="hidden text-line-strong sm:inline" aria-hidden>|</span>
-                  <span>Since {project.launched.slice(0, 4)}</span>
-                  <RiskPill level={project.riskLevel} />
-                  <CoveragePill level={coverage.level} />
-                </div>
+      {/* Masthead */}
+      <header>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-3">
+              <TokenLogo src={project.logo} name={project.name} size={40} />
+              <div className="flex flex-wrap items-center gap-x-2 text-[11.5px] font-medium uppercase tracking-[0.14em]">
+                <span className="text-accent">Research dossier</span>
+                <span className="text-line-strong" aria-hidden>
+                  /
+                </span>
+                <Link href={`/explore?sector=${project.sector}`} className="inline-flex items-center gap-1.5 text-fg-2 hover:text-fg">
+                  <span className="size-1.5 rounded-full" style={{ backgroundColor: sectorColor }} aria-hidden />
+                  {sector.label}
+                </Link>
               </div>
             </div>
-            <div className="flex shrink-0 flex-wrap gap-2">
-              <WatchlistButton slug={project.slug} name={project.name} variant="button" />
-              <ButtonLink href={`/compare?p=${[project.slug, ...d.competitors.columns.filter((c) => c.slug && c.slug !== project.slug).map((c) => c.slug)].slice(0, 4).join(",")}`} variant="secondary">
-                <Scale className="size-4" aria-hidden /> Compare
-              </ButtonLink>
-              <ButtonLink href={`/copilot?mode=analyze&project=${project.slug}`} variant="secondary">
-                <MessagesSquare className="size-4" aria-hidden /> Ask the Copilot
-              </ButtonLink>
+            <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h1 className="serif-display text-[46px] leading-none text-fg md:text-[56px]">{project.name}</h1>
+              <span className="num text-lg text-muted">{project.ticker}</span>
             </div>
+            {question ? <p className="serif-display mt-3 max-w-3xl text-[24px] leading-snug text-fg-2 md:text-[28px]">{question}</p> : null}
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">{project.oneLiner}</p>
           </div>
-          <div className="mt-6 flex flex-col gap-4 border-t border-line pt-4 text-[13px] lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap gap-x-5 gap-y-2">
-              <ExtLink href={project.links.website} icon={Globe} label="Website" />
-              {project.links.whitepaper ? <ExtLink href={project.links.whitepaper} icon={FileText} label="Whitepaper" /> : null}
-              {project.links.docs ? <ExtLink href={project.links.docs} icon={BookOpen} label="Documentation" /> : null}
-              {project.links.github ? <ExtLink href={project.links.github} icon={CodeXml} label="GitHub" /> : null}
-              {project.links.explorer ? <ExtLink href={project.links.explorer} icon={SearchCode} label="Explorer" /> : null}
-            </div>
-            <Byline project={project} stats={stats} />
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <WatchlistButton slug={project.slug} name={project.name} variant="button" />
+            <ButtonLink href={`/compare?p=${[project.slug, ...d.competitors.columns.filter((c) => c.slug && c.slug !== project.slug).map((c) => c.slug)].slice(0, 4).join(",")}`} variant="secondary">
+              <Scale className="size-4" aria-hidden /> Compare
+            </ButtonLink>
+            <ButtonLink href={`/copilot?mode=analyze&project=${project.slug}`} variant="secondary">
+              <MessagesSquare className="size-4" aria-hidden /> Ask the Copilot
+            </ButtonLink>
+          </div>
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] text-muted">
+          <span>{project.chains.map((c) => CHAINS[c].label).join(", ")}</span>
+          <span className="text-line-strong" aria-hidden>
+            ·
+          </span>
+          <span>{MATURITY[project.maturity]}</span>
+          <span className="text-line-strong" aria-hidden>
+            ·
+          </span>
+          <span>Since {project.launched.slice(0, 4)}</span>
+          <RiskPill level={project.riskLevel} />
+          <CoveragePill level={coverage.level} />
+        </div>
+        <div className="mt-4 flex flex-col gap-2.5 border-t border-line pt-4 text-[13px]">
+          <Byline project={project} stats={stats} />
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <ExtLink href={project.links.website} icon={Globe} label="Website" />
+            {project.links.whitepaper ? <ExtLink href={project.links.whitepaper} icon={FileText} label="Whitepaper" /> : null}
+            {project.links.docs ? <ExtLink href={project.links.docs} icon={BookOpen} label="Docs" /> : null}
+            {project.links.github ? <ExtLink href={project.links.github} icon={CodeXml} label="GitHub" /> : null}
+            {project.links.explorer ? <ExtLink href={project.links.explorer} icon={SearchCode} label="Explorer" /> : null}
           </div>
         </div>
       </header>
@@ -157,11 +166,9 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
         <KeyMetrics project={project} />
       </Suspense>
 
-      <Card className="p-5">
-        <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-lg" />}>
-          <ProjectChart project={project} />
-        </Suspense>
-      </Card>
+      <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-lg" />}>
+        <ProjectChart project={project} />
+      </Suspense>
 
       <div className="grid grid-cols-1 gap-10 pt-4 xl:grid-cols-[190px_minmax(0,1fr)] xl:gap-14">
         <aside>
@@ -290,6 +297,8 @@ function Byline({ project, stats }: { project: Project; stats: ReturnType<typeof
   const draft = project.editorial.status === "draft";
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-muted">
+      <span className="text-fg-2">{project.editorial.author}</span>
+      <span>{readingMinutes(project)} min read</span>
       <span className={draft ? "text-warning" : "text-positive"} title={draft ? "Prepared from public documentation; pending editorial review." : undefined}>
         {draft ? "Draft" : "Reviewed"} v{project.editorial.version}
       </span>
@@ -330,16 +339,5 @@ function ExtLink({ href, icon: Icon, label }: { href: string; icon: React.Compon
     <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-muted transition-colors hover:text-fg">
       <Icon className="size-3.5" aria-hidden /> {label} <ExternalLink className="size-3 opacity-60" aria-hidden />
     </a>
-  );
-}
-
-/** Discreet line artwork tinted with the project's accent colour. */
-function ProjectArtwork({ accent }: { accent: string }) {
-  return (
-    <svg aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-[260px] w-[520px] opacity-[0.22]" viewBox="0 0 520 260" fill="none">
-      {Array.from({ length: 14 }).map((_, i) => (
-        <path key={i} d={`M ${40 + i * 18} 260 C ${180 + i * 10} ${200 - i * 9}, ${300 + i * 6} ${120 - i * 6}, 520 ${30 + i * 8}`} stroke={accent} strokeWidth="1" opacity={1 - i * 0.055} />
-      ))}
-    </svg>
   );
 }
