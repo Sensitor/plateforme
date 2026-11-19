@@ -142,9 +142,9 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
     <div className="space-y-4">
       <CompareSelector selected={slugs} options={PROJECTS.map((p) => ({ slug: p.slug, name: p.name, ticker: p.ticker, logo: p.logo }))} />
       <DataNotice result={quotes} />
-      <div className="overflow-hidden rounded-xl border border-line bg-surface">
+      <div>
         <div className="relative overflow-x-auto">
-          <table className="w-full min-w-[760px] table-fixed text-[13px]">
+          <table className="w-full min-w-[760px] table-fixed border-b border-line text-[13px]">
             <colgroup>
               <col className="w-48" />
               {projects.map((p) => (
@@ -152,12 +152,12 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
               ))}
             </colgroup>
             <thead>
-              <tr className="border-b border-line">
-                <th scope="col" className="p-4 text-left text-[11px] font-medium uppercase tracking-wide text-subtle">
+              <tr className="border-y border-line">
+                <th scope="col" className="py-4 pr-4 text-left text-[10.5px] font-medium uppercase tracking-[0.1em] text-subtle">
                   Project
                 </th>
                 {projects.map((p) => (
-                  <th key={p.slug} scope="col" className="p-4 text-left">
+                  <th key={p.slug} scope="col" className="px-4 py-4 text-left">
                     <Link href={`/projects/${p.slug}`} className="flex items-center gap-2.5 hover:text-accent-strong">
                       <TokenLogo src={p.logo} name={p.name} size={30} />
                       <span>
@@ -171,14 +171,14 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
             </thead>
             {groups.map((g) => (
               <tbody key={g.title}>
-                <tr className="bg-bg-elevated">
-                  <th colSpan={projects.length + 1} scope="colgroup" className="px-4 py-2 text-left text-[11px] font-medium uppercase tracking-[0.12em] text-accent">
+                <tr className="border-b border-line">
+                  <th colSpan={projects.length + 1} scope="colgroup" className="pb-2 pt-7 text-left text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
                     {g.title}
                   </th>
                 </tr>
                 {g.rows.map((row) => (
-                  <tr key={row.label} className="border-b border-line/70 align-top">
-                    <th scope="row" className="px-4 py-3 text-left text-[12.5px] font-normal text-muted" title={row.hint}>
+                  <tr key={row.label} className="border-b border-line/60 align-top last:border-0">
+                    <th scope="row" className="py-3 pr-4 text-left text-[12.5px] font-normal text-muted" title={row.hint}>
                       {row.label}
                       {row.hint ? <span className="ml-1 text-subtle">ⓘ</span> : null}
                     </th>
