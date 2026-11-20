@@ -1,18 +1,23 @@
 import type { Metadata } from "next";
 import { ComingSoon } from "@/components/coming-soon";
+import { getT } from "@/i18n/server";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = { title: "Community" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("community", "/community");
+}
 
-export default function CommunityPage() {
+export default async function CommunityPage() {
+  const t = (await getT()).soon.community;
   return (
     <ComingSoon
-      eyebrow="Understand"
-      title="Community"
-      phase="Phase 4"
-      description="A research-first community: discussions organised by project and sector, focused on quality analysis."
-      planned={["Discussions by project and by sector", "Sharing analyses and comments", "Collective research sessions", "Educational live sessions and Q&A", "Founder Research publications"]}
-      principles={["Quality over volume: moderated, research-oriented discussions.", "No paid promotion or undisclosed sponsorship.", "No buy/sell calls."]}
-      availableNow={[{ label: "Research library", href: "/research" }]}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      phase={t.phase}
+      description={t.description}
+      planned={t.planned}
+      principles={t.principles}
+      availableNow={[{ label: t.links.research, href: "/research" }]}
     />
   );
 }

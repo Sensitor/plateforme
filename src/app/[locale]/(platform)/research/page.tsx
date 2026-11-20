@@ -13,18 +13,19 @@ import { Stat, StatStrip } from "@/components/ui/stat-strip";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { CoveragePill, ScorePill } from "@/components/research/pills";
 import { SectionHeader } from "@/components/overview/section-header";
+import { getLocale } from "@/i18n/server";
+import { getDictionary } from "@/i18n/dictionaries";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = { title: "Research", description: "Sensitor research library: project dossiers, methodology and editorial formats." };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("research", "/research");
+}
 
-const FORMATS = [
-  { title: "Weekly Market Intelligence", text: "A weekly read of market structure, flows and sentiment.", phase: "Research Club, Phase 4" },
-  { title: "Project Deep Dives", text: "Long-form dossiers extending the project pages with original analysis.", phase: "Research Club, Phase 4" },
-  { title: "Sector Intelligence", text: "Sector-level reports comparing business models and leaders.", phase: "Phase 2" },
-  { title: "Founder Notes", text: "Publications and frameworks from the founder.", phase: "Research Club, Phase 4" },
-  { title: "Investment Frameworks", text: "Reusable methods for analysis and risk management.", phase: "Phase 4" },
-];
-
-export default function ResearchPage() {
+export default async function ResearchPage() {
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const t = dict.research;
+  const FORMATS = t.formats.map(([title, text, phase]) => ({ title, text, phase }));
   const totals = PROJECTS.reduce(
     (acc, p) => {
       const s = claimStats(p);
@@ -42,47 +43,46 @@ export default function ResearchPage() {
     <div className="space-y-12">
       <div className="space-y-6">
         <PageHeader
-          title="Research library"
-          description="Every dossier separates verified facts, analyst interpretations and hypotheses, and links each fact to its sources."
+          title={t.title}
+          description={t.description}
           actions={
             <ButtonLink href="/research/methodology" variant="secondary" size="sm">
-              <BookOpenCheck className="size-4" aria-hidden /> Methodology
+              <BookOpenCheck className="size-4" aria-hidden /> {t.methodology}
             </ButtonLink>
           }
         />
         <StatStrip>
-          <Stat label="Dossiers" value={PROJECTS.length}>
-            Across {bySector.length} sectors
+          <Stat label={t.stats.dossiers} value={PROJECTS.length}>
+            {t.stats.across(bySector.length)}
           </Stat>
-          <Stat label="Typed claims" value={totals.claims}>
-            Facts, analysis and hypotheses
+          <Stat label={t.stats.claims} value={totals.claims}>
+            {t.stats.claimsNote}
           </Stat>
-          <Stat label="Facts with a source" value={`${totals.sourced} / ${totals.facts}`}>
-            Unsourced facts are flagged
+          <Stat label={t.stats.sourced} value={`${totals.sourced} / ${totals.facts}`}>
+            {t.stats.sourcedNote}
           </Stat>
-          <Stat label="Sources cited" value={totals.sources}>
-            Links checked automatically
+          <Stat label={t.stats.sources} value={totals.sources}>
+            {t.stats.sourcesNote}
           </Stat>
         </StatStrip>
         <p className="flex items-start gap-2.5 text-[13px] leading-relaxed text-fg-2">
           <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-warning" aria-hidden />
           <span>
-            <span className="font-medium text-warning">All dossiers in this release are drafts:</span> prepared from public documentation and data, with every source link
-            checked, but not yet peer-reviewed by the Sensitor editorial team.
+            <span className="font-medium text-warning">{t.draftsLead}</span> {t.draftsText}
           </span>
         </p>
       </div>
 
-      <section aria-label="Dossiers by sector" className="divide-y divide-line border-y border-line">
+      <section aria-label={t.bySector} className="divide-y divide-line border-y border-line">
         {bySector.map(({ sector, projects }) => (
           <div key={sector.id} id={`sec-${sector.id}`} className="grid scroll-mt-24 grid-cols-1 gap-4 py-6 lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-10">
             <div>
               <h2 className="flex items-center gap-2 text-[15px] font-semibold text-fg">
                 <span className="size-2 rounded-full" style={{ backgroundColor: SECTOR_COLORS[sector.id] }} aria-hidden />
-                {sector.label}
+                {dict.labels.sectors[sector.id].label}
                 <span className="num text-[12px] font-normal text-subtle">{projects.length}</span>
               </h2>
-              <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{sector.description}</p>
+              <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{dict.labels.sectors[sector.id].description}</p>
             </div>
             <ul className="divide-y divide-line/60">
               {projects.map((p) => {
@@ -99,16 +99,14 @@ export default function ResearchPage() {
                         </span>
                         <span className="mt-0.5 block text-[15.5px] font-medium leading-snug text-fg group-hover:text-accent-strong">{dossierTitle(p)}</span>
                         <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted">
-                          <time dateTime={p.editorial.lastUpdated}>{formatDate(p.editorial.lastUpdated)}</time>
+                          <time dateTime={p.editorial.lastUpdated}>{formatDate(p.editorial.lastUpdated, locale)}</time>
                           <span aria-hidden>·</span>
-                          <span>{readingMinutes(p)} min read</span>
+                          <span>{dict.overview.dossierMeta.minRead(readingMinutes(p))}</span>
                           <span aria-hidden>·</span>
-                          <span>{p.dossier.sources.length} sources</span>
+                          <span>{dict.overview.dossierMeta.sources(p.dossier.sources.length)}</span>
                           <span aria-hidden>·</span>
-                          <span>
-                            {stats.sourcedFacts}/{stats.facts} facts sourced
-                          </span>
-                          <span className="text-warning">Draft v{p.editorial.version}</span>
+                          <span>{dict.dossier.byline.sourced(stats.sourcedFacts, stats.facts)}</span>
+                          <span className="text-warning">{t.draft(p.editorial.version)}</span>
                           <CoveragePill level={dossierCoverage(p).level} />
                         </span>
                       </span>
@@ -123,7 +121,7 @@ export default function ResearchPage() {
       </section>
 
       <section>
-        <SectionHeader title="Coming formats" />
+        <SectionHeader title={t.formatsTitle} />
         <dl className="grid grid-cols-1 gap-x-8 sm:grid-cols-2 xl:grid-cols-5">
           {FORMATS.map((f) => (
             <div key={f.title} className="border-t border-line py-4">

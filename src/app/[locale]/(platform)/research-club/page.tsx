@@ -1,18 +1,23 @@
 import type { Metadata } from "next";
 import { ComingSoon } from "@/components/coming-soon";
+import { getT } from "@/i18n/server";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = { title: "Research Club" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("researchClub", "/research-club");
+}
 
-export default function ResearchClubPage() {
+export default async function ResearchClubPage() {
+  const t = (await getT()).soon.club;
   return (
     <ComingSoon
-      eyebrow="Research Club"
-      title="Sensitor Research Club"
-      phase="Phase 4"
-      description="The premium tier for investors who want to go deeper: founder research, deep dives and collective sessions."
-      planned={["Founder Research and Founder Notes", "Weekly Market Intelligence", "Project Deep Dives and Sector Intelligence", "Collective research sessions and educational lives", "Premium community", "Exclusive content"]}
-      principles={["Education and methodology, not signals.", "No performance promises.", "Transparent sources and conflicts of interest."]}
-      availableNow={[{ label: "See plans", href: "/pricing" }, { label: "Research library", href: "/research" }]}
+      eyebrow={t.eyebrow}
+      title={t.title}
+      phase={t.phase}
+      description={t.description}
+      planned={t.planned}
+      principles={t.principles}
+      availableNow={[{ label: t.links.plans, href: "/pricing" }, { label: t.links.research, href: "/research" }]}
     />
   );
 }

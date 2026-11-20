@@ -3,12 +3,13 @@ import { CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { getT } from "@/i18n/server";
 
 /**
  * Roadmap page for features that are not available yet. Explicitly labelled
  * so no interactive element pretends to work.
  */
-export function ComingSoon({
+export async function ComingSoon({
   eyebrow,
   title,
   phase,
@@ -25,15 +26,17 @@ export function ComingSoon({
   principles?: string[];
   availableNow?: { label: string; href: string }[];
 }) {
+  const t = (await getT()).soon;
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <PageHeader eyebrow={eyebrow} title={title} description={description} actions={<Badge tone="outline" className="text-[12px]"><Clock className="size-3" aria-hidden /> {phase}</Badge>} />
       <div className="rounded-xl border border-dashed border-line-strong bg-bg-elevated px-5 py-4 text-[13.5px] leading-relaxed text-muted">
-        This section is <strong className="text-fg-2">not available yet</strong>. Nothing on this page collects data or simulates the feature; it describes what is planned.
+        {t.notice[0]} <strong className="text-fg-2">{t.notice[1]}</strong>
+        {t.notice[2]}
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card className="p-5">
-          <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-muted">Planned features</h2>
+          <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-muted">{t.planned}</h2>
           <ul className="mt-3 space-y-2.5 text-[13.5px] text-fg-2">
             {planned.map((p) => (
               <li key={p} className="flex gap-2.5">
@@ -44,7 +47,7 @@ export function ComingSoon({
         </Card>
         {principles?.length ? (
           <Card className="p-5">
-            <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-muted">Principles</h2>
+            <h2 className="text-[12px] font-medium uppercase tracking-[0.1em] text-muted">{t.principles}</h2>
             <ul className="mt-3 space-y-2.5 text-[13.5px] text-fg-2">
               {principles.map((p) => (
                 <li key={p} className="flex gap-2.5">
@@ -57,7 +60,7 @@ export function ComingSoon({
       </div>
       {availableNow?.length ? (
         <div>
-          <h2 className="mb-3 text-[12px] font-medium uppercase tracking-[0.1em] text-muted">Available today</h2>
+          <h2 className="mb-3 text-[12px] font-medium uppercase tracking-[0.1em] text-muted">{t.availableNow}</h2>
           <div className="flex flex-wrap gap-2">
             {availableNow.map((a) => (
               <Link key={a.href} href={a.href} className="rounded-lg border border-line bg-surface px-3 py-2 text-[13px] text-fg hover:border-line-strong">

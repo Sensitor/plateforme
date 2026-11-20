@@ -1,0 +1,98 @@
+export const soon = {
+  notice: ["This section is", "not available yet", ". Nothing on this page collects data or simulates the feature; it describes what is planned."] as [string, string, string],
+  planned: "Planned features",
+  principles: "Principles",
+  availableNow: "Available today",
+  community: {
+    eyebrow: "Understand",
+    title: "Community",
+    phase: "Phase 4",
+    description: "A research-first community: discussions organised by project and sector, focused on quality analysis.",
+    planned: ["Discussions by project and by sector", "Sharing analyses and comments", "Collective research sessions", "Educational live sessions and Q&A", "Founder Research publications"],
+    principles: ["Quality over volume: moderated, research-oriented discussions.", "No paid promotion or undisclosed sponsorship.", "No buy/sell calls."],
+    links: { research: "Research library" },
+  },
+  club: {
+    eyebrow: "Research Club",
+    title: "Sensitor Research Club",
+    phase: "Phase 4",
+    description: "The premium tier for investors who want to go deeper: founder research, deep dives and collective sessions.",
+    planned: ["Founder Research and Founder Notes", "Weekly Market Intelligence", "Project Deep Dives and Sector Intelligence", "Collective research sessions and educational lives", "Premium community", "Exclusive content"],
+    principles: ["Education and methodology, not signals.", "No performance promises.", "Transparent sources and conflicts of interest."],
+    links: { plans: "See plans", research: "Research library" },
+  },
+  private: {
+    eyebrow: "Accompaniment",
+    title: "Private Program",
+    phase: "Later, by application",
+    description: "A future educational accompaniment programme, on application, with a clearly defined pedagogical and regulatory scope.",
+    planned: ["Research methodology coaching", "Understanding fundamentals", "Risk management", "Building a personal analysis method", "Educational sessions and case studies"],
+    principles: ["No personalised buy/sell recommendations without prior regulatory validation.", "No return promises.", "Scope defined with legal counsel before launch."],
+    links: { academy: "Academy", methodology: "Methodology" },
+  },
+};
+
+export const settings = {
+  eyebrow: "Settings",
+  title: "Settings",
+  description: "Preferences, your data and the status of our data providers.",
+  display: { title: "Display", subtitle: "Interface preferences", theme: "Theme", dark: "Dark (native)", currency: "Reference currency", language: "Language" },
+  data: { title: "Your data" },
+  providers: {
+    title: "Data providers",
+    subtitle: "Live status of the sources powering Sensitor",
+    rows: { quotes: "Project prices", global: "Global market", sentiment: "Sentiment", defi: "DeFi & stablecoins" },
+    status: { ok: "ok", partial: "partial", unavailable: "unavailable" } as Record<string, string>,
+    history: "Total market cap history",
+    enabled: "enabled",
+    requiresPro: "requires CoinGecko Pro",
+  },
+  local: {
+    watchlist: (n: number) => `project${n === 1 ? "" : "s"}`,
+    watchlistLabel: "Watchlist:",
+    confirm: "Remove all?",
+    cancel: "Cancel",
+    clear: "Clear watchlist",
+  },
+};
+
+export const watchlistPage = {
+  eyebrow: "Manage",
+  title: "Watchlist",
+  description: "Projects you follow, with live prices and the latest from their dossiers. Signed in, your watchlist syncs across your devices.",
+  empty: "Your watchlist is empty",
+  emptyText: "Follow projects from Explore or from any research dossier using the bookmark icon.",
+  explore: "Explore projects",
+  count: (limit: number) => `/ ${limit} projects`,
+  compare: (n: number) => `Compare ${n} →`,
+  columns: { project: "Project", price: "Price", marketCap: "Market cap", trend: "7d trend", remove: "Remove" },
+  remove: (name: string) => `Remove ${name}`,
+};
+
+export const research = {
+  title: "Research library",
+  description: "Every dossier separates verified facts, analyst interpretations and hypotheses, and links each fact to its sources.",
+  methodology: "Methodology",
+  stats: {
+    dossiers: "Dossiers",
+    across: (n: number) => `Across ${n} sectors`,
+    claims: "Typed claims",
+    claimsNote: "Facts, analysis and hypotheses",
+    sourced: "Facts with a source",
+    sourcedNote: "Unsourced facts are flagged",
+    sources: "Sources cited",
+    sourcesNote: "Links checked automatically",
+  },
+  draftsLead: "All dossiers in this release are drafts:",
+  draftsText: "prepared from public documentation and data, with every source link checked, but not yet peer-reviewed by the Sensitor editorial team.",
+  bySector: "Dossiers by sector",
+  draft: (v: string) => `Draft v${v}`,
+  formatsTitle: "Coming formats",
+  formats: [
+    ["Weekly Market Intelligence", "A weekly read of market structure, flows and sentiment.", "Research Club, Phase 4"],
+    ["Project Deep Dives", "Long-form dossiers extending the project pages with original analysis.", "Research Club, Phase 4"],
+    ["Sector Intelligence", "Sector-level reports comparing business models and leaders.", "Phase 2"],
+    ["Founder Notes", "Publications and frameworks from the founder.", "Research Club, Phase 4"],
+    ["Investment Frameworks", "Reusable methods for analysis and risk management.", "Phase 4"],
+  ] as [string, string, string][],
+};
