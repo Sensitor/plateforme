@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatDateTime, formatRelative } from "@/lib/format";
+import { useLocale } from "@/i18n/client";
 
 /**
  * Renders an absolute UTC timestamp on the server, then a relative time after
@@ -9,6 +10,7 @@ import { formatDateTime, formatRelative } from "@/lib/format";
  */
 export function TimeAgo({ iso, className }: { iso: string; className?: string }) {
   const [now, setNow] = useState<number | null>(null);
+  const locale = useLocale();
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading the clock must happen after hydration
     setNow(Date.now());
@@ -16,8 +18,8 @@ export function TimeAgo({ iso, className }: { iso: string; className?: string })
     return () => clearInterval(id);
   }, []);
   return (
-    <time dateTime={iso} title={formatDateTime(iso)} className={className}>
-      {now == null ? formatDateTime(iso) : formatRelative(iso, now)}
+    <time dateTime={iso} title={formatDateTime(iso, locale)} className={className}>
+      {now == null ? formatDateTime(iso, locale) : formatRelative(iso, now, locale)}
     </time>
   );
 }

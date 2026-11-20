@@ -1,7 +1,9 @@
 /**
  * Number and date formatting helpers. All financial figures are rendered in
- * USD with en-US conventions so the data reads the same for every viewer.
+ * USD with en-US conventions so the data reads the same for every viewer, in
+ * both interface languages. Dates and relative times follow the language.
  */
+import { INTL_LOCALE, type Locale } from "@/i18n/config";
 
 /**
  * Deterministic compact notation (identical on server and client, Intl's
@@ -70,19 +72,19 @@ export function formatNumber(value: number | null | undefined, digits = 0): stri
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: digits }).format(value);
 }
 
-/** "12 Jan 2026", unambiguous across locales. */
-export function formatDate(iso: string | number | null | undefined): string {
+/** "12 Jan 2026" / "12 janv. 2026", unambiguous across locales. */
+export function formatDate(iso: string | number | null | undefined, locale: Locale = "en"): string {
   if (iso == null) return "n/a";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
-  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(d);
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(d);
 }
 
-export function formatDateTime(iso: string | number | null | undefined): string {
+export function formatDateTime(iso: string | number | null | undefined, locale: Locale = "en"): string {
   if (iso == null) return "n/a";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -93,18 +95,19 @@ export function formatDateTime(iso: string | number | null | undefined): string 
 }
 
 /** Relative time against a reference instant (pass `now` explicitly for determinism). */
-export function formatRelative(iso: string | number, now: number): string {
+export function formatRelative(iso: string | number, now: number, locale: Locale = "en"): string {
   const t = new Date(iso).getTime();
   if (Number.isNaN(t)) return "n/a";
   const diff = Math.max(0, now - t);
   const s = Math.round(diff / 1000);
-  if (s < 60) return "just now";
+  const fr = locale === "fr";
+  if (s < 60) return fr ? "à l'instant" : "just now";
   const m = Math.round(s / 60);
-  if (m < 60) return `${m} min ago`;
+  if (m < 60) return fr ? `il y a ${m} min` : `${m} min ago`;
   const h = Math.round(m / 60);
-  if (h < 48) return `${h} h ago`;
+  if (h < 48) return fr ? `il y a ${h} h` : `${h} h ago`;
   const d = Math.round(h / 24);
-  return `${d} days ago`;
+  return fr ? `il y a ${d} jours` : `${d} days ago`;
 }
 
 export function deltaTone(value: number | null | undefined, digits = 2): "positive" | "negative" | "neutral" {

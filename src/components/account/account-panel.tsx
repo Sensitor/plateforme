@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useT } from "@/i18n/client";
 import { BellRing, CircleUser, DatabaseZap, GraduationCap, KeyRound, Loader2, Lock, LogOut, Settings2 } from "lucide-react";
 import Link from "@/i18n/link";
 import { cn } from "@/lib/utils";
@@ -16,24 +18,20 @@ import type { AcademyCatalog } from "@/lib/academy/catalog";
 import { BadgeMedal } from "@/components/academy/badge-medal";
 import { SyncLine } from "@/components/academy/progress-panel";
 
-export const TIER_LABEL: Record<Profile["tier"], { label: string; tone: BadgeTone }> = {
-  free: { label: "Free", tone: "neutral" },
-  pro: { label: "Pro", tone: "accent" },
-  research_club: { label: "Research Club", tone: "violet" },
-};
+const TIER_TONE: Record<Profile["tier"], BadgeTone> = { free: "neutral", pro: "accent", research_club: "violet" };
 
 const field = "h-10 w-full rounded-lg border border-line bg-bg-elevated px-3 text-sm text-fg placeholder:text-subtle focus:border-accent/60 focus:outline-none";
 
 function Commitments() {
+  const t = useT().account.commitments;
   return (
     <Card>
-      <CardHeader title="Privacy and security commitments" icon={<Lock className="size-4" />} />
+      <CardHeader title={t.title} icon={<Lock className="size-4" />} />
       <CardBody>
         <ul className="space-y-2 text-[13.5px] text-fg-2">
-          <li>• Sensitor will never ask for your seed phrase or private keys.</li>
-          <li>• Sensitor will never execute transactions on your behalf.</li>
-          <li>• Your watchlist, portfolio, alerts and Academy progress are isolated per user with row level security.</li>
-          <li>• Exchange connections, when offered, will be read only.</li>
+          {t.items.map((item) => (
+            <li key={item}>• {item}</li>
+          ))}
         </ul>
       </CardBody>
     </Card>
@@ -41,27 +39,26 @@ function Commitments() {
 }
 
 function Learning({ catalog }: { catalog: AcademyCatalog }) {
+  const dict = useT();
+  const t = dict.account.learning;
   const { progress, ready } = useAcademyProgress();
   const p = ready ? progress : {};
   const completed = catalog.lessons.filter((l) => isCompleted(p[l.slug])).length;
-  const badges = computeBadges(p, catalog);
+  const badges = computeBadges(p, catalog, dict);
   const earned = badges.filter((b) => b.earned);
   return (
     <Card>
       <CardHeader
-        title="Academy"
+        title={t.title}
         icon={<GraduationCap className="size-4" />}
         action={
           <Link href="/academy#progress" className="text-[12.5px] text-accent hover:text-accent-strong">
-            Open the Academy
+            {t.open}
           </Link>
         }
       />
       <CardBody className="space-y-4">
-        <p className="text-[13.5px] text-fg-2">
-          <span className="num text-fg">{completed}</span> of <span className="num">{catalog.lessons.length}</span> lessons completed,{" "}
-          <span className="num text-fg">{earned.length}</span> of <span className="num">{badges.length}</span> badges earned.
-        </p>
+        <p className="text-[13.5px] text-fg-2">{t.summary(completed, catalog.lessons.length, earned.length, badges.length)}</p>
         {earned.length ? (
           <ul className="flex flex-wrap gap-x-5 gap-y-3">
             {earned.map((b) => (
@@ -72,7 +69,7 @@ function Learning({ catalog }: { catalog: AcademyCatalog }) {
             ))}
           </ul>
         ) : (
-          <p className="text-[12.5px] text-muted">Pass a lesson&apos;s quiz to earn your first badge.</p>
+          <p className="text-[12.5px] text-muted">{t.empty}</p>
         )}
         <SyncLine />
       </CardBody>
@@ -85,15 +82,15 @@ export function AccountPanel({ catalog }: { catalog: AcademyCatalog }) {
   const router = useRouter();
   const params = useSearchParams();
   const recovery = params.get("recovery") === "1";
+  const dict = useT();
+  const t = dict.account;
 
   if (!configured) {
     return (
       <>
         <Card>
-          <CardHeader title="Sign-in" icon={<KeyRound className="size-4" />} action={<Badge tone="outline">Not enabled in this deployment</Badge>} />
-          <CardBody className="text-[13.5px] leading-relaxed text-fg-2">
-            Accounts are not configured on this deployment. Your watchlist and portfolio are stored in this browser only.
-          </CardBody>
+          <CardHeader title={t.unconfigured.title} icon={<KeyRound className="size-4" />} action={<Badge tone="outline">{t.unconfigured.badge}</Badge>} />
+          <CardBody className="text-[13.5px] leading-relaxed text-fg-2">{t.unconfigured.text}</CardBody>
         </Card>
         <Commitments />
       </>
@@ -124,16 +121,16 @@ export function AccountPanel({ catalog }: { catalog: AcademyCatalog }) {
                 <CircleUser className="size-6" aria-hidden />
               </span>
               <div>
-                <div className="font-medium text-fg">Guest</div>
-                <div className="text-[13px] text-muted">Your watchlist and portfolio live in this browser until you sign in.</div>
+                <div className="font-medium text-fg">{t.guest.title}</div>
+                <div className="text-[13px] text-muted">{t.guest.text}</div>
               </div>
             </div>
             <div className="flex gap-2">
               <ButtonLink href="/login?next=/account" variant="primary">
-                Sign in
+                {t.guest.signIn}
               </ButtonLink>
               <ButtonLink href="/login?mode=signup&next=/account" variant="secondary">
-                Create account
+                {t.guest.signUp}
               </ButtonLink>
             </div>
           </CardBody>
@@ -143,8 +140,9 @@ export function AccountPanel({ catalog }: { catalog: AcademyCatalog }) {
     );
   }
 
-  const tier = TIER_LABEL[profile?.tier ?? "free"];
-  const name = profile?.display_name || user.email?.split("@")[0] || "Member";
+  const tierId = profile?.tier ?? "free";
+  const tier = { label: dict.shell.tiers[tierId], tone: TIER_TONE[tierId] };
+  const name = profile?.display_name || user.email?.split("@")[0] || t.member;
 
   return (
     <>
@@ -158,13 +156,13 @@ export function AccountPanel({ catalog }: { catalog: AcademyCatalog }) {
               <div className="truncate font-medium text-fg">{name}</div>
               <div className="truncate text-[13px] text-muted">{user.email}</div>
               <div className="mt-1 text-[12.5px] text-muted">
-                Plan <Badge tone={tier.tone}>{tier.label}</Badge>
+                {t.plan} <Badge tone={tier.tone}>{tier.label}</Badge>
               </div>
             </div>
           </div>
           <div className="flex gap-2">
             <ButtonLink href="/pricing" variant="secondary" size="sm">
-              View plans
+              {t.viewPlans}
             </ButtonLink>
             <button
               onClick={async () => {
@@ -173,7 +171,7 @@ export function AccountPanel({ catalog }: { catalog: AcademyCatalog }) {
               }}
               className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] text-fg-2 hover:bg-surface-2 hover:text-fg"
             >
-              <LogOut className="size-3.5" aria-hidden /> Sign out
+              <LogOut className="size-3.5" aria-hidden /> {t.signOut}
             </button>
           </div>
         </CardBody>
@@ -181,11 +179,12 @@ export function AccountPanel({ catalog }: { catalog: AcademyCatalog }) {
 
       {profileError ? (
         <Card className="border-warning/30">
-          <CardHeader title="Database not initialised" icon={<DatabaseZap className="size-4 text-warning" />} />
+          <CardHeader title={t.dbError.title} icon={<DatabaseZap className="size-4 text-warning" />} />
           <CardBody className="text-[13.5px] leading-relaxed text-fg-2">
-            You are signed in, but your profile could not be read. The Sensitor schema is probably not installed yet: run{" "}
-            <code className="num rounded bg-surface-2 px-1 text-[12px]">supabase/migrations/0001_app.sql</code> in the Supabase SQL editor, then reload this page.
-            <span className="mt-2 block text-[12px] text-muted">Details: {profileError}</span>
+            {t.dbError.before} <code className="num rounded bg-surface-2 px-1 text-[12px]">supabase/migrations/0001_app.sql</code> {t.dbError.after}
+            <span className="mt-2 block text-[12px] text-muted">
+              {t.dbError.details}: {profileError}
+            </span>
           </CardBody>
         </Card>
       ) : null}
@@ -200,6 +199,7 @@ export function AccountPanel({ catalog }: { catalog: AcademyCatalog }) {
 
 function Preferences({ profile, onSaved }: { profile: Profile; onSaved: () => Promise<void> }) {
   const { supabase } = useAuth();
+  const t = useT().account.preferences;
   const [name, setName] = useState(profile.display_name ?? "");
   const [locale, setLocale] = useState(profile.locale);
   const [emailAlerts, setEmailAlerts] = useState(profile.email_alerts);
@@ -221,19 +221,19 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: () => Pr
 
   return (
     <Card>
-      <CardHeader title="Preferences" icon={<Settings2 className="size-4" />} />
+      <CardHeader title={t.title} icon={<Settings2 className="size-4" />} />
       <CardBody>
         <form onSubmit={save} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="display-name" className="mb-1.5 block text-[12px] font-medium text-muted">
-                Display name
+                {t.displayName}
               </label>
-              <input id="display-name" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder="How we greet you" className={field} />
+              <input id="display-name" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder={t.displayNamePlaceholder} className={field} />
             </div>
             <div>
               <label htmlFor="locale" className="mb-1.5 block text-[12px] font-medium text-muted">
-                Email language
+                {t.emailLanguage}
               </label>
               <select id="locale" value={locale} onChange={(e) => setLocale(e.target.value as Profile["locale"])} className={field}>
                 <option value="en">English</option>
@@ -245,20 +245,20 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: () => Pr
             <input type="checkbox" checked={emailAlerts} onChange={(e) => setEmailAlerts(e.target.checked)} className="mt-0.5 size-4 accent-[#7896FF]" />
             <span>
               <span className="flex items-center gap-2 text-[13.5px] font-medium text-fg">
-                <BellRing className="size-3.5 text-accent" aria-hidden /> Email me when an alert triggers
+                <BellRing className="size-3.5 text-accent" aria-hidden /> {t.emailAlerts}
               </span>
-              <span className="mt-0.5 block text-[12.5px] text-muted">In-app notifications are always on. Turn this off to stop alert emails.</span>
+              <span className="mt-0.5 block text-[12.5px] text-muted">{t.emailAlertsHint}</span>
             </span>
           </label>
           <div className="flex items-center justify-end gap-3">
-            {state === "saved" && !dirty ? <span className="text-[12.5px] text-positive">Saved</span> : null}
-            {state === "error" ? <span className="text-[12.5px] text-negative">Could not save, try again.</span> : null}
+            {state === "saved" && !dirty ? <span className="text-[12.5px] text-positive">{t.saved}</span> : null}
+            {state === "error" ? <span className="text-[12.5px] text-negative">{t.error}</span> : null}
             <button
               type="submit"
               disabled={!dirty || state === "saving"}
               className="inline-flex h-9 items-center gap-2 rounded-lg bg-accent px-4 text-[13px] font-semibold text-[#0d1020] hover:bg-accent-strong disabled:opacity-40"
             >
-              {state === "saving" ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : null} Save
+              {state === "saving" ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : null} {t.save}
             </button>
           </div>
         </form>
@@ -269,6 +269,7 @@ function Preferences({ profile, onSaved }: { profile: Profile; onSaved: () => Pr
 
 function PasswordCard({ highlight, supabase }: { highlight: boolean; supabase: ReturnType<typeof useAuth>["supabase"] }) {
   const ref = useRef<HTMLDivElement>(null);
+  const t = useT().account.password;
   const [password, setPassword] = useState("");
   const [state, setState] = useState<{ kind: "idle" | "saving" | "saved" | "error"; message?: string }>({ kind: "idle" });
 
@@ -279,7 +280,7 @@ function PasswordCard({ highlight, supabase }: { highlight: boolean; supabase: R
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!supabase) return;
-    if (password.length < 8) return setState({ kind: "error", message: "Use at least 8 characters." });
+    if (password.length < 8) return setState({ kind: "error", message: t.tooShort });
     setState({ kind: "saving" });
     const { error } = await supabase.auth.updateUser({ password });
     if (error) return setState({ kind: "error", message: error.message });
@@ -291,14 +292,14 @@ function PasswordCard({ highlight, supabase }: { highlight: boolean; supabase: R
     <div ref={ref}>
       <Card className={cn(highlight && "border-accent/50")}>
         <CardHeader
-          title={highlight ? "Choose a new password" : "Password"}
-          subtitle={highlight ? "Your reset link worked. Set the password you will use from now on." : "Signed in with an email link? Set a password here to use both."}
+          title={highlight ? t.recoveryTitle : t.title}
+          subtitle={highlight ? t.recoverySubtitle : t.subtitle}
           icon={<KeyRound className="size-4" />}
         />
         <CardBody>
           <form onSubmit={save} className="flex flex-col gap-3 sm:flex-row">
             <label htmlFor="new-password" className="sr-only">
-              New password
+              {t.label}
             </label>
             <input
               id="new-password"
@@ -306,7 +307,7 @@ function PasswordCard({ highlight, supabase }: { highlight: boolean; supabase: R
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="New password (8 characters minimum)"
+              placeholder={t.placeholder}
               className={field}
             />
             <button
@@ -314,10 +315,10 @@ function PasswordCard({ highlight, supabase }: { highlight: boolean; supabase: R
               disabled={state.kind === "saving" || !password}
               className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-line-strong bg-surface-2 px-4 text-sm text-fg hover:bg-surface-3 disabled:opacity-50"
             >
-              {state.kind === "saving" ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : null} Update password
+              {state.kind === "saving" ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : null} {t.update}
             </button>
           </form>
-          {state.kind === "saved" ? <p className="mt-2 text-[12.5px] text-positive">Password updated.</p> : null}
+          {state.kind === "saved" ? <p className="mt-2 text-[12.5px] text-positive">{t.updated}</p> : null}
           {state.kind === "error" ? (
             <p className="mt-2 text-[12.5px] text-negative" role="alert">
               {state.message}

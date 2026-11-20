@@ -1,22 +1,11 @@
-import { cn } from "@/lib/utils";
 import type { DataResult } from "@/lib/market/types";
-import { TimeAgo } from "./time-ago";
+import { SourceTagView } from "./source-tag-view";
 
-/** "Source: CoinGecko · 2 min ago", attached to every block of live data. */
-export function SourceTag({ result, className, label = "Source" }: { result: Pick<DataResult<unknown>, "source" | "asOf">; className?: string; label?: string }) {
+/**
+ * "Source: CoinGecko · 2 min ago", attached to every block of live data.
+ * Only the source and timestamp cross to the client, never the data itself.
+ */
+export function SourceTag({ result, className, label }: { result: Pick<DataResult<unknown>, "source" | "asOf">; className?: string; label?: string }) {
   if (!result.source) return null;
-  return (
-    <p className={cn("text-[11px] text-subtle", className)}>
-      {label}:{" "}
-      <a href={result.source.url} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:text-muted hover:underline">
-        {result.source.name}
-      </a>
-      {result.asOf ? (
-        <>
-          {" · "}
-          <TimeAgo iso={result.asOf} />
-        </>
-      ) : null}
-    </p>
-  );
+  return <SourceTagView source={{ name: result.source.name, url: result.source.url }} asOf={result.asOf ?? null} label={label} className={className} />;
 }

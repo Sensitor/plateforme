@@ -9,10 +9,13 @@ import { getAcademyProgress, isCompleted, saveQuizResult, useAcademyProgress } f
 import { computeBadges, newlyEarned, type Badge } from "@/lib/academy/badges";
 import type { AcademyCatalog } from "@/lib/academy/catalog";
 import { BadgeMedal } from "./badge-medal";
+import { useT } from "@/i18n/client";
 
 export function ConceptQuiz({ slug, questions, color, catalog }: { slug: string; questions: QuizQuestion[]; color: string; catalog: AcademyCatalog }) {
   const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
   const [earned, setEarned] = useState<Badge[]>([]);
+  const dict = useT();
+  const t = dict.academy.quiz;
   const { progress, ready } = useAcademyProgress();
   const done = answers.every((a) => a !== null);
   const score = answers.filter((a, i) => a === questions[i].answer).length;
@@ -23,9 +26,9 @@ export function ConceptQuiz({ slug, questions, color, catalog }: { slug: string;
     const next = answers.map((a, i) => (i === qi ? oi : a));
     setAnswers(next);
     if (next.every((a) => a !== null)) {
-      const before = computeBadges(getAcademyProgress(), catalog);
+      const before = computeBadges(getAcademyProgress(), catalog, dict);
       saveQuizResult(slug, next.filter((a, i) => a === questions[i].answer).length, questions.length);
-      setEarned(newlyEarned(before, computeBadges(getAcademyProgress(), catalog)));
+      setEarned(newlyEarned(before, computeBadges(getAcademyProgress(), catalog, dict)));
     }
   }
 
@@ -33,8 +36,8 @@ export function ConceptQuiz({ slug, questions, color, catalog }: { slug: string;
     <div className="space-y-6">
       {ready && best ? (
         <p className="text-[12.5px] text-muted">
-          Your best score: <span className="num text-fg-2">{best.score}/{best.total}</span>
-          {isCompleted(best) ? <span className="text-positive"> · lesson completed</span> : null}
+          {t.best} <span className="num text-fg-2">{best.score}/{best.total}</span>
+          {isCompleted(best) ? <span className="text-positive"> · {t.completed}</span> : null}
         </p>
       ) : null}
       <ol className="space-y-6">
@@ -77,7 +80,7 @@ export function ConceptQuiz({ slug, questions, color, catalog }: { slug: string;
                 </div>
                 {picked !== null ? (
                   <p className="mt-2.5 pl-8 text-[13px] leading-relaxed text-fg-2" role="status">
-                    <span className={picked === q.answer ? "font-medium text-positive" : "font-medium text-negative"}>{picked === q.answer ? "Correct. " : "Not quite. "}</span>
+                    <span className={picked === q.answer ? "font-medium text-positive" : "font-medium text-negative"}>{picked === q.answer ? t.correctAnswer : t.wrongAnswer} </span>
                     {q.explanation}
                   </p>
                 ) : null}
@@ -88,7 +91,7 @@ export function ConceptQuiz({ slug, questions, color, catalog }: { slug: string;
       </ol>
       {done && earned.length ? (
         <div className="rounded-xl border border-line bg-surface px-4 py-3.5" role="status">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">{earned.length === 1 ? "Badge earned" : `${earned.length} badges earned`}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">{earned.length === 1 ? t.badgeEarned : t.badgesEarned(earned.length)}</div>
           <ul className="mt-2.5 flex flex-wrap gap-x-6 gap-y-3">
             {earned.map((b) => (
               <li key={b.id} className="flex items-center gap-2.5">
@@ -101,15 +104,15 @@ export function ConceptQuiz({ slug, questions, color, catalog }: { slug: string;
             ))}
           </ul>
           <Link href="/academy#progress" className="mt-3 inline-block text-[12.5px] text-accent hover:text-accent-strong">
-            See all badges
+            {t.seeAll}
           </Link>
         </div>
       ) : null}
       {done ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line px-4 py-3" style={{ borderColor: color }}>
           <p className="text-[14px] text-fg">
-            <span className="num">{score}/{questions.length}</span> correct.{" "}
-            <span className="text-muted">{score === questions.length ? "Lesson mastered." : score / questions.length >= 2 / 3 ? "Lesson completed." : "Re-read the steps above and try again."}</span>
+            <span className="num">{score}/{questions.length}</span> {t.correct}{" "}
+            <span className="text-muted">{score === questions.length ? t.mastered : score / questions.length >= 2 / 3 ? t.passed : t.failed}</span>
           </p>
           <button
             onClick={() => {
@@ -118,7 +121,7 @@ export function ConceptQuiz({ slug, questions, color, catalog }: { slug: string;
             }}
             className="inline-flex items-center gap-1.5 text-[13px] text-accent hover:text-accent-strong"
           >
-            <RotateCcw className="size-3.5" aria-hidden /> Try again
+            <RotateCcw className="size-3.5" aria-hidden /> {t.retry}
           </button>
         </div>
       ) : null}

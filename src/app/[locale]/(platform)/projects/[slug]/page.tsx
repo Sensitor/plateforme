@@ -28,7 +28,8 @@ import { RiskGrid } from "@/components/research/risk-grid";
 import { ThesisSection } from "@/components/research/thesis-section";
 import { SourcesTable } from "@/components/research/sources-table";
 import { CompetitorsSection } from "@/components/research/competitors-section";
-import { CLAIM_META, CoveragePill, RiskPill } from "@/components/research/pills";
+import { CoveragePill, RiskPill } from "@/components/research/pills";
+import { ClaimKicker } from "@/components/research/claim-kicker";
 import { FundamentalsPanel } from "@/components/research/fundamentals-panel";
 
 export function generateStaticParams() {
@@ -307,7 +308,7 @@ function Byline({ project, stats }: { project: Project; stats: ReturnType<typeof
         {(["fact", "interpretation", "hypothesis"] as const).map((k) => (
           <span key={k} className="inline-flex items-baseline gap-1.5">
             <span className="num text-fg-2">{k === "fact" ? stats.facts : k === "interpretation" ? stats.interpretations : stats.hypotheses}</span>
-            <span className={`text-[10.5px] font-semibold uppercase tracking-[0.12em] ${CLAIM_META[k].text}`}>{CLAIM_META[k].short}</span>
+            <ClaimKicker kind={k} />
           </span>
         ))}
       </span>

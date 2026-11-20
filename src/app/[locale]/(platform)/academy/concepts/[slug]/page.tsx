@@ -3,12 +3,18 @@ import type { Metadata } from "next";
 import Link from "@/i18n/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, ChevronRight, Clock } from "lucide-react";
-import { ACADEMY_CATEGORIES, CONCEPTS, CONCEPT_BY_SLUG, type Concept, type ConceptDeep, type ConceptVisual } from "@/content/concepts";
+import { CONCEPTS, CONCEPT_BY_SLUG, type Concept, type ConceptDeep, type ConceptVisual } from "@/content/concepts";
 import { CONCEPT_DEEP } from "@/content/academy-deep";
 import { PROJECTS, PROJECT_BY_SLUG } from "@/content/projects";
 import { ACADEMY_COLORS, tint } from "@/lib/brand";
 import { lessonMinutes } from "@/lib/academy/lesson";
 import { academyCatalog } from "@/lib/academy/catalog";
+import { getLocale, getT } from "@/i18n/server";
+import { alternatesFor } from "@/i18n/metadata";
+import type { Dictionary } from "@/i18n/dictionaries";
+import { ContentLanguageNote } from "@/components/ui/content-language-note";
+
+type LessonT = Dictionary["academy"]["lesson"];
 import { TrackArt } from "@/components/academy/track-art";
 import { LevelDots } from "@/components/academy/concept-browser";
 import { ConceptQuiz } from "@/components/academy/concept-quiz";
@@ -27,7 +33,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/[locale]/academy/concepts/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const c = CONCEPT_BY_SLUG[slug];
-  return c ? { title: c.title, description: c.summary } : { title: "Concept not found" };
+  const t = (await getT()).academy.lesson;
+  return c ? { title: c.title, description: c.summary, alternates: alternatesFor(`/academy/concepts/${slug}`, await getLocale()) } : { title: t.notFound };
 }
 
 export default function ConceptPage({ params }: PageProps<"/[locale]/academy/concepts/[slug]">) {
@@ -122,15 +129,17 @@ async function ConceptContent({ params }: { params: Promise<{ slug: string }> })
   const c = CONCEPT_BY_SLUG[slug];
   if (!c) notFound();
   const deep = CONCEPT_DEEP[c.slug];
-  const category = ACADEMY_CATEGORIES.find((x) => x.id === c.category);
+  const dict = await getT();
+  const t = dict.academy.lesson;
+  const category = dict.labels.academyTracks[c.category];
   const color = ACADEMY_COLORS[c.category];
   const minutes = lessonMinutes(c, deep);
 
   return (
     <article className="mx-auto max-w-[1080px] space-y-8">
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px] text-muted">
+      <nav aria-label={t.breadcrumb} className="flex items-center gap-1.5 text-[13px] text-muted">
         <Link href="/academy" className="hover:text-fg">
-          Academy
+          {t.home}
         </Link>
         <ChevronRight className="size-3.5" aria-hidden />
         <span>{category?.label}</span>
@@ -145,7 +154,7 @@ async function ConceptContent({ params }: { params: Promise<{ slug: string }> })
             </span>
             <LevelDots level={c.level} color={color} />
             <span className="inline-flex items-center gap-1.5 text-[11.5px] text-muted">
-              <Clock className="size-3.5" aria-hidden /> {minutes} min
+              <Clock className="size-3.5" aria-hidden /> {t.minutes(minutes)}
             </span>
             <LessonStatus slug={c.slug} />
           </div>
@@ -153,16 +162,17 @@ async function ConceptContent({ params }: { params: Promise<{ slug: string }> })
           <p className="mt-3 max-w-2xl text-[16.5px] leading-relaxed text-fg-2">{c.summary}</p>
         </div>
       </header>
-      {deep ? <DeepLesson c={c} deep={deep} color={color} /> : <ShortLesson c={c} color={color} />}
+      <ContentLanguageNote />
+      {deep ? <DeepLesson c={c} deep={deep} color={color} t={t} catalog={academyCatalog(dict)} /> : <ShortLesson c={c} color={color} t={t} />}
     </article>
   );
 }
 
-function Takeaways({ c, color }: { c: Concept; color: string }) {
+function Takeaways({ c, color, t }: { c: Concept; color: string; t: LessonT }) {
   return (
     <div className="border-l-2 pl-5" style={{ borderColor: color }}>
       <h2 className="text-[11.5px] font-semibold uppercase tracking-[0.14em]" style={{ color }}>
-        Key takeaways
+        {t.keyTakeaways}
       </h2>
       <ol className="mt-3 space-y-2.5 text-[15px] text-fg">
         {c.keyTakeaways.map((k, i) => (
@@ -176,15 +186,15 @@ function Takeaways({ c, color }: { c: Concept; color: string }) {
   );
 }
 
-function PracticeAndRelated({ c }: { c: Concept }) {
+function PracticeAndRelated({ c, t }: { c: Concept; t: LessonT }) {
   const usedIn = PROJECTS.filter((p) => p.dossier.concepts.includes(c.slug));
   const related = c.related.map((r) => CONCEPT_BY_SLUG[r]).filter(Boolean);
   return (
     <>
       {usedIn.length ? (
         <section>
-          <h2 className="serif-display mb-2 text-[26px] text-fg">See it in practice</h2>
-          <p className="mb-3 text-[13px] text-muted">Dossiers where this concept matters:</p>
+          <h2 className="serif-display mb-2 text-[26px] text-fg">{t.practice}</h2>
+          <p className="mb-3 text-[13px] text-muted">{t.practiceText}</p>
           <div className="flex flex-wrap gap-2">
             {usedIn.map((p) => (
               <Link key={p.slug} href={`/projects/${p.slug}`} className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-1.5 text-[13px] text-fg hover:border-line-strong">
@@ -196,7 +206,7 @@ function PracticeAndRelated({ c }: { c: Concept }) {
       ) : null}
       {related.length ? (
         <section>
-          <h2 className="serif-display mb-3 text-[26px] text-fg">Related concepts</h2>
+          <h2 className="serif-display mb-3 text-[26px] text-fg">{t.related}</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {related.map((r) => (
               <Link key={r.slug} href={`/academy/concepts/${r.slug}`} className="relative overflow-hidden rounded-xl border border-line bg-surface p-4 pt-5 hover:border-line-strong">
@@ -208,12 +218,12 @@ function PracticeAndRelated({ c }: { c: Concept }) {
           </div>
         </section>
       ) : null}
-      <p className="border-t border-line pt-5 text-[12px] text-subtle">Educational content only, not investment advice.</p>
+      <p className="border-t border-line pt-5 text-[12px] text-subtle">{t.disclaimer}</p>
     </>
   );
 }
 
-function ShortLesson({ c, color }: { c: Concept; color: string }) {
+function ShortLesson({ c, color, t }: { c: Concept; color: string; t: LessonT }) {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div className="space-y-4">
@@ -223,24 +233,25 @@ function ShortLesson({ c, color }: { c: Concept; color: string }) {
           </p>
         ))}
       </div>
-      <Takeaways c={c} color={color} />
-      <p className="rounded-lg border border-line px-4 py-3 text-[12.5px] text-muted">The in-depth version of this lesson (steps, worked example, quiz) is being written.</p>
-      <PracticeAndRelated c={c} />
+      <Takeaways c={c} color={color} t={t} />
+      <p className="rounded-lg border border-line px-4 py-3 text-[12.5px] text-muted">{t.shortNote}</p>
+      <PracticeAndRelated c={c} t={t} />
     </div>
   );
 }
 
-function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: string }) {
+function DeepLesson({ c, deep, color, t, catalog }: { c: Concept; deep: ConceptDeep; color: string; t: LessonT; catalog: ReturnType<typeof academyCatalog> }) {
+  const S = t.sections;
   const toc: TocItem[] = [
-    { id: "minute", label: "In one minute" },
-    { id: "explained", label: "Explained" },
-    { id: "how", label: "How it works" },
-    { id: "research", label: "In the research" },
-    { id: "watch", label: "What to watch" },
-    { id: "myths", label: "Misconceptions" },
-    { id: "risks", label: "Risks" },
-    { id: "quiz", label: "Check yourself" },
-    { id: "sources", label: "Sources" },
+    { id: "minute", label: S.minute },
+    { id: "explained", label: S.explained },
+    { id: "how", label: S.how },
+    { id: "research", label: S.research },
+    { id: "watch", label: S.watch },
+    { id: "myths", label: S.myths },
+    { id: "risks", label: S.risks },
+    { id: "quiz", label: S.quiz },
+    { id: "sources", label: S.sources },
   ];
   const exampleProjects = deep.example.projects.map((s) => PROJECT_BY_SLUG[s]).filter(Boolean);
   return (
@@ -249,13 +260,13 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
         <section id="minute" className="scroll-mt-28">
           <div className="rounded-xl border-l-[3px] bg-surface px-5 py-4" style={{ borderColor: color }}>
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color }}>
-              In one minute
+              {S.minute}
             </div>
             <p className="mt-2 text-[17px] leading-relaxed text-fg">{deep.minute}</p>
           </div>
         </section>
 
-        <Section id="explained" title="Explained" color={color}>
+        <Section id="explained" title={S.explained} color={color}>
           <div className="space-y-4">
             {c.body.map((para, i) => (
               <p key={i} className="text-[15px] leading-[1.75] text-fg-2">
@@ -265,7 +276,7 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
           </div>
         </Section>
 
-        <Section id="how" title="How it works, step by step" color={color}>
+        <Section id="how" title={S.howTitle} color={color}>
           <ol className="space-y-4">
             {deep.steps.map((s, i) => (
               <li key={s.title} className="grid grid-cols-[28px_minmax(0,1fr)] gap-3">
@@ -287,7 +298,7 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
           ) : null}
         </Section>
 
-        <Section id="research" title={deep.example.title} kicker="In the research" color={color}>
+        <Section id="research" title={deep.example.title} kicker={S.research} color={color}>
           <div className="space-y-4">
             {deep.example.paragraphs.map((p) => (
               <p key={p} className="text-[15px] leading-[1.75] text-fg-2">
@@ -333,7 +344,7 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
           </div>
         </Section>
 
-        <Section id="watch" title="What to watch" color={color}>
+        <Section id="watch" title={S.watch} color={color}>
           <dl className="divide-y divide-line border-y border-line">
             {deep.metrics.map((m) => (
               <div key={m.label} className="grid gap-1 py-3.5 sm:grid-cols-[200px_minmax(0,1fr)] sm:gap-6">
@@ -344,16 +355,16 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
           </dl>
         </Section>
 
-        <Section id="myths" title="Common misconceptions" color={color}>
+        <Section id="myths" title={S.mythsTitle} color={color}>
           <div className="space-y-3">
             {deep.misconceptions.map((m) => (
               <div key={m.myth} className="grid gap-3 rounded-xl border border-line p-4 sm:grid-cols-2">
                 <div>
-                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-negative">Myth</div>
+                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-negative">{S.myth}</div>
                   <p className="mt-1 text-[14px] leading-relaxed text-fg-2">{m.myth}</p>
                 </div>
                 <div>
-                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-positive">Reality</div>
+                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-positive">{S.reality}</div>
                   <p className="mt-1 text-[14px] leading-relaxed text-fg">{m.reality}</p>
                 </div>
               </div>
@@ -361,7 +372,7 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
           </div>
         </Section>
 
-        <Section id="risks" title="Risks to keep in mind" color={color}>
+        <Section id="risks" title={S.risksTitle} color={color}>
           <ul className="space-y-2.5">
             {deep.risks.map((r) => (
               <li key={r} className="flex gap-3 text-[14.5px] leading-relaxed text-fg-2">
@@ -371,16 +382,16 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
             ))}
           </ul>
           <div className="mt-8">
-            <Takeaways c={c} color={color} />
+            <Takeaways c={c} color={color} t={t} />
           </div>
         </Section>
 
-        <Section id="quiz" title="Check your understanding" color={color}>
-          <p className="mb-5 text-[13.5px] text-muted">Three questions. Your result is saved in this browser and marks the lesson as completed in the Academy.</p>
-          <ConceptQuiz slug={c.slug} questions={deep.quiz} color={color} catalog={academyCatalog()} />
+        <Section id="quiz" title={S.quizTitle} color={color}>
+          <p className="mb-5 text-[13.5px] text-muted">{S.quizText}</p>
+          <ConceptQuiz slug={c.slug} questions={deep.quiz} color={color} catalog={catalog} />
         </Section>
 
-        <Section id="sources" title="Sources" color={color}>
+        <Section id="sources" title={S.sources} color={color}>
           <ul className="space-y-2">
             {deep.sources.map((s) => (
               <li key={s.url} className="text-[13.5px]">
@@ -394,10 +405,10 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
           </ul>
         </Section>
 
-        <PracticeAndRelated c={c} />
+        <PracticeAndRelated c={c} t={t} />
       </div>
       <aside className="order-first xl:order-none">
-        <Toc items={toc} title="Lesson" />
+        <Toc items={toc} title={t.toc} />
       </aside>
     </div>
   );

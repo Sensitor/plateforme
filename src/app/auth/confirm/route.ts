@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { localizeHref, splitLocale } from "@/i18n/paths";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { safeNext } from "@/lib/auth/redirect";
@@ -16,12 +17,13 @@ export async function GET(request: NextRequest) {
   const type = url.searchParams.get("type") as EmailOtpType | null;
   const fallback = type === "recovery" ? "/account?recovery=1" : "/overview";
   const next = safeNext(url.searchParams.get("next"), fallback);
-  const fail = (message: string) => NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(message)}`, url.origin));
+  // Error codes are translated by the login form; the login page keeps the visitor's language.
+  const fail = (code: string) => NextResponse.redirect(new URL(`${localizeHref(splitLocale(url.searchParams.get("next") ?? "/").locale, "/login")}?error=${encodeURIComponent(code)}`, url.origin));
 
-  if (!tokenHash || !type || !TYPES.includes(type)) return fail("The confirmation link is incomplete.");
+  if (!tokenHash || !type || !TYPES.includes(type)) return fail("incomplete");
   const supabase = await getServerSupabase();
-  if (!supabase) return fail("Sign-in is not configured on this deployment.");
+  if (!supabase) return fail("unconfigured");
   const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-  if (error) return fail("This link has expired or was already used. Request a new one below.");
+  if (error) return fail("expired-used");
   return NextResponse.redirect(new URL(next, url.origin));
 }

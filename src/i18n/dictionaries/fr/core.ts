@@ -28,7 +28,7 @@ export const meta: Dictionary["meta"] = {
 };
 
 export const common: Dictionary["common"] = {
-  na: "n/d",
+  na: "n/a",
   soon: "Bientôt",
   close: "Fermer",
   cancel: "Annuler",

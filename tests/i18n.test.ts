@@ -102,8 +102,16 @@ describe("dictionaries", () => {
     expect(bad).toEqual([]);
   });
 
-  it("leave no French string empty, except the English-only content notice", () => {
-    const empty = strings(fr).filter((s) => s.trim() === "");
+  it("leave no French string empty where the English one has text", () => {
+    const empty: string[] = [];
+    const walk = (a: Node, b: Node, path: string) => {
+      if (typeof a === "string" && typeof b === "string") {
+        if (a.trim() && !b.trim()) empty.push(path);
+      } else if (a && b && typeof a === "object" && typeof b === "object") {
+        for (const k of Object.keys(a)) walk((a as Record<string, Node>)[k], (b as Record<string, Node>)[k], `${path}.${k}`);
+      }
+    };
+    walk(en, fr, "dict");
     expect(empty).toEqual([]);
   });
 });

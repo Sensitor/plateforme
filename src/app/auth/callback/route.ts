@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { localizeHref, splitLocale } from "@/i18n/paths";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { safeNext } from "@/lib/auth/redirect";
 
@@ -10,15 +11,16 @@ export async function GET(request: NextRequest) {
   const url = request.nextUrl;
   const code = url.searchParams.get("code");
   const next = safeNext(url.searchParams.get("next"));
-  const fail = (message: string) => NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(message)}`, url.origin));
+  // Error codes are translated by the login form; the login page keeps the visitor's language.
+  const fail = (code: string) => NextResponse.redirect(new URL(`${localizeHref(splitLocale(url.searchParams.get("next") ?? "/").locale, "/login")}?error=${encodeURIComponent(code)}`, url.origin));
 
   const providerError = url.searchParams.get("error_description");
   if (providerError) return fail(providerError);
-  if (!code) return fail("The sign-in link is invalid or has expired.");
+  if (!code) return fail("invalid");
 
   const supabase = await getServerSupabase();
-  if (!supabase) return fail("Sign-in is not configured on this deployment.");
+  if (!supabase) return fail("unconfigured");
   const { error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) return fail("This link has expired or was opened in a different browser. Request a new one below.");
+  if (error) return fail("expired-browser");
   return NextResponse.redirect(new URL(next, url.origin));
 }

@@ -5,6 +5,7 @@ import { CircleCheck, Clock } from "lucide-react";
 import { ACADEMY_COLORS, tint } from "@/lib/brand";
 import type { AcademyCategory } from "@/content/concepts";
 import { isCompleted, useAcademyProgress } from "@/lib/academy/progress";
+import { useT } from "@/i18n/client";
 
 export interface PathLesson {
   slug: string;
@@ -17,6 +18,7 @@ export interface PathLesson {
 
 /** Ordered in-depth lessons with completion from quiz results (stored in this browser). */
 export function LessonPath({ lessons }: { lessons: PathLesson[] }) {
+  const t = useT().academy.path;
   const { progress, ready } = useAcademyProgress();
   const done = ready ? lessons.filter((l) => isCompleted(progress[l.slug])).length : 0;
   const next = ready ? lessons.find((l) => !isCompleted(progress[l.slug])) : undefined;
@@ -31,15 +33,15 @@ export function LessonPath({ lessons }: { lessons: PathLesson[] }) {
             <span className="num text-fg-2">
               {done}/{lessons.length}
             </span>{" "}
-            lessons completed
+            {t.completed}
           </span>
         </div>
         {next ? (
           <Link href={`/academy/concepts/${next.slug}`} className="text-[13px] text-accent hover:text-accent-strong">
-            {done ? "Continue" : "Start"} with {next.title} →
+            {done ? t.continue(next.title) : t.start(next.title)}
           </Link>
         ) : ready ? (
-          <span className="text-[13px] text-positive">All in-depth lessons completed</span>
+          <span className="text-[13px] text-positive">{t.allDone}</span>
         ) : null}
       </div>
       <ol className="grid grid-cols-1 gap-x-8 md:grid-cols-2">
@@ -53,7 +55,7 @@ export function LessonPath({ lessons }: { lessons: PathLesson[] }) {
                   className="num flex size-8 items-center justify-center rounded-full text-[12px] font-medium"
                   style={completed ? { backgroundColor: "rgba(69,185,151,0.16)", color: "#45B997" } : { backgroundColor: tint(color, 0.14), color }}
                 >
-                  {completed ? <CircleCheck className="size-4" aria-label="Completed" /> : i + 1}
+                  {completed ? <CircleCheck className="size-4" aria-label={t.completedAria} /> : i + 1}
                 </span>
                 <span className="min-w-0">
                   <span className="block text-[15px] font-medium text-fg group-hover:text-accent-strong">{l.title}</span>

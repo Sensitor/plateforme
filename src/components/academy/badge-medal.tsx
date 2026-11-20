@@ -18,8 +18,8 @@ export function BadgeMedal({ badge, size = "md" }: { badge: Badge; size?: "sm" |
   );
 }
 
-/** Badge with its label and progress: used on the Academy page. */
-export function BadgeRow({ badge }: { badge: Badge }) {
+/** Badge with its label and progress: used on the Academy page. Labels come translated in `badge`. */
+export function BadgeRow({ badge, earnedLabel = "Earned", progressLabel }: { badge: Badge; earnedLabel?: string; progressLabel?: string }) {
   const pct = badge.total ? Math.round((badge.done / badge.total) * 100) : 0;
   return (
     <li className="flex items-start gap-3.5">
@@ -28,11 +28,11 @@ export function BadgeRow({ badge }: { badge: Badge }) {
         <div className="flex items-baseline justify-between gap-3">
           <span className={cn("truncate text-[14px] font-medium", badge.earned ? "text-fg" : "text-fg-2")}>{badge.label}</span>
           <span className="num shrink-0 text-[12px] text-muted">
-            {badge.earned ? "Earned" : `${badge.done}/${badge.total}`}
+            {badge.earned ? earnedLabel : `${badge.done}/${badge.total}`}
           </span>
         </div>
         <p className="mt-0.5 text-[12.5px] leading-snug text-muted">{badge.description}</p>
-        <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-surface-3" role="progressbar" aria-label={`${badge.label} progress`} aria-valuemin={0} aria-valuemax={badge.total} aria-valuenow={badge.done}>
+        <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-surface-3" role="progressbar" aria-label={progressLabel ?? `${badge.label} progress`} aria-valuemin={0} aria-valuemax={badge.total} aria-valuenow={badge.done}>
           <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: badge.color, opacity: badge.earned ? 1 : 0.55 }} />
         </div>
       </div>

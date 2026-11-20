@@ -4,6 +4,8 @@ import { START_HERE } from "@/content/academy-deep";
 import { lessonMinutes } from "@/lib/academy/lesson";
 import { academyCatalog } from "@/lib/academy/catalog";
 import { AcademyProgressPanel } from "@/components/academy/progress-panel";
+import { getT } from "@/i18n/server";
+import { pageMetadata } from "@/i18n/metadata";
 import { LessonPath, type PathLesson } from "@/components/academy/lesson-path";
 import { ACADEMY_CATEGORIES, CONCEPTS } from "@/content/concepts";
 import { PROJECTS } from "@/content/projects";
@@ -12,21 +14,26 @@ import { SectionTitle } from "@/components/ui/section-heading";
 import { ConceptBrowser } from "@/components/academy/concept-browser";
 import { TrackArt } from "@/components/academy/track-art";
 
-export const metadata: Metadata = { title: "Academy", description: "Learn the concepts behind digital assets, linked directly from every research dossier." };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("academy", "/academy");
+}
 
-const COMING = [
-  { icon: Route, t: "Learning paths", d: "Sequenced courses such as Crypto fundamentals or Analysing a DeFi protocol.", color: "#7C93FF" },
-  { icon: Video, t: "Videos & illustrations", d: "Visual explanations of how mechanisms work.", color: "#EC7BB5" },
-  { icon: ClipboardCheck, t: "Case-based exercises", d: "Apply a lesson to a real dossier: read the data, answer, compare with the analysis.", color: "#5FCB86" },
-  { icon: BookMarked, t: "Case studies", d: "Historical events analysed step by step.", color: "#E8B04B" },
+const COMING_STYLE = [
+  { icon: Route, color: "#7C93FF" },
+  { icon: Video, color: "#EC7BB5" },
+  { icon: ClipboardCheck, color: "#5FCB86" },
+  { icon: BookMarked, color: "#E8B04B" },
 ];
 
-export default function AcademyPage() {
+export default async function AcademyPage() {
+  const dict = await getT();
+  const t = dict.academy.home;
+  const COMING = t.coming.items.map(([title, text], i) => ({ ...COMING_STYLE[i], t: title, d: text }));
   const usage: Record<string, number> = {};
   for (const p of PROJECTS) for (const c of p.dossier.concepts) usage[c] = (usage[c] ?? 0) + 1;
   const path: PathLesson[] = START_HERE
     .map((slug) => CONCEPTS.find((c) => c.slug === slug)!)
-    .map((c) => ({ slug: c.slug, title: c.title, summary: c.summary, category: c.category, categoryLabel: ACADEMY_CATEGORIES.find((x) => x.id === c.category)!.label, minutes: lessonMinutes(c) }));
+    .map((c) => ({ slug: c.slug, title: c.title, summary: c.summary, category: c.category, categoryLabel: dict.labels.academyTracks[c.category].label, minutes: lessonMinutes(c) }));
   const counts = Object.fromEntries(ACADEMY_CATEGORIES.map((c) => [c.id, CONCEPTS.filter((x) => x.category === c.id).length]));
   return (
     <div className="space-y-14">
@@ -39,24 +46,23 @@ export default function AcademyPage() {
           ))}
         </div>
         <div className="relative max-w-2xl xl:max-w-[calc(100%-520px)]">
-          <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-accent">Understand</div>
+          <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-accent">{t.eyebrow}</div>
           <h1 className="serif-display mt-3 text-[44px] leading-[1.02] text-fg md:text-[60px]">
-            Academy, <span className="italic text-violet">learn by research.</span>
+            {t.title} <span className="italic text-violet">{t.titleAccent}</span>
           </h1>
           <p className="mt-4 text-[16px] leading-relaxed text-fg-2">
-            Every dossier links to the concepts it relies on. Read an analysis, open the concept you need, come back with the right vocabulary. {CONCEPTS.length} explainers
-            across eight tracks, each an in-depth lesson with step-by-step mechanics, a worked example from our research, a visual and a quiz.
+            {t.intro(CONCEPTS.length)}
           </p>
         </div>
       </header>
 
       <section id="progress" className="scroll-mt-24">
-        <SectionTitle title="Your progress" description="Pass a lesson's quiz to complete it. Badges reward finished tracks, the Start here path and full marks." />
-        <AcademyProgressPanel catalog={academyCatalog()} />
+        <SectionTitle title={dict.academy.progress.title} description={dict.academy.progress.description} />
+        <AcademyProgressPanel catalog={academyCatalog(dict)} />
       </section>
 
       <section>
-        <SectionTitle title="Learning tracks" description="From first principles to market psychology." />
+        <SectionTitle title={t.tracks.title} description={t.tracks.description} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {ACADEMY_CATEGORIES.map((c, i) => {
             const color = ACADEMY_COLORS[c.id];
@@ -69,10 +75,10 @@ export default function AcademyPage() {
                   </span>
                 </div>
                 <div className="p-4">
-                  <div className="serif-display text-[23px] leading-tight text-fg">{c.label}</div>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{c.description}</p>
+                  <div className="serif-display text-[23px] leading-tight text-fg">{dict.labels.academyTracks[c.id].label}</div>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{dict.labels.academyTracks[c.id].description}</p>
                   <div className="mt-3 text-[12px] font-medium" style={{ color }}>
-                    {counts[c.id]} concept{counts[c.id] === 1 ? "" : "s"} available
+                    {t.tracks.count(counts[c.id])}
                   </div>
                 </div>
               </div>
@@ -82,17 +88,17 @@ export default function AcademyPage() {
       </section>
 
       <section>
-        <SectionTitle title="Start here: in-depth lessons" description="Ten fundamentals, in a suggested order. Every lesson ends with a three-question quiz; passing it marks the lesson as completed." />
+        <SectionTitle title={t.startHere.title} description={t.startHere.description} />
         <LessonPath lessons={path} />
       </section>
 
       <section>
-        <SectionTitle title="All lessons" description="Search or filter by track. Each lesson shows where the concept is used in our research, and whether you completed it." />
+        <SectionTitle title={t.all.title} description={t.all.description} />
         <ConceptBrowser concepts={CONCEPTS} usage={usage} />
       </section>
 
       <section>
-        <SectionTitle title="Coming to the Academy" description="Structured courses and exercises are planned for Phase 4." />
+        <SectionTitle title={t.coming.title} description={t.coming.description} />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {COMING.map((x) => (
             <div key={x.t} className="rounded-xl border border-dashed border-line-strong p-4">
@@ -101,7 +107,7 @@ export default function AcademyPage() {
               </span>
               <div className="mt-3 text-[14px] font-medium text-fg">{x.t}</div>
               <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{x.d}</p>
-              <span className="mt-3 inline-block text-[11px] uppercase tracking-[0.12em] text-subtle">Phase 4</span>
+              <span className="mt-3 inline-block text-[11px] uppercase tracking-[0.12em] text-subtle">{t.coming.phase}</span>
             </div>
           ))}
         </div>

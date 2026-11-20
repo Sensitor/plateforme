@@ -1,6 +1,8 @@
 import { cn } from "@/lib/utils";
 import type { Claim, ResearchSource } from "@/lib/research/types";
-import { CLAIM_META } from "./pills";
+import { ClaimKicker, SourcePending } from "./claim-kicker";
+
+export { ClaimKicker };
 
 /**
  * Editorial rendering of typed claims: each statement opens with a small
@@ -18,24 +20,11 @@ export function ClaimList({ claims, sources, className, compact = false }: { cla
             <ClaimKicker kind={c.kind} />
             {c.text}
             <SourceRefs ids={c.sources} sources={sources} />
-            {c.kind === "fact" && !c.sources?.length ? (
-              <span className="ml-1.5 whitespace-nowrap text-[11px] italic text-warning" title="This fact has no source attached yet and is pending verification.">
-                (source pending)
-              </span>
-            ) : null}
+            {c.kind === "fact" && !c.sources?.length ? <SourcePending /> : null}
           </p>
         </li>
       ))}
     </ul>
-  );
-}
-
-export function ClaimKicker({ kind }: { kind: Claim["kind"] }) {
-  const m = CLAIM_META[kind];
-  return (
-    <span className={cn("mr-2 inline-block align-[1px] text-[10.5px] font-semibold uppercase tracking-[0.12em]", m.text)} title={m.label}>
-      {m.short}
-    </span>
   );
 }
 
