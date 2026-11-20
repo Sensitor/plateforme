@@ -1,18 +1,15 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { isBetter, type Progress, type QuizResult } from "./results";
+
+export { isBetter, isCompleted, isPerfect, type Progress, type QuizResult } from "./results";
 
 /**
- * Academy quiz progress, stored in this browser (no account needed).
+ * Academy quiz progress, stored in this browser (no account needed). For
+ * signed-in users CloudSync mirrors it to the `academy_progress` table.
  * { [conceptSlug]: { score, total, at } }
  */
-export interface QuizResult {
-  score: number;
-  total: number;
-  at: string;
-}
-export type Progress = Record<string, QuizResult>;
-
 const KEY = "sensitor.academy.v1";
 const EMPTY: Progress = {};
 const listeners = new Set<() => void>();
@@ -44,17 +41,21 @@ function subscribe(listener: () => void) {
   };
 }
 
-export function saveQuizResult(slug: string, score: number, total: number) {
-  const prev = read()[slug];
-  // Keep the best score.
-  if (prev && prev.score >= score) return;
-  cache = { ...read(), [slug]: { score, total, at: new Date().toISOString() } };
+function write(next: Progress) {
+  cache = next;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(cache));
+    window.localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
     // storage unavailable: keep for this session
   }
   listeners.forEach((l) => l());
+}
+
+export function saveQuizResult(slug: string, score: number, total: number) {
+  const next: QuizResult = { score, total, at: new Date().toISOString() };
+  // Keep the best score.
+  if (!isBetter(next, read()[slug])) return;
+  write({ ...read(), [slug]: next });
 }
 
 export function useAcademyProgress() {
@@ -67,5 +68,30 @@ export function useAcademyProgress() {
   return { progress, ready };
 }
 
-/** A concept counts as completed when its quiz was passed (at least two thirds right). */
-export const isCompleted = (r: QuizResult | undefined) => Boolean(r && r.score / r.total >= 2 / 3);
+/* Primitives for cloud sync (src/lib/sync/cloud-sync.tsx). */
+export const getAcademyProgress = () => read();
+export const replaceAcademyProgress = (next: Progress) => write(next);
+export const subscribeAcademy = (listener: () => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
+
+/** "local": kept in this browser. "cloud": mirrored to the account. "unavailable": signed in, but the table is not installed. */
+export type AcademySync = "local" | "cloud" | "unavailable";
+let syncState: AcademySync = "local";
+const syncListeners = new Set<() => void>();
+export function setAcademySync(next: AcademySync) {
+  if (next === syncState) return;
+  syncState = next;
+  syncListeners.forEach((l) => l());
+}
+export function useAcademySync(): AcademySync {
+  return useSyncExternalStore(
+    (l) => {
+      syncListeners.add(l);
+      return () => syncListeners.delete(l);
+    },
+    () => syncState,
+    () => "local" as AcademySync,
+  );
+}

@@ -8,8 +8,11 @@ la synchronisation, le Research Copilot et les alertes en production. Compter 15
 1. Ouvrir le projet Supabase, puis **SQL Editor**, **New query**.
 2. Coller le contenu de [`supabase/migrations/0001_app.sql`](../supabase/migrations/0001_app.sql) et exécuter.
    Le script est idempotent : il peut être relancé sans risque.
-3. Vérifier dans **Table Editor** : `profiles`, `watchlist_items`, `portfolio_transactions`, `alerts`,
-   `notifications`, `copilot_usage`, toutes avec RLS activé.
+3. Même chose avec [`supabase/migrations/0003_academy.sql`](../supabase/migrations/0003_academy.sql) :
+   progression de l'Academy et badges synchronisés avec le compte. Sans ce fichier, la progression reste
+   dans le navigateur et la page Academy l'indique.
+4. Vérifier dans **Table Editor** : `profiles`, `watchlist_items`, `portfolio_transactions`, `alerts`,
+   `notifications`, `copilot_usage`, `academy_progress`, toutes avec RLS activé.
 
 `0002_research_cms.sql` est un modèle pour une phase ultérieure (contenu éditorial en base) : ne pas l'appliquer.
 
@@ -90,6 +93,8 @@ notification in-app et, si l'utilisateur l'a activé dans son compte, envoie un 
 4. `/alerts` : pour un test rapide, créer une alerte « 24h move larger than » à 1 %, appeler le planificateur
    (commande curl ci-dessus), puis vérifier la notification in-app et l'e-mail.
 5. `/copilot` : poser une question en mode Analyze, vérifier les sources citées et l'horodatage des prix.
+6. `/academy` : réussir le quiz d'une leçon (badge « First lesson »), puis ouvrir `/academy` sur un autre
+   navigateur connecté au même compte : la progression et le badge y sont, avec la mention « Saved to your account ».
 
 ## Quotas et coûts
 

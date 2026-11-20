@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { Award, BookMarked, ClipboardCheck, Route, Video } from "lucide-react";
+import { BookMarked, ClipboardCheck, Route, Video } from "lucide-react";
 import { START_HERE } from "@/content/academy-deep";
 import { lessonMinutes } from "@/lib/academy/lesson";
+import { academyCatalog } from "@/lib/academy/catalog";
+import { AcademyProgressPanel } from "@/components/academy/progress-panel";
 import { LessonPath, type PathLesson } from "@/components/academy/lesson-path";
 import { ACADEMY_CATEGORIES, CONCEPTS } from "@/content/concepts";
 import { PROJECTS } from "@/content/projects";
@@ -17,7 +19,6 @@ const COMING = [
   { icon: Video, t: "Videos & illustrations", d: "Visual explanations of how mechanisms work.", color: "#EC7BB5" },
   { icon: ClipboardCheck, t: "Case-based exercises", d: "Apply a lesson to a real dossier: read the data, answer, compare with the analysis.", color: "#5FCB86" },
   { icon: BookMarked, t: "Case studies", d: "Historical events analysed step by step.", color: "#E8B04B" },
-  { icon: Award, t: "Badges and synced progress", d: "Badges per track, and progress saved to your account across devices.", color: "#A487F0" },
 ];
 
 export default function AcademyPage() {
@@ -48,6 +49,11 @@ export default function AcademyPage() {
           </p>
         </div>
       </header>
+
+      <section id="progress" className="scroll-mt-24">
+        <SectionTitle title="Your progress" description="Pass a lesson's quiz to complete it. Badges reward finished tracks, the Start here path and full marks." />
+        <AcademyProgressPanel catalog={academyCatalog()} />
+      </section>
 
       <section>
         <SectionTitle title="Learning tracks" description="From first principles to market psychology." />
@@ -86,8 +92,8 @@ export default function AcademyPage() {
       </section>
 
       <section>
-        <SectionTitle title="Coming to the Academy" description="Structured courses, exercises and synced progress are planned for Phase 4." />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <SectionTitle title="Coming to the Academy" description="Structured courses and exercises are planned for Phase 4." />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {COMING.map((x) => (
             <div key={x.t} className="rounded-xl border border-dashed border-line-strong p-4">
               <span className="flex size-8 items-center justify-center rounded-lg" style={{ backgroundColor: tint(x.color, 0.14), color: x.color }}>

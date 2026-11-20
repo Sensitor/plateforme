@@ -2,13 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BellRing, CircleUser, DatabaseZap, KeyRound, Loader2, Lock, LogOut, Settings2 } from "lucide-react";
+import { BellRing, CircleUser, DatabaseZap, GraduationCap, KeyRound, Loader2, Lock, LogOut, Settings2 } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAuth, type Profile } from "@/lib/auth/auth-provider";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isCompleted, useAcademyProgress } from "@/lib/academy/progress";
+import { computeBadges } from "@/lib/academy/badges";
+import type { AcademyCatalog } from "@/lib/academy/catalog";
+import { BadgeMedal } from "@/components/academy/badge-medal";
+import { SyncLine } from "@/components/academy/progress-panel";
 
 export const TIER_LABEL: Record<Profile["tier"], { label: string; tone: BadgeTone }> = {
   free: { label: "Free", tone: "neutral" },
@@ -26,7 +32,7 @@ function Commitments() {
         <ul className="space-y-2 text-[13.5px] text-fg-2">
           <li>• Sensitor will never ask for your seed phrase or private keys.</li>
           <li>• Sensitor will never execute transactions on your behalf.</li>
-          <li>• Your watchlist, portfolio and alerts are isolated per user with row level security.</li>
+          <li>• Your watchlist, portfolio, alerts and Academy progress are isolated per user with row level security.</li>
           <li>• Exchange connections, when offered, will be read only.</li>
         </ul>
       </CardBody>
@@ -34,7 +40,47 @@ function Commitments() {
   );
 }
 
-export function AccountPanel() {
+function Learning({ catalog }: { catalog: AcademyCatalog }) {
+  const { progress, ready } = useAcademyProgress();
+  const p = ready ? progress : {};
+  const completed = catalog.lessons.filter((l) => isCompleted(p[l.slug])).length;
+  const badges = computeBadges(p, catalog);
+  const earned = badges.filter((b) => b.earned);
+  return (
+    <Card>
+      <CardHeader
+        title="Academy"
+        icon={<GraduationCap className="size-4" />}
+        action={
+          <Link href="/academy#progress" className="text-[12.5px] text-accent hover:text-accent-strong">
+            Open the Academy
+          </Link>
+        }
+      />
+      <CardBody className="space-y-4">
+        <p className="text-[13.5px] text-fg-2">
+          <span className="num text-fg">{completed}</span> of <span className="num">{catalog.lessons.length}</span> lessons completed,{" "}
+          <span className="num text-fg">{earned.length}</span> of <span className="num">{badges.length}</span> badges earned.
+        </p>
+        {earned.length ? (
+          <ul className="flex flex-wrap gap-x-5 gap-y-3">
+            {earned.map((b) => (
+              <li key={b.id} className="flex items-center gap-2">
+                <BadgeMedal badge={b} size="sm" />
+                <span className="text-[13px] text-fg-2">{b.label}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-[12.5px] text-muted">Pass a lesson&apos;s quiz to earn your first badge.</p>
+        )}
+        <SyncLine />
+      </CardBody>
+    </Card>
+  );
+}
+
+export function AccountPanel({ catalog }: { catalog: AcademyCatalog }) {
   const { configured, loading, user, profile, profileError, supabase, refreshProfile, signOut } = useAuth();
   const router = useRouter();
   const params = useSearchParams();
@@ -145,6 +191,7 @@ export function AccountPanel() {
       ) : null}
 
       {profile ? <Preferences profile={profile} onSaved={refreshProfile} /> : null}
+      <Learning catalog={catalog} />
       <PasswordCard highlight={recovery} supabase={supabase} />
       <Commitments />
     </>

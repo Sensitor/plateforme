@@ -8,6 +8,7 @@ import { CONCEPT_DEEP } from "@/content/academy-deep";
 import { PROJECTS, PROJECT_BY_SLUG } from "@/content/projects";
 import { ACADEMY_COLORS, tint } from "@/lib/brand";
 import { lessonMinutes } from "@/lib/academy/lesson";
+import { academyCatalog } from "@/lib/academy/catalog";
 import { TrackArt } from "@/components/academy/track-art";
 import { LevelDots } from "@/components/academy/concept-browser";
 import { ConceptQuiz } from "@/components/academy/concept-quiz";
@@ -376,7 +377,7 @@ function DeepLesson({ c, deep, color }: { c: Concept; deep: ConceptDeep; color: 
 
         <Section id="quiz" title="Check your understanding" color={color}>
           <p className="mb-5 text-[13.5px] text-muted">Three questions. Your result is saved in this browser and marks the lesson as completed in the Academy.</p>
-          <ConceptQuiz slug={c.slug} questions={deep.quiz} color={color} />
+          <ConceptQuiz slug={c.slug} questions={deep.quiz} color={color} catalog={academyCatalog()} />
         </Section>
 
         <Section id="sources" title="Sources" color={color}>

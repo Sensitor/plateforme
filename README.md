@@ -87,7 +87,7 @@ src/
     copilot/              Contexte d'ancrage (dossiers, concepts, prix), prompt, quotas
     alerts/, email/       Règles d'alerte, notifications, gabarit e-mail, envoi Resend
   proxy.ts                Rafraîchissement de la session Supabase (routes /api)
-supabase/migrations/      0001_app.sql (schéma utilisé par l'app, RLS) ; 0002 modèle CMS pour plus tard
+supabase/migrations/      0001_app.sql (schéma utilisé par l'app, RLS) ; 0003_academy.sql (progression Academy) ; 0002 modèle CMS pour plus tard
 supabase/schedule_alerts.sql  Planification pg_cron des alertes (facultatif)
 tests/                    vitest
 scripts/check-sources.mjs Vérification des liens sources

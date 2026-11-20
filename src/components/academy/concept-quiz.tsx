@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Check, RotateCcw, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { QuizQuestion } from "@/content/concepts";
-import { isCompleted, saveQuizResult, useAcademyProgress } from "@/lib/academy/progress";
+import { getAcademyProgress, isCompleted, saveQuizResult, useAcademyProgress } from "@/lib/academy/progress";
+import { computeBadges, newlyEarned, type Badge } from "@/lib/academy/badges";
+import type { AcademyCatalog } from "@/lib/academy/catalog";
+import { BadgeMedal } from "./badge-medal";
 
-export function ConceptQuiz({ slug, questions, color }: { slug: string; questions: QuizQuestion[]; color: string }) {
+export function ConceptQuiz({ slug, questions, color, catalog }: { slug: string; questions: QuizQuestion[]; color: string; catalog: AcademyCatalog }) {
   const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
+  const [earned, setEarned] = useState<Badge[]>([]);
   const { progress, ready } = useAcademyProgress();
   const done = answers.every((a) => a !== null);
   const score = answers.filter((a, i) => a === questions[i].answer).length;
@@ -17,7 +22,11 @@ export function ConceptQuiz({ slug, questions, color }: { slug: string; question
     if (answers[qi] !== null) return;
     const next = answers.map((a, i) => (i === qi ? oi : a));
     setAnswers(next);
-    if (next.every((a) => a !== null)) saveQuizResult(slug, next.filter((a, i) => a === questions[i].answer).length, questions.length);
+    if (next.every((a) => a !== null)) {
+      const before = computeBadges(getAcademyProgress(), catalog);
+      saveQuizResult(slug, next.filter((a, i) => a === questions[i].answer).length, questions.length);
+      setEarned(newlyEarned(before, computeBadges(getAcademyProgress(), catalog)));
+    }
   }
 
   return (
@@ -77,13 +86,38 @@ export function ConceptQuiz({ slug, questions, color }: { slug: string; question
           );
         })}
       </ol>
+      {done && earned.length ? (
+        <div className="rounded-xl border border-line bg-surface px-4 py-3.5" role="status">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">{earned.length === 1 ? "Badge earned" : `${earned.length} badges earned`}</div>
+          <ul className="mt-2.5 flex flex-wrap gap-x-6 gap-y-3">
+            {earned.map((b) => (
+              <li key={b.id} className="flex items-center gap-2.5">
+                <BadgeMedal badge={b} size="sm" />
+                <span>
+                  <span className="block text-[13.5px] font-medium text-fg">{b.label}</span>
+                  <span className="block text-[12px] text-muted">{b.description}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Link href="/academy#progress" className="mt-3 inline-block text-[12.5px] text-accent hover:text-accent-strong">
+            See all badges
+          </Link>
+        </div>
+      ) : null}
       {done ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line px-4 py-3" style={{ borderColor: color }}>
           <p className="text-[14px] text-fg">
             <span className="num">{score}/{questions.length}</span> correct.{" "}
             <span className="text-muted">{score === questions.length ? "Lesson mastered." : score / questions.length >= 2 / 3 ? "Lesson completed." : "Re-read the steps above and try again."}</span>
           </p>
-          <button onClick={() => setAnswers(questions.map(() => null))} className="inline-flex items-center gap-1.5 text-[13px] text-accent hover:text-accent-strong">
+          <button
+            onClick={() => {
+              setAnswers(questions.map(() => null));
+              setEarned([]);
+            }}
+            className="inline-flex items-center gap-1.5 text-[13px] text-accent hover:text-accent-strong"
+          >
             <RotateCcw className="size-3.5" aria-hidden /> Try again
           </button>
         </div>

@@ -1,4 +1,5 @@
 import type { Transaction } from "@/lib/portfolio/engine";
+import { isBetter, isValidResult, type Progress, type QuizResult } from "@/lib/academy/results";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (s: string) => UUID.test(s);
@@ -58,4 +59,51 @@ export function diffIds<T>(previous: Map<string, T>, current: Map<string, T>) {
     added: [...current.keys()].filter((k) => !previous.has(k)),
     removed: [...previous.keys()].filter((k) => !current.has(k)),
   };
+}
+
+export interface RemoteAcademyRow {
+  concept_slug: string;
+  score: number;
+  total: number;
+  achieved_at: string;
+}
+
+export const academyFromRemote = (rows: RemoteAcademyRow[]): Progress =>
+  Object.fromEntries(rows.map((r) => [r.concept_slug, { score: Number(r.score), total: Number(r.total), at: r.achieved_at }]));
+
+export const academyToRemote = (slug: string, r: QuizResult, userId: string) => ({
+  user_id: userId,
+  concept_slug: slug,
+  score: r.score,
+  total: r.total,
+  achieved_at: r.at,
+});
+
+const SLUG = /^[a-z0-9-]{1,80}$/;
+
+/**
+ * First Academy sync after sign-in: the best result per lesson wins. Guest
+ * progress is adopted into the account; progress left by another account on
+ * this browser is discarded.
+ */
+export function mergeAcademy(local: Progress, remote: Progress, adoptLocal: boolean) {
+  const merged: Progress = { ...remote };
+  const toUpsert: string[] = [];
+  if (adoptLocal) {
+    for (const [slug, r] of Object.entries(local)) {
+      if (!SLUG.test(slug) || !isValidResult(r)) continue;
+      if (isBetter(r, merged[slug])) {
+        merged[slug] = r;
+        toUpsert.push(slug);
+      }
+    }
+  }
+  return { merged, toUpsert };
+}
+
+/** Lessons whose local result is better than the last result known to be in the cloud. */
+export function academyChanges(cloud: Progress, current: Progress): string[] {
+  return Object.entries(current)
+    .filter(([slug, r]) => SLUG.test(slug) && isValidResult(r) && isBetter(r, cloud[slug]))
+    .map(([slug]) => slug);
 }

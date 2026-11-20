@@ -6,22 +6,25 @@ import { useAuth } from "@/lib/auth/auth-provider";
 import { getWatchlist, replaceWatchlist, setWatchlistLimit, subscribeWatchlist, WATCHLIST_FREE_LIMIT, WATCHLIST_PAID_LIMIT } from "@/lib/watchlist/store";
 import { getPortfolio, newId, replacePortfolio, subscribePortfolio } from "@/lib/portfolio/store";
 import type { Transaction } from "@/lib/portfolio/engine";
-import { diffIds, fromRemote, mergeTransactions, mergeWatchlist, toRemote, type RemoteTransaction } from "./merge";
+import { getAcademyProgress, replaceAcademyProgress, setAcademySync, subscribeAcademy, type Progress } from "@/lib/academy/progress";
+import { academyChanges, academyFromRemote, academyToRemote, diffIds, fromRemote, mergeAcademy, mergeTransactions, mergeWatchlist, toRemote, type RemoteAcademyRow, type RemoteTransaction } from "./merge";
 import { setSyncStatus } from "./status";
 
 const OWNER_KEY = "sensitor.sync.owner";
+/** Separate owner for Academy progress: its table (0003) may be installed later than the others. */
+const ACADEMY_OWNER_KEY = "sensitor.academy.owner";
 
-function getOwner(): string | null {
+function getOwner(key = OWNER_KEY): string | null {
   try {
-    return window.localStorage.getItem(OWNER_KEY);
+    return window.localStorage.getItem(key);
   } catch {
     return null;
   }
 }
-function setOwner(id: string | null) {
+function setOwner(id: string | null, key = OWNER_KEY) {
   try {
-    if (id) window.localStorage.setItem(OWNER_KEY, id);
-    else window.localStorage.removeItem(OWNER_KEY);
+    if (id) window.localStorage.setItem(key, id);
+    else window.localStorage.removeItem(key);
   } catch {
     // storage unavailable
   }
@@ -90,9 +93,40 @@ async function startSync(supabase: SupabaseClient, userId: string, paid: boolean
   };
 }
 
+async function startAcademySync(supabase: SupabaseClient, userId: string, isCancelled: () => boolean) {
+  const { data, error } = await supabase.from("academy_progress").select("concept_slug, score, total, achieved_at");
+  if (isCancelled()) return null;
+  if (error) {
+    // Typically: 0003_academy.sql not applied yet. Progress stays in this browser.
+    setAcademySync("unavailable");
+    return null;
+  }
+  const owner = getOwner(ACADEMY_OWNER_KEY);
+  const { merged, toUpsert } = mergeAcademy(getAcademyProgress(), academyFromRemote((data ?? []) as RemoteAcademyRow[]), owner === null || owner === userId);
+  if (toUpsert.length) {
+    const { error: upErr } = await supabase.from("academy_progress").upsert(toUpsert.map((slug) => academyToRemote(slug, merged[slug], userId)));
+    if (upErr) {
+      setAcademySync("unavailable");
+      return null;
+    }
+  }
+  if (isCancelled()) return null;
+  replaceAcademyProgress(merged);
+  setOwner(userId, ACADEMY_OWNER_KEY);
+  setAcademySync("cloud");
+
+  let cloud: Progress = merged;
+  return subscribeAcademy(() => {
+    const current = getAcademyProgress();
+    const changed = academyChanges(cloud, current);
+    cloud = current;
+    if (changed.length) void supabase.from("academy_progress").upsert(changed.map((slug) => academyToRemote(slug, current[slug], userId))).then(({ error: e }) => e && setAcademySync("unavailable"));
+  });
+}
+
 /**
- * Keeps the offline-first watchlist and portfolio in step with the signed-in
- * account. On sign-out the local copy is cleared, so the next person using
+ * Keeps the offline-first watchlist, portfolio and Academy progress in step
+ * with the signed-in account. On sign-out the local copy is cleared, so the next person using
  * this browser does not see the previous account's data.
  */
 export function CloudSync() {
@@ -105,23 +139,34 @@ export function CloudSync() {
     if (!userId) {
       setSyncStatus("local");
       setWatchlistLimit(WATCHLIST_FREE_LIMIT);
+      setAcademySync("local");
       if (getOwner()) {
         // Signed out (or session expired): the data lives in the account.
         replaceWatchlist([]);
         replacePortfolio({ transactions: [], example: false });
         setOwner(null);
       }
+      if (getOwner(ACADEMY_OWNER_KEY)) {
+        replaceAcademyProgress({});
+        setOwner(null, ACADEMY_OWNER_KEY);
+      }
       return;
     }
     let cancelled = false;
     let stop: (() => void) | null = null;
+    let stopAcademy: (() => void) | null = null;
     void startSync(supabase, userId, paid, () => cancelled).then((fn) => {
       if (cancelled) fn?.();
       else stop = fn;
     });
+    void startAcademySync(supabase, userId, () => cancelled).then((fn) => {
+      if (cancelled) fn?.();
+      else stopAcademy = fn;
+    });
     return () => {
       cancelled = true;
       stop?.();
+      stopAcademy?.();
     };
   }, [supabase, userId, paid, loading]);
 
