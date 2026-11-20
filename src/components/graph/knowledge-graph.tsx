@@ -13,16 +13,26 @@ import { GRAPH_HEIGHT, GRAPH_WIDTH } from "@/lib/graph-layout";
 import { Delta } from "@/components/ui/delta";
 import { SectorBadge } from "@/components/ui/sector-badge";
 import { TokenLogo } from "@/components/ui/token-logo";
+import { useT } from "@/i18n/client";
+import type { Dictionary } from "@/i18n/dictionaries";
 
 const KINDS = Object.keys(RELATION_META) as RelationKind[];
 
-function evidenceHref(evidence: string): { href: string; external: boolean; label: string } {
+type GraphT = Dictionary["graph"];
+
+function evidenceHref(evidence: string, t: GraphT): { href: string; external: boolean; label: string } {
   if (evidence.startsWith("dossier:")) {
     const [slug, section] = evidence.slice(8).split("#");
-    return { href: `/projects/${slug}${section ? `#${section}` : ""}`, external: false, label: "Dossier" };
+    return { href: `/projects/${slug}${section ? `#${section}` : ""}`, external: false, label: t.evidence.dossier };
   }
-  return { href: evidence, external: true, label: "Official docs" };
+  return { href: evidence, external: true, label: t.evidence.docs };
 }
+
+/** Relation label and verb in the interface language. */
+const relation = (t: GraphT, kind: RelationKind) => {
+  const [label, verb] = t.relations[kind] ?? [RELATION_META[kind].label, RELATION_META[kind].verb];
+  return { ...RELATION_META[kind], label, verb };
+};
 
 /** Line between two node centres, trimmed so it starts and ends at the circle edges. */
 function edgePath(a: GraphNode, b: GraphNode, curve: number) {
@@ -41,6 +51,7 @@ function edgePath(a: GraphNode, b: GraphNode, curve: number) {
 }
 
 export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: GraphNode[]; edges: GraphEdge[]; halos: GraphHalo[]; marketNote?: React.ReactNode }) {
+  const t = useT().graph;
   const searchParams = useSearchParams();
   const bySlug = useMemo(() => new Map(nodes.map((n) => [n.slug, n])), [nodes]);
   const initial = searchParams.get("focus");
@@ -95,9 +106,9 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
       {/* Controls */}
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        <div className="flex w-max gap-1.5 sm:w-auto sm:flex-wrap" role="group" aria-label="Relationship types">
+        <div className="flex w-max gap-1.5 sm:w-auto sm:flex-wrap" role="group" aria-label={t.typesAria}>
           {KINDS.map((k) => {
-            const m = RELATION_META[k];
+            const m = relation(t, k);
             const on = kinds.has(k);
             return (
               <button
@@ -123,8 +134,8 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Find a project"
-              aria-label="Find a project in the graph"
+              placeholder={t.find}
+              aria-label={t.findAria}
               className="h-9 w-48 rounded-lg border border-line bg-surface pl-8 pr-2 text-[13px] text-fg placeholder:text-subtle focus:border-accent/60 focus:outline-none"
             />
             {matches.length ? (
@@ -150,28 +161,28 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
             className="inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-lg border border-line-strong bg-surface-2 px-3 text-[13px] text-fg-2 hover:bg-surface-3"
           >
             {view === "graph" ? <List className="size-4" aria-hidden /> : <Network className="size-4" aria-hidden />}
-            {view === "graph" ? "List view" : "Graph view"}
+            {view === "graph" ? t.listView : t.graphView}
           </button>
         </div>
       </div>
 
       {view === "list" ? (
-        <RelationshipTable edges={visibleEdges} bySlug={bySlug} />
+        <RelationshipTable edges={visibleEdges} bySlug={bySlug} t={t} />
       ) : (
         <div className="grid grid-cols-1 gap-x-8 gap-y-8 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
           {/* Graph */}
           <div className="relative overflow-hidden rounded-lg border border-line bg-bg-elevated">
-            <div className="absolute left-4 top-3 z-10 hidden text-[11.5px] text-subtle sm:block">Click a project to see its environment. Node size follows market cap.</div>
+            <div className="absolute left-4 top-3 z-10 hidden text-[11.5px] text-subtle sm:block">{t.hint}</div>
             <div className="absolute bottom-3 left-4 z-10 hidden flex-wrap gap-x-4 gap-y-1 text-[11.5px] text-muted sm:flex">
               {halos.map((h) => (
                 <span key={h.id} className="inline-flex items-center gap-1.5">
                   <span className="size-2.5 rounded-sm" style={{ backgroundColor: tint(h.color, 0.45) }} aria-hidden />
-                  {h.label}
+                  {t.ecosystems[h.id] ?? h.label}
                 </span>
               ))}
               <span className="inline-flex items-center gap-1.5">
                 <span className="size-2.5 rounded-full border border-line-strong" aria-hidden />
-                Ring colour = sector
+                {t.ring}
               </span>
             </div>
             {selected ? (
@@ -181,14 +192,14 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
                   aria-pressed={focusOnly}
                   className={cn("h-8 rounded-lg border px-3 text-[12.5px]", focusOnly ? "border-accent/50 bg-accent-soft text-fg" : "border-line-strong bg-surface text-fg-2")}
                 >
-                  Focus on {selectedNode?.name}
+                  {t.focus(selectedNode?.name ?? "")}
                 </button>
-                <button onClick={() => select(null)} className="flex size-8 items-center justify-center rounded-lg border border-line-strong bg-surface text-fg-2" aria-label="Reset selection">
+                <button onClick={() => select(null)} className="flex size-8 items-center justify-center rounded-lg border border-line-strong bg-surface text-fg-2" aria-label={t.reset}>
                   <RotateCcw className="size-3.5" />
                 </button>
               </div>
             ) : null}
-            <svg viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`} className="block h-auto w-full" role="img" aria-label="Knowledge graph of relationships between covered projects" onClick={() => select(null)}>
+            <svg viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`} className="block h-auto w-full" role="img" aria-label={t.svgLabel} onClick={() => select(null)}>
               <defs>
                 {KINDS.filter((k) => RELATION_META[k].directed).map((k) => (
                   <marker key={k} id={`arrow-${k}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -296,28 +307,28 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
                 <p className="text-[13.5px] leading-relaxed text-fg-2">{selectedNode.oneLiner}</p>
                 <dl className="grid grid-cols-2 gap-4 border-y border-line py-3 text-[12px]">
                   <div>
-                    <dt className="text-subtle">Price</dt>
+                    <dt className="text-subtle">{t.price}</dt>
                     <dd className="num mt-0.5 text-[14px] text-fg">
                       {formatPrice(selectedNode.price)} <Delta value={selectedNode.change24h} className="text-[11.5px]" />
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-subtle">Market cap</dt>
+                    <dt className="text-subtle">{t.marketCap}</dt>
                     <dd className="num mt-0.5 text-[14px] text-fg">{formatUsdCompact(selectedNode.marketCap)}</dd>
                   </div>
                 </dl>
                 {marketNote}
                 <div>
                   <h3 className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                    Relationships <span className="num text-subtle">{selectedEdges.length}</span>
+                    {t.relationships} <span className="num text-subtle">{selectedEdges.length}</span>
                   </h3>
                   <ul className="space-y-3">
                     {selectedEdges.map((e, i) => {
-                      const m = RELATION_META[e.kind];
+                      const m = relation(t, e.kind);
                       const other = bySlug.get(e.from === selected ? e.to : e.from)!;
                       const from = bySlug.get(e.from)!;
                       const to = bySlug.get(e.to)!;
-                      const ev = evidenceHref(e.evidence);
+                      const ev = evidenceHref(e.evidence, t);
                       return (
                         <li key={i} className="border-l-2 pl-3" style={{ borderColor: m.color }}>
                           <div className="text-[13px] text-fg">
@@ -326,7 +337,7 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
                           <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{e.note}</p>
                           <div className="mt-1 flex gap-3 text-[11.5px]">
                             <button onClick={() => select(other.slug)} className="text-accent hover:text-accent-strong">
-                              Go to {other.name}
+                              {t.goTo(other.name)}
                             </button>
                             {ev.external ? (
                               <a href={ev.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-subtle hover:text-fg-2">
@@ -341,39 +352,33 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
                         </li>
                       );
                     })}
-                    {selectedEdges.length === 0 ? <li className="text-[12.5px] text-muted">No relationship of the selected types.</li> : null}
+                    {selectedEdges.length === 0 ? <li className="text-[12.5px] text-muted">{t.none}</li> : null}
                   </ul>
                 </div>
                 <Link href={`/projects/${selectedNode.slug}`} className="flex items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-[13.5px] font-semibold text-[#0d1020]">
-                  Open the research dossier <ArrowRight className="size-4" aria-hidden />
+                  {t.open} <ArrowRight className="size-4" aria-hidden />
                 </Link>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="serif-display text-[26px] leading-tight text-fg">How to read the map</div>
-                <p className="text-[13.5px] leading-relaxed text-fg-2">
-                  Each circle is a project covered by Sensitor, ringed in its sector colour. Lines are documented relationships: where a protocol settles, where it is deployed,
-                  which oracle it relies on, who it competes with.
-                </p>
+                <div className="serif-display text-[26px] leading-tight text-fg">{t.howTitle}</div>
+                <p className="text-[13.5px] leading-relaxed text-fg-2">{t.howText}</p>
                 <ul className="space-y-2 text-[13px] text-fg-2">
-                  <li>Hover a project to highlight its connections.</li>
-                  <li>Click it to open its environment on the right.</li>
-                  <li>Toggle relationship types above to simplify the map.</li>
+                  {t.howSteps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
                 </ul>
                 <dl className="grid grid-cols-2 gap-4 border-y border-line py-3">
                   <div>
                     <dd className="num text-xl text-fg">{nodes.length}</dd>
-                    <dt className="text-[11.5px] text-subtle">projects</dt>
+                    <dt className="text-[11.5px] text-subtle">{t.projects}</dt>
                   </div>
                   <div>
                     <dd className="num text-xl text-fg">{edges.length}</dd>
-                    <dt className="text-[11.5px] text-subtle">relationships</dt>
+                    <dt className="text-[11.5px] text-subtle">{t.relationshipsCount}</dt>
                   </div>
                 </dl>
-                <p className="text-[11.5px] leading-relaxed text-subtle">
-                  Every relationship links to the dossier section or official documentation that supports it. Announced partnerships are not shown unless they correspond to a
-                  live integration.
-                </p>
+                <p className="text-[11.5px] leading-relaxed text-subtle">{t.evidenceNote}</p>
               </div>
             )}
           </aside>
@@ -383,26 +388,26 @@ export function KnowledgeGraph({ nodes, edges, halos, marketNote }: { nodes: Gra
   );
 }
 
-function RelationshipTable({ edges, bySlug }: { edges: GraphEdge[]; bySlug: Map<string, GraphNode> }) {
+function RelationshipTable({ edges, bySlug, t }: { edges: GraphEdge[]; bySlug: Map<string, GraphNode>; t: GraphT }) {
   return (
     <div>
       <div className="relative overflow-x-auto">
         <table className="w-full min-w-[760px] border-y border-line text-[13px]">
           <thead>
             <tr className="border-b border-line text-left text-[10.5px] uppercase tracking-[0.1em] text-subtle">
-              <th scope="col" className="py-2.5 font-medium">From</th>
-              <th scope="col" className="px-3 py-2.5 font-medium">Relationship</th>
-              <th scope="col" className="px-3 py-2.5 font-medium">To</th>
-              <th scope="col" className="px-3 py-2.5 font-medium">Detail</th>
-              <th scope="col" className="py-2.5 pl-3 font-medium">Evidence</th>
+              <th scope="col" className="py-2.5 font-medium">{t.table.from}</th>
+              <th scope="col" className="px-3 py-2.5 font-medium">{t.table.relationship}</th>
+              <th scope="col" className="px-3 py-2.5 font-medium">{t.table.to}</th>
+              <th scope="col" className="px-3 py-2.5 font-medium">{t.table.detail}</th>
+              <th scope="col" className="py-2.5 pl-3 font-medium">{t.table.evidence}</th>
             </tr>
           </thead>
           <tbody>
             {edges.map((e, i) => {
               const a = bySlug.get(e.from)!;
               const b = bySlug.get(e.to)!;
-              const m = RELATION_META[e.kind];
-              const ev = evidenceHref(e.evidence);
+              const m = relation(t, e.kind);
+              const ev = evidenceHref(e.evidence, t);
               return (
                 <tr key={i} className="border-b border-line/60 align-top last:border-0">
                   <td className="py-3">

@@ -19,19 +19,20 @@ import { SourceTag } from "@/components/ui/source-tag";
 import { DataNotice } from "@/components/ui/data-notice";
 import { RiskPill, ScorePill } from "@/components/research/pills";
 import { CompareSelector } from "@/components/compare/compare-selector";
+import { getT } from "@/i18n/server";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = { title: "Compare projects", description: "Compare crypto projects side by side: market data, tokenomics, fundamentals and research framework." };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("compare", "/compare");
+}
 
 const DEFAULT = ["ethereum", "solana", "avalanche"];
 
-export default function ComparePage(props: PageProps<"/[locale]/compare">) {
+export default async function ComparePage(props: PageProps<"/[locale]/compare">) {
+  const t = (await getT()).compare;
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Discover"
-        title="Compare projects"
-        description="Up to four projects side by side. Live metrics come from market data providers; qualitative rows come from each project's Sensitor dossier."
-      />
+      <PageHeader eyebrow={t.eyebrow} title={t.title} description={t.description} />
       <Suspense fallback={<CardSkeleton lines={10} />}>
         <CompareContent searchParams={props.searchParams} />
       </Suspense>
@@ -49,36 +50,39 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
   const [quotes, ...funds] = await Promise.all([getCoverageQuotes(), ...slugs.map((s) => getProjectFundamentals(s))]);
   const q = (p: Project): Quote | undefined => quotes.data?.[p.slug];
   const f = (i: number): ProjectFundamentals | null => funds[i]?.data ?? null;
+  const dict = await getT();
+  const t = dict.compare;
+  const R = t.rows;
 
   type Row = { label: string; render: (p: Project, i: number) => React.ReactNode; hint?: string };
   const groups: { title: string; rows: Row[] }[] = [
     {
-      title: "Market",
+      title: t.groups.market,
       rows: [
-        { label: "Price", render: (p) => <span className="num">{formatPrice(q(p)?.price)}</span> },
-        { label: "24h / 7d", render: (p) => <span className="flex gap-3"><Delta value={q(p)?.change24h} /><Delta value={q(p)?.change7d} /></span> },
-        { label: "Market cap", render: (p) => <span className="num">{formatUsdCompact(q(p)?.marketCap)}</span> },
-        { label: "FDV", render: (p) => <span className="num">{formatUsdCompact(q(p)?.fdv)}</span> },
+        { label: R.price, render: (p) => <span className="num">{formatPrice(q(p)?.price)}</span> },
+        { label: R.change, render: (p) => <span className="flex gap-3"><Delta value={q(p)?.change24h} /><Delta value={q(p)?.change7d} /></span> },
+        { label: R.marketCap, render: (p) => <span className="num">{formatUsdCompact(q(p)?.marketCap)}</span> },
+        { label: R.fdv, render: (p) => <span className="num">{formatUsdCompact(q(p)?.fdv)}</span> },
         {
-          label: "MC / FDV",
-          hint: "Share of fully diluted value already circulating; low values signal future dilution.",
+          label: R.mcFdv,
+          hint: R.mcFdvHint,
           render: (p) => {
             const x = q(p);
             return <span className="num">{x?.marketCap && x?.fdv ? formatPercent((x.marketCap / x.fdv) * 100, { signed: false, digits: 0 }) : "n/a"}</span>;
           },
         },
-        { label: "Volume 24h", render: (p) => <span className="num">{formatUsdCompact(q(p)?.volume24h)}</span> },
+        { label: R.volume, render: (p) => <span className="num">{formatUsdCompact(q(p)?.volume24h)}</span> },
       ],
     },
     {
-      title: "Fundamentals",
+      title: t.groups.fundamentals,
       rows: [
-        { label: "TVL", render: (_, i) => <span className="num">{formatUsdCompact(f(i)?.tvl)}</span> },
-        { label: "Fees · 30d", render: (_, i) => <span className="num">{formatUsdCompact(f(i)?.fees30d)}</span> },
-        { label: "Revenue · 30d", render: (_, i) => <span className="num">{formatUsdCompact(f(i)?.revenue30d)}</span> },
+        { label: R.tvl, render: (_, i) => <span className="num">{formatUsdCompact(f(i)?.tvl)}</span> },
+        { label: R.fees, render: (_, i) => <span className="num">{formatUsdCompact(f(i)?.fees30d)}</span> },
+        { label: R.revenue, render: (_, i) => <span className="num">{formatUsdCompact(f(i)?.revenue30d)}</span> },
         {
-          label: "Annualised fees / MCap",
-          hint: "Fees over the last 30 days × 12, divided by market cap. A rough usage-to-valuation ratio; not comparable across business models.",
+          label: R.feesCap,
+          hint: R.feesCapHint,
           render: (p, i) => {
             const fees = f(i)?.fees30d;
             const cap = q(p)?.marketCap;
@@ -88,21 +92,21 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
       ],
     },
     {
-      title: "Profile",
+      title: t.groups.profile,
       rows: [
-        { label: "Sector", render: (p) => <SectorBadge sector={p.sector} /> },
-        { label: "Blockchain", render: (p) => p.chains.map((c) => CHAINS[c].label).join(", ") },
-        { label: "Launched", render: (p) => p.launched.slice(0, 4) },
-        { label: "Maturity", render: (p) => MATURITY[p.maturity] },
-        { label: "Risk level", render: (p) => <RiskPill level={p.riskLevel} /> },
-        { label: "Max supply", render: (p) => (p.dossier.tokenomics.maxSupply ? formatNumber(p.dossier.tokenomics.maxSupply) : "No hard cap") },
+        { label: R.sector, render: (p) => <SectorBadge sector={p.sector} /> },
+        { label: R.chain, render: (p) => p.chains.map((c) => CHAINS[c].label).join(", ") },
+        { label: R.launched, render: (p) => p.launched.slice(0, 4) },
+        { label: R.maturity, render: (p) => dict.labels.maturity[p.maturity] },
+        { label: R.risk, render: (p) => <RiskPill level={p.riskLevel} /> },
+        { label: R.maxSupply, render: (p) => (p.dossier.tokenomics.maxSupply ? formatNumber(p.dossier.tokenomics.maxSupply) : R.noCap) },
       ],
     },
     {
-      title: "Sensitor Research Framework",
+      title: t.groups.framework,
       rows: [
         ...PILLARS.map((pillar) => ({
-          label: pillar.label,
+          label: dict.labels.pillars[pillar.id].label,
           render: (p: Project) => {
             const a = p.dossier.framework.find((x) => x.pillar === pillar.id);
             return (
@@ -112,13 +116,13 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
                     <span key={n} className={cn("h-1.5 w-4 rounded-full", a?.rating != null && n <= a.rating ? "bg-accent" : "bg-surface-3")} />
                   ))}
                 </span>
-                <span className="text-[11px] text-subtle">{a?.rating == null ? "n/r" : a.confidence}</span>
+                <span className="text-[11px] text-subtle">{a?.rating == null ? t.nr : dict.ui.confidenceShort[a.confidence]}</span>
               </span>
             );
           },
         })),
         {
-          label: "Composite",
+          label: R.composite,
           render: (p: Project) => {
             const c = compositeScore(p.dossier.framework);
             return <ScorePill score={c.score} note={c.withheldReason} />;
@@ -127,13 +131,13 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
       ],
     },
     {
-      title: "Analysis",
+      title: t.groups.analysis,
       rows: [
-        { label: "Strengths", render: (p) => p.dossier.competitors.columns[0]?.strengths },
-        { label: "Weaknesses", render: (p) => p.dossier.competitors.columns[0]?.weaknesses },
-        { label: "Positioning", render: (p) => p.dossier.competitors.columns[0]?.positioning },
-        { label: "Bull case", render: (p) => p.dossier.thesis.bull[0]?.text },
-        { label: "Bear case", render: (p) => p.dossier.thesis.bear[0]?.text },
+        { label: R.strengths, render: (p) => p.dossier.competitors.columns[0]?.strengths },
+        { label: R.weaknesses, render: (p) => p.dossier.competitors.columns[0]?.weaknesses },
+        { label: R.positioning, render: (p) => p.dossier.competitors.columns[0]?.positioning },
+        { label: R.bull, render: (p) => p.dossier.thesis.bull[0]?.text },
+        { label: R.bear, render: (p) => p.dossier.thesis.bear[0]?.text },
       ],
     },
   ];
@@ -154,7 +158,7 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
             <thead>
               <tr className="border-y border-line">
                 <th scope="col" className="py-4 pr-4 text-left text-[10.5px] font-medium uppercase tracking-[0.1em] text-subtle">
-                  Project
+                  {t.project}
                 </th>
                 {projects.map((p) => (
                   <th key={p.slug} scope="col" className="px-4 py-4 text-left">
@@ -195,8 +199,8 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
         </div>
       </div>
       <div className="flex flex-wrap gap-x-4">
-        <SourceTag result={quotes} label="Market data" />
-        {funds[0] && funds[0].status !== "unavailable" ? <SourceTag result={funds[0]} label="Fundamentals" /> : null}
+        <SourceTag result={quotes} label={dict.ui.sources.marketData} />
+        {funds[0] && funds[0].status !== "unavailable" ? <SourceTag result={funds[0]} label={dict.ui.sources.fundamentals} /> : null}
       </div>
       <p className="text-[12px] leading-relaxed text-subtle">
         Comparisons across different business models (e.g. an L1 vs a DeFi protocol) are indicative only. Framework ratings are Sensitor analyst assessments from draft dossiers.

@@ -7,9 +7,9 @@ import { overview, watchlistUi } from "./overview";
 import { markets } from "./markets";
 import { explore } from "./explore";
 import { dossier } from "./dossier";
-import { research, settings, soon, watchlistPage } from "./pages";
+import { compare, graph, research, settings, soon, watchlistPage } from "./pages";
 import { methodology } from "./methodology";
 
-export const en = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier, soon, settings, watchlistPage, research, methodology };
+export const en = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier, soon, settings, watchlistPage, research, methodology, compare, graph };
 
 export type Dictionary = typeof en;
