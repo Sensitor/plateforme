@@ -62,14 +62,11 @@ export function LoginForm() {
         const { error } = await supabase.auth.signInWithPassword({ email: address, password });
         if (error) return setError(error.message === "Email not confirmed" ? "Confirm your email first: check your inbox for the link." : "Email or password is incorrect.");
         router.replace(next);
-        router.refresh();
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({ email: address, password, options: { emailRedirectTo: callback(next) } });
         if (error) return setError(error.message);
-        if (data.session) {
-          router.replace(next);
-          router.refresh();
-        } else setSent(`We sent a confirmation link to ${address}. Open it to activate your account.`);
+        if (data.session) router.replace(next);
+        else setSent(`We sent a confirmation link to ${address}. Open it to activate your account.`);
       } else if (mode === "magic") {
         const { error } = await supabase.auth.signInWithOtp({ email: address, options: { emailRedirectTo: callback(next), shouldCreateUser: true } });
         if (error) return setError(error.message);

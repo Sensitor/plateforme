@@ -124,7 +124,6 @@ export function AccountPanel() {
               onClick={async () => {
                 await signOut();
                 router.replace("/overview");
-                router.refresh();
               }}
               className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] text-fg-2 hover:bg-surface-2 hover:text-fg"
             >

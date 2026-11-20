@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { isAuthRetryableFetchError, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 import { supabaseConfigured } from "@/lib/supabase/config";
 
@@ -60,15 +60,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!supabase) return;
     let cancelled = false;
-    supabase.auth.getUser().then(({ data }) => {
+    let currentId: string | null | undefined;
+
+    // Re-render and reload the profile only when the account actually changes:
+    // Supabase also emits events on every token refresh and when a tab regains focus.
+    const apply = (next: User | null, force = false) => {
       if (cancelled) return;
-      setUser(data.user);
+      const id = next?.id ?? null;
       setLoading(false);
-      void loadProfile(data.user);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      void loadProfile(session?.user ?? null);
+      if (!force && id === currentId) return;
+      currentId = id;
+      setUser(next);
+      void loadProfile(next);
+    };
+
+    supabase.auth
+      .getUser()
+      .then(({ data, error }) => {
+        // A network failure says nothing about the session: keep what the auth events report.
+        if (error && isAuthRetryableFetchError(error)) return setLoading(false);
+        apply(data.user);
+      })
+      .catch(() => setLoading(false));
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      // Deferred, as Supabase recommends: calling the client from inside this
+      // callback while the auth state is being committed can stall it.
+      setTimeout(() => apply(session?.user ?? null, event === "USER_UPDATED"), 0);
     });
     return () => {
       cancelled = true;
