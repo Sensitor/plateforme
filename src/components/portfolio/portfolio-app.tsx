@@ -23,6 +23,7 @@ import { StorageNote, useStorageWord } from "@/components/storage-note";
 import { ImportDialog, TransactionDialog } from "./dialogs";
 import { fetchHistories, useHistories } from "./use-histories";
 import type { AssetMeta } from "./types";
+import { useT } from "@/i18n/client";
 
 const DAY = 86400_000;
 const dayKey = (t: number) => new Date(t).toISOString().slice(0, 10);
@@ -39,6 +40,8 @@ const EXAMPLE = [
 ];
 
 export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta[]; today: string; quoteSource: React.ReactNode }) {
+  const dict = useT();
+  const t = dict.portfolio;
   const { transactions, example, ready, add, remove, clear, setExample } = usePortfolio();
   const storageWord = useStorageWord();
   const [dialog, setDialog] = useState<"add" | "import" | null>(null);
@@ -50,7 +53,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
 
   const meta = useMemo(() => new Map(assets.map((a) => [a.slug, a])), [assets]);
   const names = useMemo(() => Object.fromEntries(assets.map((a) => [a.slug, a.name])), [assets]);
-  const { positions, issues } = useMemo(() => computePositions(transactions), [transactions]);
+  const { positions, issues } = useMemo(() => computePositions(transactions, t.engine), [transactions, t.engine]);
 
   const rows = useMemo(() => {
     const list = [...positions.values()]
@@ -89,13 +92,13 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
         asset: r.asset,
         name: r.meta?.name ?? r.asset,
         value: r.value!,
-        sectorLabel: r.meta?.sectorLabel ?? (r.asset === STABLE_ASSET ? "Stablecoins" : null),
+        sectorLabel: r.meta?.sectorLabel ?? (r.asset === STABLE_ASSET ? t.stablecoins : null),
         ecosystem: r.meta?.ecosystem ?? null,
         riskLevel: r.meta?.riskLevel ?? null,
         volume24h: r.meta?.volume24h ?? null,
       }));
-    return buildInsights(holdings, names);
-  }, [rows, names]);
+    return buildInsights(holdings, names, dict);
+  }, [rows, names, dict, t.stablecoins]);
 
   const correlations = useMemo(() => {
     if (!histories) return null;
@@ -123,7 +126,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       if (txs.some((t) => t.price == null)) throw new Error("missing price");
       setExample([...txs.map((t) => ({ ...t, price: Math.round(t.price! * 100) / 100 })), { asset: STABLE_ASSET, date: "2026-03-02", side: "buy", quantity: 1500, price: 1, fee: 0 }]);
     } catch {
-      setExampleError("Historical prices could not be loaded right now, so the example was not created. Try again in a moment.");
+      setExampleError(t.exampleError);
     } finally {
       setLoadingExample(false);
     }
@@ -143,10 +146,10 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
     <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[12px] text-muted">
       <StorageNote />
       <span className="inline-flex items-center gap-1.5">
-        <Eye className="size-3.5 text-positive" aria-hidden /> Read-only: Sensitor never executes transactions
+        <Eye className="size-3.5 text-positive" aria-hidden /> {t.principles.readOnly}
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <ShieldCheck className="size-3.5 text-positive" aria-hidden /> Never asks for a seed phrase or private key
+        <ShieldCheck className="size-3.5 text-positive" aria-hidden /> {t.principles.noSeed}
       </span>
     </div>
   );
@@ -168,20 +171,17 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
           <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-accent-soft text-accent">
             <WalletMinimal className="size-6" aria-hidden />
           </span>
-          <h2 className="serif-display mt-5 text-[34px] leading-tight text-fg">Track what you own, understand what you risk</h2>
-          <p className="mx-auto mt-3 max-w-xl text-[14.5px] leading-relaxed text-muted">
-            Add your positions manually or import a CSV. Sensitor values them with live prices and analyses concentration, sector and ecosystem exposure, shared dependencies,
-            correlations and upcoming unlocks.
-          </p>
+          <h2 className="serif-display mt-5 text-[34px] leading-tight text-fg">{t.empty.title}</h2>
+          <p className="mx-auto mt-3 max-w-xl text-[14.5px] leading-relaxed text-muted">{t.empty.text}</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <button onClick={() => setDialog("add")} className="inline-flex h-11 items-center gap-2 rounded-lg bg-accent px-5 text-[15px] font-semibold text-[#0d1020] hover:bg-accent-strong">
-              <Plus className="size-4" aria-hidden /> Add a transaction
+              <Plus className="size-4" aria-hidden /> {t.empty.add}
             </button>
             <button onClick={() => setDialog("import")} className="inline-flex h-11 items-center gap-2 rounded-lg border border-line-strong bg-surface-2 px-5 text-[15px] text-fg hover:bg-surface-3">
-              <FileUp className="size-4" aria-hidden /> Import CSV
+              <FileUp className="size-4" aria-hidden /> {t.empty.import}
             </button>
             <button onClick={loadExample} disabled={loadingExample} className="inline-flex h-11 items-center gap-2 rounded-lg px-5 text-[15px] text-accent hover:bg-accent-soft disabled:opacity-50">
-              <Sparkles className="size-4" aria-hidden /> {loadingExample ? "Loading example" : "Explore with an example"}
+              <Sparkles className="size-4" aria-hidden /> {loadingExample ? t.empty.loading : t.empty.example}
             </button>
           </div>
           {exampleError ? <p className="mt-4 text-[13px] text-negative">{exampleError}</p> : null}
@@ -197,19 +197,19 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
         {principles}
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setDialog("add")} className="inline-flex h-9 items-center gap-2 rounded-lg bg-accent px-3.5 text-[13.5px] font-semibold text-[#0d1020] hover:bg-accent-strong">
-            <Plus className="size-4" aria-hidden /> Add transaction
+            <Plus className="size-4" aria-hidden /> {t.actions.add}
           </button>
           <button onClick={() => setDialog("import")} className="inline-flex h-9 items-center gap-2 rounded-lg border border-line-strong bg-surface-2 px-3.5 text-[13.5px] text-fg hover:bg-surface-3">
-            <FileUp className="size-4" aria-hidden /> Import
+            <FileUp className="size-4" aria-hidden /> {t.actions.import}
           </button>
           <button onClick={exportCsv} className="inline-flex h-9 items-center gap-2 rounded-lg border border-line-strong bg-surface-2 px-3.5 text-[13.5px] text-fg hover:bg-surface-3">
-            <Download className="size-4" aria-hidden /> Export
+            <Download className="size-4" aria-hidden /> {t.actions.export}
           </button>
           {confirmClear ? (
             <span className="inline-flex items-center gap-2 text-[13px]">
-              <span className="text-muted">Delete all transactions?</span>
+              <span className="text-muted">{t.actions.confirm}</span>
               <button onClick={() => setConfirmClear(false)} className="h-9 rounded-lg px-3 text-fg-2 hover:bg-surface-2">
-                Cancel
+                {t.actions.cancel}
               </button>
               <button
                 onClick={() => {
@@ -218,12 +218,12 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
                 }}
                 className="h-9 rounded-lg border border-negative/40 px-3 text-negative hover:bg-negative-soft"
               >
-                Delete
+                {t.actions.delete}
               </button>
             </span>
           ) : (
             <button onClick={() => setConfirmClear(true)} className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-[13.5px] text-muted hover:bg-surface-2 hover:text-negative">
-              <Trash2 className="size-4" aria-hidden /> Clear
+              <Trash2 className="size-4" aria-hidden /> {t.actions.clear}
             </button>
           )}
         </div>
@@ -232,11 +232,10 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       {example ? (
         <div className="flex flex-col gap-2 rounded-xl border border-violet/30 bg-violet-soft px-4 py-2.5 text-[13px] text-fg-2 sm:flex-row sm:items-center sm:justify-between">
           <span>
-            <strong className="text-violet">Example portfolio.</strong> Hypothetical positions, bought at the real historical price of each date (DefiLlama). Adding your own
-            transaction replaces it.
+            <strong className="text-violet">{t.exampleBanner.lead}</strong> {t.exampleBanner.text}
           </span>
           <button onClick={clear} className="shrink-0 text-violet underline-offset-2 hover:underline">
-            Remove example
+            {t.exampleBanner.remove}
           </button>
         </div>
       ) : null}
@@ -252,38 +251,38 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       {/* Summary */}
       <div>
         <StatStrip columns={5}>
-          <Stat label="Portfolio value" value={formatPrice(totals.value)}>
+          <Stat label={t.stats.value} value={formatPrice(totals.value)}>
             <Delta value={totals.change24hPct} className="text-[12.5px]" /> 24h
           </Stat>
-          <Stat label="Unrealised P&L" value={<span className={pnlClass(totals.unrealized)}>{signedUsd(totals.unrealized)}</span>}>
+          <Stat label={t.stats.unrealized} value={<span className={pnlClass(totals.unrealized)}>{signedUsd(totals.unrealized)}</span>}>
             <span className={pnlClass(totals.unrealized)}>{totals.cost ? formatPercent((totals.unrealized / totals.cost) * 100) : "n/a"}</span>
           </Stat>
-          <Stat label="Realised P&L" value={<span className={pnlClass(totals.realized)}>{signedUsd(totals.realized)}</span>}>
-            From sales
+          <Stat label={t.stats.realized} value={<span className={pnlClass(totals.realized)}>{signedUsd(totals.realized)}</span>}>
+            {t.stats.fromSales}
           </Stat>
-          <Stat label="Cost basis" value={formatPrice(totals.cost)}>
-            Average cost method
+          <Stat label={t.stats.cost} value={formatPrice(totals.cost)}>
+            {t.stats.method}
           </Stat>
-          <Stat label="Positions" value={formatNumber(rows.length)}>
-            {transactions.length} transactions
+          <Stat label={t.stats.positions} value={formatNumber(rows.length)}>
+            {t.stats.transactions(transactions.length)}
           </Stat>
         </StatStrip>
         <div className="mt-2 flex justify-end">{quoteSource}</div>
       </div>
 
       {/* Holdings */}
-      <Panel title="Holdings" subtitle="Valued with live prices; stablecoins at $1.00">
+      <Panel title={t.holdings.title} subtitle={t.holdings.subtitle}>
           <div className="relative overflow-x-auto">
             <table className="w-full min-w-[780px] border-y border-line text-[13.5px]">
               <thead>
                 <tr className="border-b border-line text-left text-[10.5px] uppercase tracking-[0.1em] text-subtle">
-                  <th scope="col" className="py-2.5 font-medium">Asset</th>
-                  <th scope="col" className="px-3 py-2.5 text-right font-medium">Quantity</th>
-                  <th scope="col" className="px-3 py-2.5 text-right font-medium">Avg cost</th>
-                  <th scope="col" className="px-3 py-2.5 text-right font-medium">Price</th>
-                  <th scope="col" className="px-3 py-2.5 text-right font-medium">Value</th>
-                  <th scope="col" className="px-3 py-2.5 text-right font-medium">Unrealised P&L</th>
-                  <th scope="col" className="py-2.5 pl-3 font-medium">Weight</th>
+                  <th scope="col" className="py-2.5 font-medium">{t.holdings.asset}</th>
+                  <th scope="col" className="px-3 py-2.5 text-right font-medium">{t.holdings.quantity}</th>
+                  <th scope="col" className="px-3 py-2.5 text-right font-medium">{t.holdings.avgCost}</th>
+                  <th scope="col" className="px-3 py-2.5 text-right font-medium">{t.holdings.price}</th>
+                  <th scope="col" className="px-3 py-2.5 text-right font-medium">{t.holdings.value}</th>
+                  <th scope="col" className="px-3 py-2.5 text-right font-medium">{t.holdings.unrealized}</th>
+                  <th scope="col" className="py-2.5 pl-3 font-medium">{t.holdings.weight}</th>
                 </tr>
               </thead>
               <tbody>
@@ -293,7 +292,7 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
                       {r.asset === STABLE_ASSET ? (
                         <span className="flex items-center gap-3">
                           <span className="flex size-7 items-center justify-center rounded-full bg-positive-soft text-[11px] font-semibold text-positive">$</span>
-                          <span className="font-medium text-fg">Stablecoins</span>
+                          <span className="font-medium text-fg">{t.stablecoins}</span>
                         </span>
                       ) : (
                         <Link href={`/projects/${r.asset}`} className="flex items-center gap-3 hover:text-accent-strong">
@@ -334,10 +333,10 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
       {/* Performance + allocation */}
       <div className="grid grid-cols-1 gap-x-10 gap-y-12 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">
         <Panel
-            title="Performance"
-            subtitle="Portfolio value versus cost basis, from your transactions and daily prices"
+            title={t.performance.title}
+            subtitle={t.performance.subtitle}
             action={
-              <div className="flex gap-0.5 rounded-lg border border-line bg-surface-2 p-0.5" role="tablist" aria-label="Range">
+              <div className="flex gap-0.5 rounded-lg border border-line bg-surface-2 p-0.5" role="tablist" aria-label={t.performance.range}>
                 {(["1M", "3M", "1Y"] as ChartRange[]).map((r) => (
                   <button key={r} role="tab" aria-selected={r === range} onClick={() => setRange(r)} className={cn("num rounded-md px-2.5 py-1 text-[12px]", r === range ? "bg-accent text-[#0d1020]" : "text-muted hover:text-fg")}>
                     {r}
@@ -349,44 +348,44 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
           <div>
             {performance && performance.value.length > 2 ? (
               <MultiLineChart
-                label="Portfolio value versus cost basis"
+                label={t.performance.chartLabel}
                 format={(v) => formatUsdCompact(v)}
                 height={260}
                 series={[
-                  { key: "value", label: "Portfolio value", color: CATEGORICAL[0], data: performance.value },
-                  { key: "cost", label: "Cost basis", color: CATEGORICAL[5], data: performance.cost, dashed: true },
+                  { key: "value", label: t.performance.value, color: CATEGORICAL[0], data: performance.value },
+                  { key: "cost", label: t.performance.cost, color: CATEGORICAL[5], data: performance.cost, dashed: true },
                 ]}
               />
             ) : historiesLoading ? (
               <Skeleton className="h-[260px] w-full rounded-lg" />
             ) : (
-              <p className="flex h-[200px] items-center justify-center text-center text-[13px] text-muted">Not enough history in this range yet. Try a longer range.</p>
+              <p className="flex h-[200px] items-center justify-center text-center text-[13px] text-muted">{t.performance.empty}</p>
             )}
-            <p className="mt-2 text-[11px] text-subtle">Daily closes from DefiLlama. Stablecoins counted at $1.00. Fees are included in the cost basis.</p>
+            <p className="mt-2 text-[11px] text-subtle">{t.performance.note}</p>
           </div>
         </Panel>
 
-        <Panel title="Allocation" subtitle="By asset, sector and blockchain">
+        <Panel title={t.allocation.title} subtitle={t.allocation.subtitle}>
           <div className="space-y-6">
             <Donut
               data={(() => {
-                const top = rows.slice(0, 6).map((r) => ({ label: r.asset === STABLE_ASSET ? "Stablecoins" : (r.meta?.name ?? r.asset), value: Math.round(r.weight * 10000) / 100 }));
+                const top = rows.slice(0, 6).map((r) => ({ label: r.asset === STABLE_ASSET ? t.stablecoins : (r.meta?.name ?? r.asset), value: Math.round(r.weight * 10000) / 100 }));
                 const other = rows.slice(6).reduce((s, r) => s + r.weight, 0);
-                return other > 0 ? [...top, { label: "Other", value: Math.round(other * 10000) / 100 }] : top;
+                return other > 0 ? [...top, { label: t.other, value: Math.round(other * 10000) / 100 }] : top;
               })()}
               centerValue={formatUsdCompact(totals.value)}
               centerLabel="total"
             />
-            <Breakdown title="Sector" rows={rows} keyOf={(r) => (r.asset === STABLE_ASSET ? "Stablecoins (cash)" : (r.meta?.sectorLabel ?? "Other"))} colorOf={(r) => (r.meta?.sector ? SECTOR_COLORS[r.meta.sector] : "#5FCB86")} />
-            <Breakdown title="Blockchain" rows={rows} keyOf={(r) => (r.asset === STABLE_ASSET ? "Stablecoins (cash)" : (r.meta?.chainLabel ?? "Other"))} />
+            <Breakdown title={t.allocation.sector} rows={rows} keyOf={(r) => (r.asset === STABLE_ASSET ? t.stablecoinsCash : (r.meta?.sectorLabel ?? t.other))} colorOf={(r) => (r.meta?.sector ? SECTOR_COLORS[r.meta.sector] : "#5FCB86")} />
+            <Breakdown title={t.allocation.chain} rows={rows} keyOf={(r) => (r.asset === STABLE_ASSET ? t.stablecoinsCash : (r.meta?.chainLabel ?? t.other))} />
           </div>
         </Panel>
       </div>
 
       {/* Intelligence */}
       <section aria-labelledby="intel-title">
-        <SectionHeader id="intel-title" title="Portfolio intelligence" />
-        <p className="-mt-2 mb-5 text-[13px] text-muted">Informative observations about your exposures. They describe, they do not recommend.</p>
+        <SectionHeader id="intel-title" title={t.intel.title} />
+        <p className="-mt-2 mb-5 text-[13px] text-muted">{t.intel.intro}</p>
         <div className="grid grid-cols-1 gap-x-10 gap-y-12 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-start">
           <ul className="divide-y divide-line border-y border-line">
             {insights.map((ins) => (
@@ -394,14 +393,14 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className={cn("text-[10.5px] font-semibold uppercase tracking-[0.12em]", ins.tone === "watch" ? "text-warning" : "text-accent-strong")}>{ins.tone === "watch" ? "Watch" : "Note"}</span>
+                      <span className={cn("text-[10.5px] font-semibold uppercase tracking-[0.12em]", ins.tone === "watch" ? "text-warning" : "text-accent-strong")}>{ins.tone === "watch" ? t.intel.watch : t.intel.note}</span>
                       <span className="text-[14px] font-medium text-fg">{ins.title}</span>
                     </div>
                     <p className="mt-1 text-[13px] leading-relaxed text-muted">{ins.detail}</p>
                   </div>
                   {ins.concept ? (
                     <Link href={`/academy/concepts/${ins.concept}`} className="inline-flex shrink-0 items-center gap-1 text-[12px] text-accent hover:text-accent-strong">
-                      Learn <ArrowUpRight className="size-3" aria-hidden />
+                      {t.intel.learn} <ArrowUpRight className="size-3" aria-hidden />
                     </Link>
                   ) : null}
                 </div>
@@ -410,31 +409,28 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
             {correlations?.average != null ? (
               <li className="py-3.5">
                 <div className="flex items-center gap-2">
-                  <span className={cn("text-[10.5px] font-semibold uppercase tracking-[0.12em]", correlations.average > 0.7 ? "text-warning" : "text-accent-strong")}>{correlations.average > 0.7 ? "Watch" : "Note"}</span>
-                  <span className="text-[14px] font-medium text-fg">Average correlation between positions: {correlations.average.toFixed(2)}</span>
+                  <span className={cn("text-[10.5px] font-semibold uppercase tracking-[0.12em]", correlations.average > 0.7 ? "text-warning" : "text-accent-strong")}>{correlations.average > 0.7 ? t.intel.watch : t.intel.note}</span>
+                  <span className="text-[14px] font-medium text-fg">{t.intel.avgCorrelation(correlations.average.toFixed(2))}</span>
                 </div>
                 <p className="mt-1 text-[13px] leading-relaxed text-muted">
-                  {correlations.average > 0.7
-                    ? "Your crypto positions moved closely together over this period: holding several of them diversified less than it may seem."
-                    : "Your positions did not all move together over this period, which provided some diversification."}{" "}
-                  Based on daily returns over {range}; correlations change over time.
+                  {correlations.average > 0.7 ? t.intel.highCorrelation : t.intel.lowCorrelation} {t.intel.basedOn(range)}
                 </p>
               </li>
             ) : null}
           </ul>
-          <Panel title="Correlation matrix" subtitle={`Daily returns over ${range}`} className="xl:border-t-0 xl:pt-0">
-            {correlations ? <CorrelationMatrix data={correlations} meta={meta} /> : <p className="text-[13px] text-muted">{historiesLoading ? "Loading price history…" : "Needs at least two crypto positions with price history."}</p>}
+          <Panel title={t.intel.matrix} subtitle={t.intel.matrixSubtitle(range)} className="xl:border-t-0 xl:pt-0">
+            {correlations ? <CorrelationMatrix data={correlations} meta={meta} /> : <p className="text-[13px] text-muted">{historiesLoading ? t.intel.loadingHistory : t.intel.needsTwo}</p>}
           </Panel>
         </div>
       </section>
 
       {/* Ledger */}
       <Panel
-          title="Transactions"
-          subtitle={`${transactions.length} recorded ${storageWord}`}
+          title={t.ledger.title}
+          subtitle={t.ledger.subtitle(transactions.length, storageWord)}
           action={
             <button onClick={() => setShowLedger((v) => !v)} className="text-[12.5px] text-accent hover:text-accent-strong">
-              {showLedger ? "Hide" : "Show"}
+              {showLedger ? t.ledger.hide : t.ledger.show}
             </button>
           }
         >
@@ -444,26 +440,26 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
               <table className="w-full min-w-[640px] border-y border-line text-[13px]">
                 <thead>
                   <tr className="border-b border-line text-left text-[10.5px] uppercase tracking-[0.1em] text-subtle">
-                    <th scope="col" className="py-2.5 font-medium">Date</th>
-                    <th scope="col" className="px-3 py-2.5 font-medium">Asset</th>
-                    <th scope="col" className="px-3 py-2.5 font-medium">Side</th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium">Quantity</th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium">Price</th>
-                    <th scope="col" className="px-3 py-2.5 text-right font-medium">Fee</th>
-                    <th scope="col" className="py-2.5"><span className="sr-only">Delete</span></th>
+                    <th scope="col" className="py-2.5 font-medium">{t.ledger.date}</th>
+                    <th scope="col" className="px-3 py-2.5 font-medium">{t.ledger.asset}</th>
+                    <th scope="col" className="px-3 py-2.5 font-medium">{t.ledger.side}</th>
+                    <th scope="col" className="px-3 py-2.5 text-right font-medium">{t.ledger.quantity}</th>
+                    <th scope="col" className="px-3 py-2.5 text-right font-medium">{t.ledger.price}</th>
+                    <th scope="col" className="px-3 py-2.5 text-right font-medium">{t.ledger.fee}</th>
+                    <th scope="col" className="py-2.5"><span className="sr-only">{t.ledger.delete}</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[...transactions].sort((a, b) => b.date.localeCompare(a.date)).map((t) => (
-                    <tr key={t.id} className="border-b border-line/60 last:border-0">
-                      <td className="num py-2.5 text-fg-2">{t.date}</td>
-                      <td className="px-3 py-2.5 text-fg">{t.asset === STABLE_ASSET ? "Stablecoins" : (meta.get(t.asset)?.name ?? t.asset)}</td>
-                      <td className={cn("px-3 py-2.5 capitalize", t.side === "buy" ? "text-positive" : "text-negative")}>{t.side}</td>
-                      <td className="num px-3 py-2.5 text-right text-fg-2">{formatNumber(t.quantity, 6)}</td>
-                      <td className="num px-3 py-2.5 text-right text-fg-2">{formatPrice(t.price)}</td>
-                      <td className="num px-3 py-2.5 text-right text-fg-2">{formatPrice(t.fee)}</td>
+                  {[...transactions].sort((a, b) => b.date.localeCompare(a.date)).map((tx) => (
+                    <tr key={tx.id} className="border-b border-line/60 last:border-0">
+                      <td className="num py-2.5 text-fg-2">{tx.date}</td>
+                      <td className="px-3 py-2.5 text-fg">{tx.asset === STABLE_ASSET ? t.stablecoins : (meta.get(tx.asset)?.name ?? tx.asset)}</td>
+                      <td className={cn("px-3 py-2.5 capitalize", tx.side === "buy" ? "text-positive" : "text-negative")}>{t.ledger.sides[tx.side]}</td>
+                      <td className="num px-3 py-2.5 text-right text-fg-2">{formatNumber(tx.quantity, 6)}</td>
+                      <td className="num px-3 py-2.5 text-right text-fg-2">{formatPrice(tx.price)}</td>
+                      <td className="num px-3 py-2.5 text-right text-fg-2">{formatPrice(tx.fee)}</td>
                       <td className="py-2.5 text-right">
-                        <button onClick={() => remove(t.id)} className="inline-flex size-7 items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-negative" aria-label="Delete transaction">
+                        <button onClick={() => remove(tx.id)} className="inline-flex size-7 items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-negative" aria-label={t.ledger.deleteAria}>
                           <Trash2 className="size-3.5" />
                         </button>
                       </td>
@@ -527,6 +523,7 @@ function Breakdown({ title, rows, keyOf, colorOf }: { title: string; rows: Row[]
 }
 
 function CorrelationMatrix({ data, meta }: { data: { slugs: string[]; matrix: (number | null)[][] }; meta: Map<string, AssetMeta> }) {
+  const legend = useT().portfolio.intel.legend;
   const cell = (v: number | null) => {
     if (v == null) return { bg: "var(--surface-2)", fg: "var(--subtle)" };
     // Diverging: cool for negative, neutral grey near zero, warm for strongly positive
@@ -566,7 +563,7 @@ function CorrelationMatrix({ data, meta }: { data: { slugs: string[]; matrix: (n
           ))}
         </tbody>
       </table>
-      <p className="mt-3 text-[11px] leading-relaxed text-subtle">1.00 = moved identically. Values near 0 = unrelated moves. Negative values (blue) = opposite moves.</p>
+      <p className="mt-3 text-[11px] leading-relaxed text-subtle">{legend}</p>
     </div>
   );
 }

@@ -1,12 +1,16 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden className={cn("skeleton h-4 w-full", className)} />;
 }
 
 export function CardSkeleton({ className, lines = 3 }: { className?: string; lines?: number }) {
+  const loading = useT().common.loading;
   return (
-    <div className={cn("rounded-[var(--radius)] border border-line bg-surface p-5", className)} role="status" aria-label="Loading">
+    <div className={cn("rounded-[var(--radius)] border border-line bg-surface p-5", className)} role="status" aria-label={loading}>
       <Skeleton className="h-4 w-1/3" />
       <div className="mt-4 space-y-2.5">
         {Array.from({ length: lines }).map((_, i) => (

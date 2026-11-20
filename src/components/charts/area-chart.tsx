@@ -47,9 +47,9 @@ export function AreaChart({
   label: string;
   id: string;
 }) {
+  const tag = INTL_LOCALE[useLocale()];
   if (data.length < 2) return null;
   const spanDays = (data[data.length - 1].t - data[0].t) / 86400_000;
-  const tag = INTL_LOCALE[useLocale()];
   const values = data.map((d) => d.v);
   const min = Math.min(...values);
   const max = Math.max(...values);

@@ -1,3 +1,7 @@
+import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
+
+type EngineMessages = Dictionary["portfolio"]["engine"];
+const EN_MESSAGES: EngineMessages = getDictionary("en").portfolio.engine;
 /**
  * Portfolio engine: pure functions, no I/O. Positions are derived from a
  * transaction ledger with the weighted average cost method (the method most
@@ -39,7 +43,7 @@ export interface LedgerIssue {
 }
 
 /** Sorts by date then insertion order, replays the ledger and returns positions. */
-export function computePositions(transactions: Transaction[]): { positions: Map<string, Position>; issues: LedgerIssue[] } {
+export function computePositions(transactions: Transaction[], msgs: EngineMessages = EN_MESSAGES): { positions: Map<string, Position>; issues: LedgerIssue[] } {
   const positions = new Map<string, Position>();
   const issues: LedgerIssue[] = [];
   const sorted = [...transactions].map((t, i) => ({ t, i })).sort((a, b) => a.t.date.localeCompare(b.t.date) || a.i - b.i);
@@ -53,7 +57,7 @@ export function computePositions(transactions: Transaction[]): { positions: Map<
     } else {
       const qty = Math.min(t.quantity, p.quantity);
       if (t.quantity > p.quantity + 1e-12) {
-        issues.push({ id: t.id, message: `Sell of ${t.quantity} exceeds the ${p.quantity} held on ${t.date}; only ${qty} counted.` });
+        issues.push({ id: t.id, message: msgs.oversell(t.quantity, p.quantity, t.date, qty) });
       }
       const avg = p.quantity > 0 ? p.costBasis / p.quantity : 0;
       p.realizedPnl += qty * t.price - t.fee - qty * avg;
@@ -145,11 +149,11 @@ export interface CsvResult {
  * spreadsheet exports use semicolons and decimal commas), headers in any order
  * and case, and assets given as a ticker (ETH) or a slug (ethereum).
  */
-export function parseCsv(text: string, resolveAsset: (raw: string) => string | null): CsvResult {
+export function parseCsv(text: string, resolveAsset: (raw: string) => string | null, msgs: EngineMessages = EN_MESSAGES): CsvResult {
   const lines = text.replace(/^﻿/, "").split(/\r?\n/).filter((l) => l.trim().length);
   const errors: CsvResult["errors"] = [];
   const rows: CsvResult["rows"] = [];
-  if (!lines.length) return { rows, errors: [{ line: 0, message: "The file is empty." }] };
+  if (!lines.length) return { rows, errors: [{ line: 0, message: msgs.empty }] };
   const sep = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
   const header = lines[0].split(sep).map((h) => h.trim().toLowerCase());
   const col = (name: string, alts: string[] = []) => [name, ...alts].map((n) => header.indexOf(n)).find((i) => i >= 0) ?? -1;
@@ -162,7 +166,7 @@ export function parseCsv(text: string, resolveAsset: (raw: string) => string | n
     fee: col("fee", ["fees", "fee_usd"]),
   };
   const missing = (["date", "asset", "side", "quantity", "price"] as const).filter((k) => idx[k] < 0);
-  if (missing.length) return { rows, errors: [{ line: 1, message: `Missing column(s): ${missing.join(", ")}. Expected header: ${CSV_HEADER}` }] };
+  if (missing.length) return { rows, errors: [{ line: 1, message: msgs.missing(missing.join(", "), CSV_HEADER) }] };
   const num = (raw: string | undefined) => {
     if (raw == null || raw.trim() === "") return NaN;
     const cleaned = sep === ";" ? raw.replace(/\s/g, "").replace(",", ".") : raw.replace(/\s/g, "");
@@ -179,12 +183,12 @@ export function parseCsv(text: string, resolveAsset: (raw: string) => string | n
     const price = num(cells[idx.price]);
     const fee = idx.fee >= 0 ? num(cells[idx.fee]) : 0;
     const problems: string[] = [];
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? "") || Number.isNaN(Date.parse(date))) problems.push("date must be YYYY-MM-DD");
-    if (!asset) problems.push(`unknown asset "${cells[idx.asset] ?? ""}"`);
-    if (!side) problems.push(`side must be buy or sell`);
-    if (!(quantity > 0)) problems.push("quantity must be positive");
-    if (!(price >= 0)) problems.push("price must be a number");
-    if (Number.isNaN(fee) || fee < 0) problems.push("fee must be zero or positive");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? "") || Number.isNaN(Date.parse(date))) problems.push(msgs.date);
+    if (!asset) problems.push(msgs.asset(cells[idx.asset] ?? ""));
+    if (!side) problems.push(msgs.side);
+    if (!(quantity > 0)) problems.push(msgs.quantity);
+    if (!(price >= 0)) problems.push(msgs.price);
+    if (Number.isNaN(fee) || fee < 0) problems.push(msgs.fee);
     if (problems.length) errors.push({ line: lineNo, message: problems.join("; ") });
     else rows.push({ date, asset: asset!, side: side!, quantity, price, fee: Number.isNaN(fee) ? 0 : fee });
   });

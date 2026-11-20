@@ -10,5 +10,6 @@ import { explore } from "./explore";
 import { dossier } from "./dossier";
 import { alerts, compare, copilot, graph, research, settings, soon, watchlistPage } from "./pages";
 import { methodology } from "./methodology";
+import { portfolio } from "./portfolio";
 
-export const fr: Dictionary = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier, soon, settings, watchlistPage, research, methodology, compare, graph, copilot, alerts };
+export const fr: Dictionary = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier, soon, settings, watchlistPage, research, methodology, compare, graph, copilot, alerts, portfolio };

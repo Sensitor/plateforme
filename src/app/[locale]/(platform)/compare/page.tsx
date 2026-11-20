@@ -6,7 +6,7 @@ import Link from "@/i18n/link";
 import { PROJECTS, PROJECT_BY_SLUG } from "@/content/projects";
 import { getCoverageQuotes, getProjectFundamentals } from "@/lib/market/service";
 import { compositeScore } from "@/lib/research/framework";
-import { CHAINS, MATURITY, PILLARS } from "@/lib/research/taxonomy";
+import { CHAINS, PILLARS } from "@/lib/research/taxonomy";
 import { formatNumber, formatPercent, formatPrice, formatUsdCompact } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/research/types";

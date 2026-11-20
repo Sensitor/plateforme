@@ -7,8 +7,10 @@ import { formatPrice } from "@/lib/format";
 import { CSV_HEADER, parseCsv, STABLE_ASSET, type CsvResult, type Side, type Transaction } from "@/lib/portfolio/engine";
 import { Button } from "@/components/ui/button";
 import type { AssetMeta } from "./types";
+import { useT } from "@/i18n/client";
 
 function Dialog({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  const closeLabel = useT().portfolio.dialogs.close;
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -21,7 +23,7 @@ function Dialog({ title, onClose, children }: { title: string; onClose: () => vo
       <div ref={ref} role="dialog" aria-modal="true" aria-label={title} className="w-full max-w-lg animate-fade-in rounded-2xl border border-line-strong bg-surface shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <h2 className="serif-display text-[24px] text-fg">{title}</h2>
-          <button onClick={onClose} className="flex size-8 items-center justify-center rounded-lg text-muted hover:bg-surface-2" aria-label="Close">
+          <button onClick={onClose} className="flex size-8 items-center justify-center rounded-lg text-muted hover:bg-surface-2" aria-label={closeLabel}>
             <X className="size-4" />
           </button>
         </div>
@@ -43,25 +45,26 @@ export function TransactionDialog({ assets, onClose, onSubmit, today }: { assets
   const [fee, setFee] = useState("");
   const [error, setError] = useState<string | null>(null);
   const meta = assets.find((a) => a.slug === asset);
+  const t = useT().portfolio.dialogs.add;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const q = Number(quantity.replace(",", "."));
     const p = asset === STABLE_ASSET ? 1 : Number(price.replace(",", "."));
     const f = fee ? Number(fee.replace(",", ".")) : 0;
-    if (!asset) return setError("Choose an asset.");
-    if (!(q > 0)) return setError("Quantity must be a positive number.");
-    if (!(p >= 0) || Number.isNaN(p)) return setError("Price must be a number.");
-    if (!(f >= 0) || Number.isNaN(f)) return setError("Fees must be zero or positive.");
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > today) return setError("Use a date that is not in the future.");
+    if (!asset) return setError(t.errors.asset);
+    if (!(q > 0)) return setError(t.errors.quantity);
+    if (!(p >= 0) || Number.isNaN(p)) return setError(t.errors.price);
+    if (!(f >= 0) || Number.isNaN(f)) return setError(t.errors.fee);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > today) return setError(t.errors.date);
     onSubmit({ asset, side, date, quantity: q, price: p, fee: f });
     onClose();
   }
 
   return (
-    <Dialog title="Add a transaction" onClose={onClose}>
+    <Dialog title={t.title} onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-1 rounded-lg border border-line bg-bg-elevated p-1" role="radiogroup" aria-label="Side">
+        <div className="grid grid-cols-2 gap-1 rounded-lg border border-line bg-bg-elevated p-1" role="radiogroup" aria-label={t.side}>
           {(["buy", "sell"] as const).map((s) => (
             <button
               key={s}
@@ -71,12 +74,12 @@ export function TransactionDialog({ assets, onClose, onSubmit, today }: { assets
               onClick={() => setSide(s)}
               className={cn("h-9 rounded-md text-sm capitalize", side === s ? (s === "buy" ? "bg-positive-soft text-positive" : "bg-negative-soft text-negative") : "text-muted")}
             >
-              {s}
+              {t.sides[s]}
             </button>
           ))}
         </div>
         <div>
-          <label className={label} htmlFor="tx-asset">Asset</label>
+          <label className={label} htmlFor="tx-asset">{t.asset}</label>
           <select id="tx-asset" value={asset} onChange={(e) => setAsset(e.target.value)} className={field}>
             {assets.map((a) => (
               <option key={a.slug} value={a.slug}>
@@ -87,18 +90,18 @@ export function TransactionDialog({ assets, onClose, onSubmit, today }: { assets
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={label} htmlFor="tx-qty">Quantity</label>
+            <label className={label} htmlFor="tx-qty">{t.quantity}</label>
             <input id="tx-qty" inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className={cn(field, "num")} />
           </div>
           <div>
-            <label className={label} htmlFor="tx-date">Date</label>
+            <label className={label} htmlFor="tx-date">{t.date}</label>
             <input id="tx-date" type="date" max={today} value={date} onChange={(e) => setDate(e.target.value)} className={field} />
           </div>
         </div>
         {asset !== STABLE_ASSET ? (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={label} htmlFor="tx-price">Price per unit (USD)</label>
+              <label className={label} htmlFor="tx-price">{t.price}</label>
               <input id="tx-price" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" className={cn(field, "num")} />
               {meta?.price != null ? (
                 <button type="button" onClick={() => setPrice(String(meta.price))} className="mt-1 text-[11.5px] text-accent hover:text-accent-strong">
@@ -107,20 +110,20 @@ export function TransactionDialog({ assets, onClose, onSubmit, today }: { assets
               ) : null}
             </div>
             <div>
-              <label className={label} htmlFor="tx-fee">Fees (USD, optional)</label>
+              <label className={label} htmlFor="tx-fee">{t.fee}</label>
               <input id="tx-fee" inputMode="decimal" value={fee} onChange={(e) => setFee(e.target.value)} placeholder="0.00" className={cn(field, "num")} />
             </div>
           </div>
         ) : (
-          <p className="text-[12px] text-muted">Stablecoins are recorded at $1.00 per unit (peg assumption).</p>
+          <p className="text-[12px] text-muted">{t.stableNote}</p>
         )}
         {error ? <p className="text-[13px] text-negative" role="alert">{error}</p> : null}
         <div className="flex justify-end gap-2 pt-1">
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t.cancel}
           </Button>
           <button type="submit" className="h-10 rounded-lg bg-accent px-4 text-sm font-semibold text-[#0d1020] hover:bg-accent-strong">
-            Add transaction
+            {t.submit}
           </button>
         </div>
       </form>
@@ -136,7 +139,9 @@ export function ImportDialog({ assets, onClose, onImport }: { assets: AssetMeta[
     if (["usd", "usdc", "usdt", "dai", "usds", "stablecoin", "stablecoins"].includes(r)) return STABLE_ASSET;
     return assets.find((a) => a.slug === r || a.ticker.toLowerCase() === r || a.name.toLowerCase() === r)?.slug ?? null;
   };
-  const result = text.trim() ? parseCsv(text, resolve) : null;
+  const dict = useT().portfolio;
+  const t = dict.dialogs.import;
+  const result = text.trim() ? parseCsv(text, resolve, dict.engine) : null;
 
   function downloadTemplate() {
     const sample = `${CSV_HEADER}\n2026-03-02,BTC,buy,0.1,87000,2\n2026-03-02,ETH,buy,2,2100,1.5\n2026-06-01,ETH,sell,0.5,2500,1\n2026-06-01,USDC,buy,1000,1,0\n`;
@@ -149,15 +154,15 @@ export function ImportDialog({ assets, onClose, onImport }: { assets: AssetMeta[
   }
 
   return (
-    <Dialog title="Import transactions" onClose={onClose}>
+    <Dialog title={t.title} onClose={onClose}>
       <div className="space-y-4">
         <p className="text-[13px] leading-relaxed text-fg-2">
-          CSV with columns <code className="num rounded bg-surface-2 px-1 text-[12px]">{CSV_HEADER}</code>. Assets can be tickers (ETH) or names. Semicolon separators and
-          decimal commas from French spreadsheets are accepted. The file is read in your browser and never uploaded.
+          {t.intro[0]} <code className="num rounded bg-surface-2 px-1 text-[12px]">{CSV_HEADER}</code>
+          {t.intro[1]}
         </p>
         <div className="flex flex-wrap gap-2">
           <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-line-strong bg-surface-2 px-3 text-[13px] text-fg hover:bg-surface-3">
-            <FileUp className="size-4" aria-hidden /> {fileName ?? "Choose a CSV file"}
+            <FileUp className="size-4" aria-hidden /> {fileName ?? t.choose}
             <input
               type="file"
               accept=".csv,text/csv"
@@ -171,24 +176,24 @@ export function ImportDialog({ assets, onClose, onImport }: { assets: AssetMeta[
             />
           </label>
           <button onClick={downloadTemplate} className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-[13px] text-accent hover:bg-accent-soft">
-            <Download className="size-4" aria-hidden /> Template
+            <Download className="size-4" aria-hidden /> {t.template}
           </button>
         </div>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={`Or paste here:\n${CSV_HEADER}\n2026-03-02,ETH,buy,2,2100,1.5`}
+          placeholder={`${t.paste}\n${CSV_HEADER}\n2026-03-02,ETH,buy,2,2100,1.5`}
           rows={6}
-          aria-label="CSV content"
+          aria-label={t.aria}
           className="num w-full rounded-lg border border-line bg-bg-elevated p-3 text-[12px] text-fg placeholder:text-subtle focus:border-accent/60 focus:outline-none"
         />
         {result ? (
           <div className="space-y-2 text-[13px]">
             <p className="text-fg-2">
-              <span className="num text-positive">{result.rows.length}</span> valid row{result.rows.length === 1 ? "" : "s"}
+              <span className="num text-positive">{result.rows.length}</span> {t.valid(result.rows.length)}
               {result.errors.length ? (
                 <>
-                  , <span className="num text-negative">{result.errors.length}</span> with errors (skipped)
+                  , <span className="num text-negative">{result.errors.length}</span> {t.withErrors}
                 </>
               ) : null}
             </p>
@@ -196,7 +201,7 @@ export function ImportDialog({ assets, onClose, onImport }: { assets: AssetMeta[
               <ul className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-negative/25 bg-negative-soft p-3 text-[12px] text-negative">
                 {result.errors.slice(0, 20).map((e) => (
                   <li key={e.line}>
-                    Line {e.line}: {e.message}
+                    {t.line(e.line)}: {e.message}
                   </li>
                 ))}
               </ul>
@@ -205,7 +210,7 @@ export function ImportDialog({ assets, onClose, onImport }: { assets: AssetMeta[
         ) : null}
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t.cancel}
           </Button>
           <button
             disabled={!result?.rows.length}
@@ -217,7 +222,7 @@ export function ImportDialog({ assets, onClose, onImport }: { assets: AssetMeta[
             }}
             className="h-10 rounded-lg bg-accent px-4 text-sm font-semibold text-[#0d1020] hover:bg-accent-strong disabled:opacity-40"
           >
-            Import {result?.rows.length ? result.rows.length : ""}
+            {t.submit(result?.rows.length ? String(result.rows.length) : "")}
           </button>
         </div>
       </div>
