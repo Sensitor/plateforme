@@ -12,6 +12,8 @@ import { formatDateTime } from "@/lib/format";
 import type { ContextRef, CopilotMode } from "@/lib/copilot/context";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { CopilotMarkdown } from "./markdown";
+import { useLocale, useT } from "@/i18n/client";
+import type { Dictionary } from "@/i18n/dictionaries";
 
 export interface CopilotProject {
   slug: string;
@@ -27,24 +29,25 @@ interface Message {
   error?: { text: string; upgrade?: "signup" | "plans" };
 }
 
-const MODES: { id: CopilotMode; label: string; hint: string; icon: typeof GraduationCap; color: string }[] = [
-  { id: "learn", label: "Learn", hint: "Concepts explained from first principles", icon: GraduationCap, color: "#45B997" },
-  { id: "analyze", label: "Analyze", hint: "One project through its dossier", icon: ScanSearch, color: "#7896FF" },
-  { id: "compare", label: "Compare", hint: "Two or three projects side by side", icon: GitCompareArrows, color: "#9C83E8" },
+const MODES: { id: CopilotMode; icon: typeof GraduationCap; color: string }[] = [
+  { id: "learn", icon: GraduationCap, color: "#45B997" },
+  { id: "analyze", icon: ScanSearch, color: "#7896FF" },
+  { id: "compare", icon: GitCompareArrows, color: "#9C83E8" },
 ];
 
-function suggestions(mode: CopilotMode, picked: CopilotProject[]): string[] {
-  if (mode === "learn") return ["What is restaking, and what can go wrong?", "Explain data availability as if I were new to crypto", "How do token unlocks affect circulating supply?", "Comment un stablecoin garde-t-il son ancrage au dollar ?"];
-  if (mode === "analyze") {
-    const n = picked[0]?.name ?? "this project";
-    return [`How does ${n} capture value for token holders?`, `What are the main risks in the ${n} dossier?`, `Which framework pillars are weakest for ${n}, and why?`, `What would invalidate the bull case for ${n}?`];
-  }
-  return ["Compare their technology trade-offs", "How do their tokens accrue value?", "Which risks do they share, and which are specific?", "Where does each one stand on adoption evidence?"];
+type CopilotT = Dictionary["copilot"];
+
+function suggestions(mode: CopilotMode, picked: CopilotProject[], t: CopilotT): string[] {
+  if (mode === "learn") return t.suggestions.learn;
+  if (mode === "analyze") return t.suggestions.analyze(picked[0]?.name ?? t.suggestions.thisProject);
+  return t.suggestions.compare;
 }
 
 const quotaFetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<{ configured: boolean; signedIn: boolean; remaining: number; limit: number }>);
 
 export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
+  const t = useT().copilot;
+  const locale = useLocale();
   const params = useSearchParams();
   const { user } = useAuth();
   const bySlug = new Map(projects.map((p) => [p.slug, p]));
@@ -96,12 +99,12 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
       const res = await fetch("/api/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, projects: picked, messages: history.map(({ role, content }) => ({ role, content })) }),
+        body: JSON.stringify({ mode, locale, projects: picked, messages: history.map(({ role, content }) => ({ role, content })) }),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
         const j = (await res.json().catch(() => ({}))) as { error?: string; signedIn?: boolean };
-        update({ error: { text: j.error ?? "Something went wrong.", upgrade: res.status === 429 ? (j.signedIn ? "plans" : "signup") : undefined } });
+        update({ error: { text: j.error ?? t.errors.generic, upgrade: res.status === 429 ? (j.signedIn ? "plans" : "signup") : undefined } });
         return;
       }
       const refsHeader = res.headers.get("X-Copilot-Context");
@@ -116,9 +119,9 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
         acc += decoder.decode(value, { stream: true });
         update({ content: acc });
       }
-      if (!acc.trim()) update({ error: { text: "The Copilot returned an empty answer. Try rephrasing your question." } });
+      if (!acc.trim()) update({ error: { text: t.errors.empty } });
     } catch (err) {
-      if ((err as Error).name !== "AbortError") update({ error: { text: "Connection lost. Please try again." } });
+      if ((err as Error).name !== "AbortError") update({ error: { text: t.errors.connection } });
     } finally {
       setStreaming(false);
       abortRef.current = null;
@@ -143,14 +146,14 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
   }, []);
 
-  const disabledReason = quota.data && !quota.data.configured ? "The Copilot is not configured on this deployment." : needsProjects ? (mode === "analyze" ? "Pick a project first." : "Pick at least two projects.") : null;
+  const disabledReason = quota.data && !quota.data.configured ? t.errors.notConfigured : needsProjects ? (mode === "analyze" ? t.errors.pickOne : t.errors.pickTwo) : null;
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
       <div className="flex min-h-[560px] flex-col overflow-hidden rounded-2xl border border-line bg-surface">
         {/* Mode and scope */}
         <div className="border-b border-line p-4">
-          <div className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-bg-elevated p-1" role="radiogroup" aria-label="Copilot mode">
+          <div className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-bg-elevated p-1" role="radiogroup" aria-label={t.modeAria}>
             {MODES.map((m) => {
               const active = mode === m.id;
               const Icon = m.icon;
@@ -164,8 +167,8 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
                   style={active ? { background: tint(m.color, 0.14), boxShadow: `inset 0 0 0 1px ${tint(m.color, 0.35)}` } : undefined}
                 >
                   <Icon className="size-4" style={{ color: active ? m.color : undefined }} aria-hidden />
-                  <span>{m.label}</span>
-                  <span className="hidden text-[11.5px] text-subtle 2xl:inline">· {m.hint}</span>
+                  <span>{t.modes[m.id][0]}</span>
+                  <span className="hidden text-[11.5px] text-subtle 2xl:inline">· {t.modes[m.id][1]}</span>
                 </button>
               );
             })}
@@ -173,7 +176,7 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
           {maxPick > 0 ? (
             <div className="mt-3">
               <div className="mb-2 text-[12px] text-muted">
-                {mode === "analyze" ? "Project to analyze" : `Projects to compare (${picked.length}/3, at least 2)`}
+                {mode === "analyze" ? t.pickAnalyze : t.pickCompare(picked.length)}
               </div>
               <div className="flex max-h-[92px] flex-wrap gap-1.5 overflow-y-auto">
                 {projects.map((p) => {
@@ -204,11 +207,11 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
           {messages.length === 0 ? (
             <div className="mx-auto max-w-xl py-6 text-center">
               <h2 className="serif-display text-[30px] leading-tight text-fg">
-                {mode === "learn" ? "What do you want to understand?" : mode === "analyze" ? (pickedProjects[0] ? `Ask about ${pickedProjects[0].name}` : "Pick a project to analyze") : "Pick projects to compare"}
+                {mode === "learn" ? t.emptyLearn : mode === "analyze" ? (pickedProjects[0] ? t.emptyAnalyze(pickedProjects[0].name) : t.emptyAnalyzePick) : t.emptyCompare}
               </h2>
-              <p className="mt-2 text-[13.5px] text-muted">Try one of these, or write your own question in English or French.</p>
+              <p className="mt-2 text-[13.5px] text-muted">{t.emptyHint}</p>
               <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {suggestions(mode, pickedProjects).map((s) => (
+                {suggestions(mode, pickedProjects, t).map((s) => (
                   <button
                     key={s}
                     disabled={needsProjects}
@@ -228,22 +231,22 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
                 </div>
               ) : (
                 <div key={i} className="max-w-none">
-                  {m.content ? <CopilotMarkdown text={m.content} /> : !m.error ? <Thinking /> : null}
+                  {m.content ? <CopilotMarkdown text={m.content} /> : !m.error ? <Thinking label={t.thinking} /> : null}
                   {m.error ? (
                     <div className="rounded-xl border border-warning/30 bg-warning-soft px-4 py-3 text-[13.5px] text-fg-2" role="alert">
                       {m.error.text}
                       {m.error.upgrade === "signup" ? (
                         <Link href="/login?mode=signup&next=/copilot" className="ml-2 font-medium text-accent hover:text-accent-strong">
-                          Create a free account
+                          {t.createAccount}
                         </Link>
                       ) : m.error.upgrade === "plans" ? (
                         <Link href="/pricing" className="ml-2 font-medium text-accent hover:text-accent-strong">
-                          See plans
+                          {t.seePlans}
                         </Link>
                       ) : null}
                     </div>
                   ) : null}
-                  {m.refs && (m.content || !streaming) ? <Grounding refs={m.refs} /> : null}
+                  {m.refs && (m.content || !streaming) ? <Grounding refs={m.refs} t={t} /> : null}
                 </div>
               ),
             )
@@ -261,7 +264,7 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
             className="flex items-end gap-2 rounded-xl border border-line bg-bg-elevated p-2 focus-within:border-accent/50"
           >
             <label htmlFor="copilot-input" className="sr-only">
-              Your question
+              {t.yourQuestion}
             </label>
             <textarea
               id="copilot-input"
@@ -276,11 +279,11 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
                 }
               }}
               maxLength={2000}
-              placeholder={disabledReason ?? "Ask a question…"}
+              placeholder={disabledReason ?? t.placeholder}
               className="max-h-40 min-h-9 flex-1 resize-none bg-transparent px-2 py-1.5 text-[14px] text-fg placeholder:text-subtle focus:outline-none focus-visible:outline-none [field-sizing:content]"
             />
             {streaming ? (
-              <button type="button" onClick={() => abortRef.current?.abort()} className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-fg hover:bg-line-strong" aria-label="Stop">
+              <button type="button" onClick={() => abortRef.current?.abort()} className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-fg hover:bg-line-strong" aria-label={t.stop}>
                 <Square className="size-3.5 fill-current" />
               </button>
             ) : (
@@ -288,23 +291,21 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
                 type="submit"
                 disabled={!input.trim() || Boolean(disabledReason)}
                 className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-[#0d1020] hover:bg-accent-strong disabled:opacity-30"
-                aria-label="Send"
+                aria-label={t.send}
               >
                 <ArrowUp className="size-4" />
               </button>
             )}
           </form>
           <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11.5px] text-subtle">
-            <span>Educational answers, not investment advice. The Copilot can be wrong: check the linked sources.</span>
+            <span>{t.disclaimer}</span>
             <span className="flex items-center gap-3">
               {quota.data ? (
-                <span className="num">
-                  {quota.data.remaining}/{quota.data.limit} left today
-                </span>
+                <span className="num">{t.left(quota.data.remaining, quota.data.limit)}</span>
               ) : null}
               {messages.length ? (
                 <button onClick={() => setMessages([])} disabled={streaming} className="inline-flex items-center gap-1 text-accent hover:text-accent-strong disabled:opacity-40">
-                  <Plus className="size-3" aria-hidden /> New conversation
+                  <Plus className="size-3" aria-hidden /> {t.newConversation}
                 </button>
               ) : null}
             </span>
@@ -314,44 +315,42 @@ export function CopilotChat({ projects }: { projects: CopilotProject[] }) {
 
       <aside className="space-y-4">
         <div className="rounded-2xl border border-line bg-surface p-5">
-          <h2 className="text-[14px] font-semibold text-fg">How the Copilot answers</h2>
+          <h2 className="text-[14px] font-semibold text-fg">{t.how.title}</h2>
           <ul className="mt-3 space-y-3 text-[13px] leading-relaxed text-fg-2">
             <li className="flex gap-2.5">
-              <FileText className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden /> From Sensitor&apos;s dossiers and Academy, with links to the original sources.
+              <FileText className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden /> {t.how.sources}
             </li>
             <li className="flex gap-2.5">
               <BookOpenText className="mt-0.5 size-4 shrink-0 text-violet" aria-hidden />
               <span>
-                Claims keep their label: <span className="text-positive">fact</span>, <span className="text-accent-strong">analysis</span> or <span className="text-warning">hypothesis</span>.
+                {t.how.labels[0]} <span className="text-positive">{t.how.labels[1]}</span>, <span className="text-accent-strong">{t.how.labels[2]}</span> {t.how.labels[3]}{" "}
+                <span className="text-warning">{t.how.labels[4]}</span>.
               </span>
             </li>
             <li className="flex gap-2.5">
-              <Database className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden /> Live figures only with their provider and timestamp. Missing data is shown as n/a.
+              <Database className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden /> {t.how.live}
             </li>
             <li className="flex gap-2.5">
-              <X className="mt-0.5 size-4 shrink-0 text-negative" aria-hidden /> No buy, sell or hold calls, no price targets.
+              <X className="mt-0.5 size-4 shrink-0 text-negative" aria-hidden /> {t.how.noAdvice}
             </li>
           </ul>
         </div>
         <div className="rounded-2xl border border-line bg-surface p-5 text-[13px] leading-relaxed text-fg-2">
-          <h2 className="text-[14px] font-semibold text-fg">Daily questions</h2>
-          <p className="mt-2">
-            Guests <span className="num">3</span>, free accounts <span className="num">10</span>, Pro <span className="num">100</span>, Research Club <span className="num">300</span>. Resets at
-            midnight UTC.
-          </p>
+          <h2 className="text-[14px] font-semibold text-fg">{t.quota.title}</h2>
+          <p className="mt-2">{t.quota.text(3, 10, 100, 300)}</p>
           {!user ? (
             <Link href="/login?mode=signup&next=/copilot" className="mt-3 inline-block font-medium text-accent hover:text-accent-strong">
-              Create a free account
+              {t.createAccount}
             </Link>
           ) : null}
-          <p className="mt-3 text-[12px] text-muted">Questions are sent to OpenAI to generate the answer. Do not include personal or account information.</p>
+          <p className="mt-3 text-[12px] text-muted">{t.quota.privacy}</p>
         </div>
       </aside>
     </div>
   );
 }
 
-function Thinking() {
+function Thinking({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 text-[13px] text-muted">
       <span className="flex gap-1" aria-hidden>
@@ -359,19 +358,20 @@ function Thinking() {
           <span key={i} className="size-1.5 animate-pulse rounded-full bg-accent" style={{ animationDelay: `${i * 150}ms` }} />
         ))}
       </span>
-      Reading the research…
+      {label}
     </div>
   );
 }
 
-function Grounding({ refs }: { refs: ContextRef }) {
+function Grounding({ refs, t }: { refs: ContextRef; t: CopilotT }) {
+  const locale = useLocale();
   if (!refs.projects.length && !refs.concepts.length && !refs.market) return null;
   return (
     <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-line pt-3 text-[11.5px]">
-      <span className="mr-1 text-subtle">Grounded in</span>
+      <span className="mr-1 text-subtle">{t.grounded}</span>
       {refs.projects.map((p) => (
         <Link key={p.slug} href={`/projects/${p.slug}`} className="inline-flex items-center gap-1 rounded-md border border-line px-1.5 py-0.5 text-fg-2 hover:border-accent/50 hover:text-fg">
-          <FileText className="size-3 text-accent" aria-hidden /> {p.name} dossier
+          <FileText className="size-3 text-accent" aria-hidden /> {t.dossier(p.name)}
         </Link>
       ))}
       {refs.concepts.map((c) => (
@@ -381,8 +381,8 @@ function Grounding({ refs }: { refs: ContextRef }) {
       ))}
       {refs.market ? (
         <span className="inline-flex items-center gap-1 rounded-md border border-line px-1.5 py-0.5 text-muted">
-          <Database className="size-3 text-positive" aria-hidden /> {refs.market.source ?? "Market data n/a"}
-          {refs.market.asOf ? `, ${formatDateTime(refs.market.asOf)}` : ""}
+          <Database className="size-3 text-positive" aria-hidden /> {refs.market.source ?? t.marketNa}
+          {refs.market.asOf ? `, ${formatDateTime(refs.market.asOf, locale)}` : ""}
         </span>
       ) : null}
     </div>

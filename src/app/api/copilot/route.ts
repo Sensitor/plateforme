@@ -4,6 +4,8 @@ import { getServerUser } from "@/lib/supabase/server";
 import { buildContext, COPILOT_MODES, type CopilotMode } from "@/lib/copilot/context";
 import { stripDashes, systemPrompt } from "@/lib/copilot/prompt";
 import { COPILOT_LIMITS, GUEST_COOKIE, guestCookieValue, readGuestCount, userQuota, type QuotaState } from "@/lib/copilot/quota";
+import { getDictionary } from "@/i18n/dictionaries";
+import { isLocale, type Locale } from "@/i18n/config";
 
 /**
  * Research Copilot: streams an OpenAI answer grounded in Sensitor's dossiers.
@@ -11,6 +13,8 @@ import { COPILOT_LIMITS, GUEST_COOKIE, guestCookieValue, readGuestCount, userQuo
  */
 interface Body {
   mode?: string;
+  /** Interface language: error messages, and the answer language when the question's language is unclear. */
+  locale?: string;
   projects?: unknown;
   messages?: unknown;
 }
@@ -28,19 +32,20 @@ function parseMessages(raw: unknown): Msg[] | null {
 }
 
 export async function POST(request: NextRequest) {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) return NextResponse.json({ error: "The Copilot is not configured on this deployment (OPENAI_API_KEY)." }, { status: 503 });
-
   let body: Body;
   try {
     body = (await request.json()) as Body;
   } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    return NextResponse.json({ error: getDictionary("en").copilot.api.invalid }, { status: 400 });
   }
+  const locale: Locale = isLocale(body.locale) ? body.locale : "en";
+  const t = getDictionary(locale).copilot.api;
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return NextResponse.json({ error: t.notConfigured }, { status: 503 });
   const mode: CopilotMode = COPILOT_MODES.includes(body.mode as CopilotMode) ? (body.mode as CopilotMode) : "learn";
   const projects = Array.isArray(body.projects) ? body.projects.filter((p): p is string => typeof p === "string").slice(0, 3) : [];
   const messages = parseMessages(body.messages);
-  if (!messages) return NextResponse.json({ error: "Ask a question first." }, { status: 400 });
+  if (!messages) return NextResponse.json({ error: t.askFirst }, { status: 400 });
 
   // Quota
   const guestRaw = request.cookies.get(GUEST_COOKIE)?.value;
@@ -50,9 +55,7 @@ export async function POST(request: NextRequest) {
   if (quota.used >= quota.limit) {
     return NextResponse.json(
       {
-        error: user
-          ? `You have used your ${quota.limit} Copilot questions for today. The counter resets at midnight UTC.`
-          : `Guests can ask ${quota.limit} questions per day. Create a free account for ${COPILOT_LIMITS.free} per day.`,
+        error: user ? t.quotaUser(quota.limit) : t.quotaGuest(quota.limit, COPILOT_LIMITS.free),
         signedIn: Boolean(user),
         limit: quota.limit,
       },
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
       stream: true,
       reasoning_effort: "low",
       max_completion_tokens: 2000,
-      messages: [{ role: "system", content: `${systemPrompt(mode, today)}\n\nCONTEXT\n${ctx.text}` }, ...messages],
+      messages: [{ role: "system", content: `${systemPrompt(mode, today, locale)}\n\nCONTEXT\n${ctx.text}` }, ...messages],
     }),
     signal: request.signal,
   }).catch(() => null);
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
   if (!upstream?.ok || !upstream.body) {
     const detail = upstream ? await upstream.text().catch(() => "") : "";
     console.error("[copilot] upstream error", upstream?.status, detail.slice(0, 300));
-    return NextResponse.json({ error: "The Copilot is unavailable right now. Please try again in a minute." }, { status: 502 });
+    return NextResponse.json({ error: t.unavailable }, { status: 502 });
   }
 
   // Count the question once the model has accepted it.
