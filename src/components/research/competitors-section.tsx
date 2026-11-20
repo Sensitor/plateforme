@@ -8,6 +8,7 @@ import type { CompetitorColumn, Project } from "@/lib/research/types";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { Delta } from "@/components/ui/delta";
 import { SourceTag } from "@/components/ui/source-tag";
+import { getT } from "@/i18n/server";
 
 const ROWS: { key: keyof Omit<CompetitorColumn, "name" | "slug">; label: string }[] = [
   { key: "technology", label: "Technology" },
@@ -20,34 +21,36 @@ const ROWS: { key: keyof Omit<CompetitorColumn, "name" | "slug">; label: string 
 ];
 
 async function LiveRow({ columns }: { columns: CompetitorColumn[] }) {
+  const dict = await getT();
+  const t = dict.dossier.competitors;
   await connection(); // market data is request-time: never fetched at build
   const [quotes, tvl] = await Promise.all([getCoverageQuotes(), getCoverageTvl()]);
   return (
     <>
       <tr className="border-b border-line/70 align-top">
         <th scope="row" className="py-3 pl-4 pr-3 text-left text-[12px] font-medium text-muted">
-          Live data
+          {t.live}
         </th>
         {columns.map((c) => {
           const q = c.slug ? quotes.data?.[c.slug] : null;
-          const t = c.slug ? tvl.data?.[c.slug] : null;
+          const tvlValue = c.slug ? tvl.data?.[c.slug] : null;
           return (
             <td key={c.name} className="px-3 py-3 text-[12.5px]">
               {c.slug ? (
                 <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-                  <dt className="text-subtle">MCap</dt>
+                  <dt className="text-subtle">{t.mcap}</dt>
                   <dd className="num text-fg-2">{formatUsdCompact(q?.marketCap)}</dd>
                   <dt className="text-subtle">FDV</dt>
                   <dd className="num text-fg-2">{formatUsdCompact(q?.fdv)}</dd>
                   <dt className="text-subtle">TVL</dt>
-                  <dd className="num text-fg-2">{formatUsdCompact(t)}</dd>
+                  <dd className="num text-fg-2">{formatUsdCompact(tvlValue)}</dd>
                   <dt className="text-subtle">7d</dt>
                   <dd>
                     <Delta value={q?.change7d} className="text-[12.5px]" />
                   </dd>
                 </dl>
               ) : (
-                <span className="text-subtle">Not covered by Sensitor</span>
+                <span className="text-subtle">{t.notCovered}</span>
               )}
             </td>
           );
@@ -55,14 +58,15 @@ async function LiveRow({ columns }: { columns: CompetitorColumn[] }) {
       </tr>
       <tr>
         <td colSpan={columns.length + 1} className="px-4 pb-2">
-          <SourceTag result={quotes} label="Market data" />
+          <SourceTag result={quotes} label={dict.ui.sources.marketData} />
         </td>
       </tr>
     </>
   );
 }
 
-export function CompetitorsSection({ project }: { project: Project }) {
+export async function CompetitorsSection({ project }: { project: Project }) {
+  const t = (await getT()).dossier.competitors;
   const { columns, note } = project.dossier.competitors;
   return (
     <div className="space-y-3">
@@ -87,7 +91,7 @@ export function CompetitorsSection({ project }: { project: Project }) {
                         <span className="inline-flex items-center gap-2 text-fg">
                           {covered ? <TokenLogo src={covered.logo} name={c.name} size={20} /> : null}
                           {c.name}
-                          {i === 0 ? <span className="rounded bg-accent-soft px-1.5 text-[10.5px] text-accent-strong">This project</span> : null}
+                          {i === 0 ? <span className="rounded bg-accent-soft px-1.5 text-[10.5px] text-accent-strong">{t.thisProject}</span> : null}
                         </span>
                       )}
                     </th>
@@ -110,7 +114,7 @@ export function CompetitorsSection({ project }: { project: Project }) {
               {ROWS.map((row) => (
                 <tr key={row.key} className="border-b border-line/70 align-top last:border-0">
                   <th scope="row" className="py-3 pl-4 pr-3 text-left text-[12px] font-medium text-muted">
-                    {row.label}
+                    {t.dimensions[row.key] ?? row.label}
                   </th>
                   {columns.map((c) => (
                     <td key={c.name} className="px-3 py-3 leading-relaxed text-fg-2">

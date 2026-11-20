@@ -7,11 +7,14 @@ import { Stat, StatStrip } from "@/components/ui/stat-strip";
 import { SourceTag } from "@/components/ui/source-tag";
 import { DataNotice } from "@/components/ui/data-notice";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getT } from "@/i18n/server";
 
 /** Live market + fundamental metrics strip for a project (request-time data). */
 export async function KeyMetrics({ project }: { project: Project }) {
   await connection(); // market data is request-time: never fetched at build
   const [quotes, fundamentals] = await Promise.all([getCoverageQuotes(), getProjectFundamentals(project.slug)]);
+  const dict = await getT();
+  const t = dict.dossier.metrics;
   const q = quotes.data?.[project.slug];
   const f = fundamentals.data;
   const mcFdv = q?.marketCap && q?.fdv ? (q.marketCap / q.fdv) * 100 : null;
@@ -22,7 +25,7 @@ export async function KeyMetrics({ project }: { project: Project }) {
     <div className="space-y-2">
       <DataNotice result={quotes} />
       <StatStrip columns={6}>
-        <Stat size="md" label="Price" value={formatPrice(q?.price)}>
+        <Stat size="md" label={t.price} value={formatPrice(q?.price)}>
           <span className="flex flex-wrap gap-x-2">
             <span>
               <Delta value={q?.change24h} className="text-[11.5px]" /> 24h
@@ -32,30 +35,30 @@ export async function KeyMetrics({ project }: { project: Project }) {
             </span>
           </span>
         </Stat>
-        <Stat size="md" label="Market cap" value={formatUsdCompact(q?.marketCap)}>
-          {q?.rank ? `Rank #${q.rank}` : "Rank n/a"}
+        <Stat size="md" label={t.marketCap} value={formatUsdCompact(q?.marketCap)}>
+          {q?.rank ? t.rank(q.rank) : t.rankNa}
         </Stat>
-        <Stat size="md" label="FDV" value={formatUsdCompact(q?.fdv)} tip="Fully diluted valuation as reported by the provider (price × total supply). A low MC/FDV ratio signals future dilution.">
-          {mcFdv != null ? `MC/FDV ${formatPercent(mcFdv, { signed: false, digits: 0 })}` : project.dossier.tokenomics.maxSupply == null ? "No max supply" : "MC/FDV n/a"}
+        <Stat size="md" label={t.fdv} value={formatUsdCompact(q?.fdv)} tip={t.fdvTip}>
+          {mcFdv != null ? t.mcFdv(formatPercent(mcFdv, { signed: false, digits: 0 })) : project.dossier.tokenomics.maxSupply == null ? t.noMax : t.mcFdvNa}
         </Stat>
-        <Stat size="md" label="Circulating supply" value={formatNumberCompact(q?.circulatingSupply)}>
-          {circPct != null ? `${formatPercent(circPct, { signed: false, digits: 1 })} of max` : supplyRef == null ? "Uncapped supply" : "n/a"}
+        <Stat size="md" label={t.circulating} value={formatNumberCompact(q?.circulatingSupply)}>
+          {circPct != null ? t.ofMax(formatPercent(circPct, { signed: false, digits: 1 })) : supplyRef == null ? t.uncapped : "n/a"}
         </Stat>
-        <Stat size="md" label="Volume 24h" value={formatUsdCompact(q?.volume24h)}>
-          {q?.volume24h && q?.marketCap ? `${formatPercent((q.volume24h / q.marketCap) * 100, { signed: false, digits: 1 })} of market cap` : "n/a"}
+        <Stat size="md" label={t.volume} value={formatUsdCompact(q?.volume24h)}>
+          {q?.volume24h && q?.marketCap ? t.ofCap(formatPercent((q.volume24h / q.marketCap) * 100, { signed: false, digits: 1 })) : "n/a"}
         </Stat>
         <Stat
           size="md"
-          label={f?.tvlScope === "chain" ? "Chain TVL" : "TVL"}
+          label={f?.tvlScope === "chain" ? t.chainTvl : t.tvl}
           value={formatUsdCompact(f?.tvl)}
-          tip="Total value locked in DeFi contracts (DefiLlama). Price-sensitive; not a valuation metric."
+          tip={t.tvlTip}
         >
-          {f?.fees30d != null ? `Fees 30d ${formatUsdCompact(f.fees30d)}` : fundamentals.status === "unavailable" ? "Not tracked" : "Fees n/a"}
+          {f?.fees30d != null ? t.fees30d(formatUsdCompact(f.fees30d)) : fundamentals.status === "unavailable" ? t.notTracked : t.feesNa}
         </Stat>
       </StatStrip>
       <div className="flex flex-wrap gap-x-4">
-        <SourceTag result={quotes} label="Market data" />
-        {fundamentals.status !== "unavailable" ? <SourceTag result={fundamentals} label="Fundamentals" /> : null}
+        <SourceTag result={quotes} label={dict.ui.sources.marketData} />
+        {fundamentals.status !== "unavailable" ? <SourceTag result={fundamentals} label={dict.ui.sources.fundamentals} /> : null}
       </div>
     </div>
   );

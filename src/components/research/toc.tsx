@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 export interface TocItem {
   id: string;
@@ -11,6 +12,7 @@ export interface TocItem {
 
 /** Sticky table of contents with scroll-spy (desktop) / chip bar (mobile). */
 export function Toc({ items, title = "Dossier" }: { items: TocItem[]; title?: string }) {
+  const sectionsLabel = useT().dossier.toc.sections(title);
   const [active, setActive] = useState(items[0]?.id);
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export function Toc({ items, title = "Dossier" }: { items: TocItem[]; title?: st
 
   return (
     <>
-      <nav aria-label={`${title} sections`} className="sticky top-24 hidden max-h-[calc(100vh-7rem)] overflow-y-auto xl:block">
+      <nav aria-label={sectionsLabel} className="sticky top-24 hidden max-h-[calc(100vh-7rem)] overflow-y-auto xl:block">
         <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.12em] text-subtle">{title}</div>
         <ul className="space-y-0.5 border-l border-line">
           {items.map((i) => (
@@ -49,7 +51,7 @@ export function Toc({ items, title = "Dossier" }: { items: TocItem[]; title?: st
           ))}
         </ul>
       </nav>
-      <nav aria-label={`${title} sections`} className="sticky top-16 z-10 -mx-4 overflow-x-auto border-b border-line bg-bg/90 px-4 py-2 backdrop-blur md:-mx-6 md:px-6 xl:hidden">
+      <nav aria-label={sectionsLabel} className="sticky top-16 z-10 -mx-4 overflow-x-auto border-b border-line bg-bg/90 px-4 py-2 backdrop-blur md:-mx-6 md:px-6 xl:hidden">
         <ul className="flex w-max gap-1.5">
           {items.map((i) => (
             <li key={i.id}>

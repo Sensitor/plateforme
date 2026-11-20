@@ -6,7 +6,8 @@ import { academy } from "./academy";
 import { overview, watchlistUi } from "./overview";
 import { markets } from "./markets";
 import { explore } from "./explore";
+import { dossier } from "./dossier";
 
-export const en = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore };
+export const en = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier };
 
 export type Dictionary = typeof en;

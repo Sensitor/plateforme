@@ -7,5 +7,6 @@ import { academy } from "./academy";
 import { overview, watchlistUi } from "./overview";
 import { markets } from "./markets";
 import { explore } from "./explore";
+import { dossier } from "./dossier";
 
-export const fr: Dictionary = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore };
+export const fr: Dictionary = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier };
