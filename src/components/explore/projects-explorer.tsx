@@ -3,7 +3,9 @@
 import { SECTOR_COLORS } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import Link from "@/i18n/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useT } from "@/i18n/client";
 import { ArrowDown, ArrowUp, ChevronRight, Scale, Search, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatPrice, formatUsdCompact } from "@/lib/format";
@@ -67,15 +69,18 @@ function Select<T extends string>({ label, value, onChange, options }: { label: 
   );
 }
 
-const COLUMNS: { key: SortKey; label: string; align: "left" | "right"; className?: string }[] = [
-  { key: "price", label: "Price", align: "right" },
+const COLUMNS: { key: SortKey; label: "price" | "24h" | "7d" | "marketCap" | "fdv" | "tvl" | "volume"; align: "left" | "right"; className?: string }[] = [
+  { key: "price", label: "price", align: "right" },
   { key: "change24h", label: "24h", align: "right" },
   { key: "change7d", label: "7d", align: "right" },
-  { key: "marketCap", label: "Market cap", align: "right" },
-  { key: "fdv", label: "FDV", align: "right", className: "hidden md:table-cell" },
-  { key: "tvl", label: "TVL", align: "right", className: "hidden md:table-cell" },
-  { key: "volume24h", label: "Volume 24h", align: "right", className: "hidden 2xl:table-cell" },
+  { key: "marketCap", label: "marketCap", align: "right" },
+  { key: "fdv", label: "fdv", align: "right", className: "hidden md:table-cell" },
+  { key: "tvl", label: "tvl", align: "right", className: "hidden md:table-cell" },
+  { key: "volume24h", label: "volume", align: "right", className: "hidden 2xl:table-cell" },
 ];
+
+const BUCKET_KEY = { mega: "mega", large: "large", mid: "mid", small: "small" } as const;
+const VOLUME_KEY = { high: "volHigh", mid: "volMid", low: "volLow" } as const;
 
 export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]; marketAvailable: boolean }) {
   const router = useRouter();
@@ -86,6 +91,9 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
   const [panelOpen, setPanelOpen] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const { slugs: watchlist } = useWatchlist();
+  const dict = useT();
+  const t = dict.explore;
+  const columnLabel = (k: (typeof COLUMNS)[number]["label"]) => (k === "24h" || k === "7d" ? k : t.columns[k]);
 
   const update = (patch: Partial<ExploreFilters>) => {
     const next = { ...filters, ...patch };
@@ -126,7 +134,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
   return (
     <div className="space-y-4">
       {/* Sector tabs */}
-      <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0" role="tablist" aria-label="Sectors">
+      <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0" role="tablist" aria-label={t.sectorsAria}>
         <div className="flex w-max gap-x-5 gap-y-1 border-b border-line md:w-auto md:flex-wrap md:border-b-0">
           <button
             role="tab"
@@ -134,7 +142,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
             onClick={() => update({ sector: "all" })}
             className={cn("-mb-px whitespace-nowrap border-b-2 pb-2 pt-1 text-[13px] transition-colors", filters.sector === "all" ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg-2")}
           >
-            All <span className="num ml-1 text-subtle">{rows.length}</span>
+            {t.all} <span className="num ml-1 text-subtle">{rows.length}</span>
           </button>
           {SECTORS.filter((s) => sectorCounts[s.id]).map((s) => {
             const active = filters.sector === s.id;
@@ -144,12 +152,12 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                 role="tab"
                 aria-selected={active}
                 onClick={() => update({ sector: active ? "all" : s.id })}
-                title={s.description}
+                title={dict.labels.sectors[s.id].description}
                 className={cn("-mb-px inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 pb-2 pt-1 text-[13px] transition-colors", active ? "text-fg" : "border-transparent text-muted hover:text-fg-2")}
                 style={active ? { borderColor: SECTOR_COLORS[s.id] } : undefined}
               >
                 <span className="size-1.5 rounded-full" style={{ backgroundColor: SECTOR_COLORS[s.id] }} aria-hidden />
-                {s.label} <span className="num text-subtle">{sectorCounts[s.id]}</span>
+                {dict.labels.sectors[s.id].label} <span className="num text-subtle">{sectorCounts[s.id]}</span>
               </button>
             );
           })}
@@ -163,12 +171,12 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
           <input
             value={filters.q}
             onChange={(e) => update({ q: e.target.value })}
-            placeholder="Filter by name, ticker or theme…"
-            aria-label="Filter projects"
+            placeholder={t.filterPlaceholder}
+            aria-label={t.filterAria}
             className="h-9 w-full rounded-lg border border-line bg-surface pl-9 pr-9 text-[13.5px] text-fg placeholder:text-subtle focus:border-accent/60 focus:outline-none"
           />
           {filters.q ? (
-            <button onClick={() => update({ q: "" })} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-subtle hover:text-fg" aria-label="Clear search">
+            <button onClick={() => update({ q: "" })} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-subtle hover:text-fg" aria-label={t.clearSearch}>
               <X className="size-3.5" />
             </button>
           ) : null}
@@ -183,7 +191,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
             )}
           >
             <SlidersHorizontal className="size-4" aria-hidden />
-            Filters
+            {t.filters}
             {extraFilters ? <span className="num rounded bg-accent px-1.5 text-[11px] text-[#0d1020]">{extraFilters}</span> : null}
           </button>
           <button
@@ -194,59 +202,59 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
               filters.watchlistOnly ? "border-accent/50 bg-accent-soft text-fg" : "border-line-strong bg-surface-2 text-fg-2 hover:bg-surface-3",
             )}
           >
-            Watchlist
+            {t.watchlist}
           </button>
         </div>
       </div>
 
       {panelOpen ? (
         <div className="grid animate-fade-in grid-cols-2 gap-3 border-y border-line py-4 md:grid-cols-4 xl:grid-cols-7">
-          <Select label="Blockchain" value={filters.chain} onChange={(v) => update({ chain: v })} options={[{ value: "all", label: "All chains" }, ...chainOptions.map((c) => ({ value: c, label: CHAINS[c].label }))]} />
+          <Select label={t.chain} value={filters.chain} onChange={(v) => update({ chain: v })} options={[{ value: "all", label: t.allChains }, ...chainOptions.map((c) => ({ value: c, label: CHAINS[c].label }))]} />
           <Select
-            label="Market cap"
+            label={t.marketCap}
             value={filters.mcap}
             onChange={(v) => update({ mcap: v })}
-            options={[{ value: "all", label: "Any" }, ...Object.entries(MCAP_BUCKETS).map(([k, b]) => ({ value: k as ExploreFilters["mcap"], label: b.label }))]}
+            options={[{ value: "all", label: t.any }, ...Object.keys(MCAP_BUCKETS).map((k) => ({ value: k as ExploreFilters["mcap"], label: t.buckets[BUCKET_KEY[k as keyof typeof BUCKET_KEY]] }))]}
           />
           <Select
-            label="Volume"
+            label={t.volume}
             value={filters.volume}
             onChange={(v) => update({ volume: v })}
-            options={[{ value: "all", label: "Any" }, ...Object.entries(VOLUME_BUCKETS).map(([k, b]) => ({ value: k as ExploreFilters["volume"], label: b.label }))]}
+            options={[{ value: "all", label: t.any }, ...Object.keys(VOLUME_BUCKETS).map((k) => ({ value: k as ExploreFilters["volume"], label: t.buckets[VOLUME_KEY[k as keyof typeof VOLUME_KEY]] }))]}
           />
           <Select
-            label="Performance"
+            label={t.performance}
             value={filters.perf}
             onChange={(v) => update({ perf: v })}
             options={[
-              { value: "all", label: "Any" },
-              { value: "up24h", label: "Up 24h" },
-              { value: "down24h", label: "Down 24h" },
-              { value: "up7d", label: "Up 7d" },
-              { value: "down7d", label: "Down 7d" },
+              { value: "all", label: t.any },
+              { value: "up24h", label: t.perf.up24h },
+              { value: "down24h", label: t.perf.down24h },
+              { value: "up7d", label: t.perf.up7d },
+              { value: "down7d", label: t.perf.down7d },
             ]}
           />
           <Select
-            label="Risk level"
+            label={t.risk}
             value={filters.risk}
             onChange={(v) => update({ risk: v })}
-            options={[{ value: "all", label: "Any" }, ...Object.entries(RISK_LEVELS).map(([k, r]) => ({ value: k as ExploreFilters["risk"], label: r.label }))]}
+            options={[{ value: "all", label: t.any }, ...Object.keys(RISK_LEVELS).map((k) => ({ value: k as ExploreFilters["risk"], label: dict.labels.riskLevels[k as keyof typeof RISK_LEVELS] }))]}
           />
           <Select
-            label="Maturity"
+            label={t.maturity}
             value={filters.maturity}
             onChange={(v) => update({ maturity: v })}
-            options={[{ value: "all", label: "Any" }, ...Object.entries(MATURITY).map(([k, l]) => ({ value: k as ExploreFilters["maturity"], label: l }))]}
+            options={[{ value: "all", label: t.any }, ...Object.keys(MATURITY).map((k) => ({ value: k as ExploreFilters["maturity"], label: dict.labels.maturity[k as keyof typeof MATURITY] }))]}
           />
           <Select
-            label="Research coverage"
+            label={t.coverage}
             value={filters.coverage}
             onChange={(v) => update({ coverage: v })}
             options={[
-              { value: "all", label: "Any" },
-              { value: "full", label: "Full dossier" },
-              { value: "partial", label: "Partial" },
-              { value: "limited", label: "Limited" },
+              { value: "all", label: t.any },
+              { value: "full", label: t.coverageOptions.full },
+              { value: "partial", label: t.coverageOptions.partial },
+              { value: "limited", label: t.coverageOptions.limited },
             ]}
           />
           {extraFilters ? (
@@ -255,7 +263,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                 onClick={() => update({ ...DEFAULT_FILTERS, q: filters.q, sector: filters.sector })}
                 className="text-[13px] text-accent hover:text-accent-strong"
               >
-                Reset filters
+                {t.resetFilters}
               </button>
             </div>
           ) : null}
@@ -266,13 +274,13 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
       <div>
         <div className="flex items-center justify-between pb-2.5 text-[12.5px] text-muted">
           <span>
-            <span className="num text-fg">{visible.length}</span> of {rows.length} projects
+            <span className="num text-fg">{visible.length}</span> {t.count(visible.length, rows.length)}
           </span>
           {selected.length > 0 ? (
             <span className="flex items-center gap-3">
-              <span>{selected.length} selected</span>
+              <span>{t.selected(selected.length)}</span>
               <button onClick={() => setSelected([])} className="text-subtle hover:text-fg">
-                Clear
+                {t.clear}
               </button>
               <Link
                 href={`/compare?p=${selected.join(",")}`}
@@ -282,21 +290,21 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                 )}
                 aria-disabled={selected.length < 2}
               >
-                <Scale className="size-3.5" aria-hidden /> Compare
+                <Scale className="size-3.5" aria-hidden /> {t.compare}
               </Link>
             </span>
           ) : (
-            <span className="hidden sm:inline">Select up to {MAX_COMPARE} projects to compare</span>
+            <span className="hidden sm:inline">{t.selectHint(MAX_COMPARE)}</span>
           )}
         </div>
         {visible.length === 0 ? (
           <EmptyState
             icon={<Search className="size-4" />}
-            title={filters.watchlistOnly && watchlist.length === 0 ? "Your watchlist is empty" : "No project matches these filters"}
-            description={filters.watchlistOnly && watchlist.length === 0 ? "Use the bookmark icon on any project to follow it." : "Try removing a filter or broadening your search."}
+            title={filters.watchlistOnly && watchlist.length === 0 ? t.emptyWatchlist : t.emptyFilters}
+            description={filters.watchlistOnly && watchlist.length === 0 ? t.emptyWatchlistText : t.emptyFiltersText}
             action={
               <button onClick={() => update({ ...DEFAULT_FILTERS })} className="text-sm text-accent hover:text-accent-strong">
-                Reset all filters
+                {t.resetAll}
               </button>
             }
           />
@@ -306,27 +314,27 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
               <thead>
                 <tr className="border-b border-line text-[10.5px] uppercase tracking-[0.1em] text-subtle">
                   <th scope="col" className="w-9 py-2.5 pl-1 pr-1 text-left font-medium">
-                    <span className="sr-only">Select</span>
+                    <span className="sr-only">{t.columns.select}</span>
                   </th>
                   <th scope="col" className="sticky left-0 z-10 bg-bg py-2.5 pr-3 text-left font-medium">
-                    <SortButton label="Project" active={sort.key === "name"} dir={sort.dir} onClick={() => toggleSort("name")} />
+                    <SortButton label={t.columns.project} sortLabel={t.sortBy(t.columns.project)} active={sort.key === "name"} dir={sort.dir} onClick={() => toggleSort("name")} />
                   </th>
                   {COLUMNS.map((c) => (
                     <th key={c.key} scope="col" className={cn("whitespace-nowrap px-3 py-2.5 text-right font-medium", c.className)}>
-                      <SortButton label={c.label} active={sort.key === c.key} dir={sort.dir} onClick={() => toggleSort(c.key)} align="right" />
+                      <SortButton label={columnLabel(c.label)} sortLabel={t.sortBy(columnLabel(c.label))} active={sort.key === c.key} dir={sort.dir} onClick={() => toggleSort(c.key)} align="right" />
                     </th>
                   ))}
                   <th scope="col" className="hidden whitespace-nowrap px-3 py-2.5 text-left font-medium xl:table-cell">
-                    Sector, chain
+                    {t.columns.sectorChain}
                   </th>
                   <th scope="col" className="px-3 py-2.5 text-right font-medium">
-                    <SortButton label="Score" active={sort.key === "score"} dir={sort.dir} onClick={() => toggleSort("score")} align="right" />
+                    <SortButton label={t.columns.score} sortLabel={t.sortBy(t.columns.score)} active={sort.key === "score"} dir={sort.dir} onClick={() => toggleSort("score")} align="right" />
                   </th>
                   <th scope="col" className="hidden px-3 py-2.5 text-right font-medium min-[1700px]:table-cell">
-                    7d trend
+                    {t.columns.trend}
                   </th>
                   <th scope="col" className="py-2.5 pl-2 pr-1">
-                    <span className="sr-only">Actions</span>
+                    <span className="sr-only">{t.columns.actions}</span>
                   </th>
                 </tr>
               </thead>
@@ -343,7 +351,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                         checked={selected.includes(r.slug)}
                         onChange={() => toggleSelected(r.slug)}
                         disabled={!selected.includes(r.slug) && selected.length >= MAX_COMPARE}
-                        aria-label={`Select ${r.name} for comparison`}
+                        aria-label={t.selectFor(r.name)}
                         className="size-3.5 accent-[#7896ff]"
                       />
                     </td>
@@ -391,7 +399,7 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
                         <Link
                           href={`/projects/${r.slug}`}
                           className="flex size-8 items-center justify-center rounded-lg text-subtle hover:bg-surface-3 hover:text-fg"
-                          aria-label={`Open ${r.name} research`}
+                          aria-label={t.open(r.name)}
                         >
                           <ChevronRight className="size-4" />
                         </Link>
@@ -406,23 +414,23 @@ export function ProjectsExplorer({ rows, marketAvailable }: { rows: ExploreRow[]
       </div>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-subtle">
         <span className="flex items-center gap-1.5">
-          Coverage: <CoveragePill level="full" /> <CoveragePill level="partial" />
+          {t.coverageLegend} <CoveragePill level="full" /> <CoveragePill level="partial" />
         </span>
         <Link href="/research/methodology" className="text-accent hover:text-accent-strong">
-          How scores are built →
+          {t.howScores}
         </Link>
       </div>
     </div>
   );
 }
 
-function SortButton({ label, active, dir, onClick, align = "left" }: { label: string; active: boolean; dir: SortDir; onClick: () => void; align?: "left" | "right" }) {
+function SortButton({ label, sortLabel, active, dir, onClick, align = "left" }: { label: string; sortLabel: string; active: boolean; dir: SortDir; onClick: () => void; align?: "left" | "right" }) {
   const Icon = dir === "asc" ? ArrowUp : ArrowDown;
   return (
     <button
       onClick={onClick}
       className={cn("inline-flex items-center gap-1 uppercase tracking-wide hover:text-fg-2", active && "text-fg-2", align === "right" && "flex-row-reverse")}
-      aria-label={`Sort by ${label}`}
+      aria-label={sortLabel}
     >
       {label}
       <Icon className={cn("size-3", active ? "opacity-100" : "opacity-0")} aria-hidden />

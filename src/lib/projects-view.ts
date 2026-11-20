@@ -1,12 +1,13 @@
 import "server-only";
 import { PROJECTS } from "@/content/projects";
 import { compositeScore, dossierCoverage } from "@/lib/research/framework";
-import { CHAINS, SECTOR_BY_ID } from "@/lib/research/taxonomy";
+import { CHAINS } from "@/lib/research/taxonomy";
 import type { Quote } from "@/lib/market/types";
 import type { ExploreRow } from "@/lib/explore";
+import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
 /** Combine research metadata with live quotes and TVL into table rows. */
-export function buildExploreRows(quotes: Record<string, Quote> | null, tvl: Record<string, number | null> | null): ExploreRow[] {
+export function buildExploreRows(quotes: Record<string, Quote> | null, tvl: Record<string, number | null> | null, dict: Dictionary = getDictionary("en")): ExploreRow[] {
   return PROJECTS.map((p) => {
     const q = quotes?.[p.slug];
     const composite = compositeScore(p.dossier.framework);
@@ -17,7 +18,7 @@ export function buildExploreRows(quotes: Record<string, Quote> | null, tvl: Reco
       logo: p.logo,
       oneLiner: p.oneLiner,
       sector: p.sector,
-      sectorLabel: SECTOR_BY_ID[p.sector].label,
+      sectorLabel: dict.labels.sectors[p.sector].label,
       chains: p.chains,
       chainLabel: CHAINS[p.chains[0]].label,
       riskLevel: p.riskLevel,

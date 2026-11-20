@@ -4,7 +4,9 @@ import { landing, plans, ui } from "./landing";
 import { account, login } from "./auth";
 import { academy } from "./academy";
 import { overview, watchlistUi } from "./overview";
+import { markets } from "./markets";
+import { explore } from "./explore";
 
-export const en = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi };
+export const en = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore };
 
 export type Dictionary = typeof en;

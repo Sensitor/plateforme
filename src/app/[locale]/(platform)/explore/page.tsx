@@ -16,34 +16,35 @@ import { coverageSummary } from "@/lib/explore";
 import { formatPercent, formatUsdCompact } from "@/lib/format";
 import { PROJECTS } from "@/content/projects";
 import { SECTORS } from "@/lib/research/taxonomy";
+import { getT } from "@/i18n/server";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Explore Projects",
-  description: "A documented library of crypto projects organised by sector, technology and blockchain.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("explore", "/explore");
+}
 
-export default function ExplorePage() {
+export default async function ExplorePage() {
+  const t = (await getT()).explore;
   const sectors = new Set(PROJECTS.map((p) => p.sector)).size;
   return (
     <div className="space-y-8">
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="serif-display text-[38px] leading-none text-fg md:text-[44px]">Explore projects</h1>
+          <h1 className="serif-display text-[38px] leading-none text-fg md:text-[44px]">{t.title}</h1>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg-2">
-            {PROJECTS.length} reference projects across {sectors === SECTORS.length ? `all ${sectors}` : `${sectors} of ${SECTORS.length}`} sectors, each with a sourced research
-            dossier. Filter, sort and select up to four to compare.
+            {t.intro(PROJECTS.length, sectors === SECTORS.length ? t.allSectors(sectors) : t.someSectors(sectors, SECTORS.length))}
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
           <ButtonLink href="/research/methodology" variant="ghost" size="sm">
-            <BookOpenCheck className="size-4" aria-hidden /> Methodology
+            <BookOpenCheck className="size-4" aria-hidden /> {t.methodology}
           </ButtonLink>
           <ButtonLink href="/compare" variant="secondary" size="sm">
-            <Scale className="size-4" aria-hidden /> Compare
+            <Scale className="size-4" aria-hidden /> {t.compare}
           </ButtonLink>
         </div>
       </header>
-      <Suspense fallback={<ExplorerSkeleton />}>
+      <Suspense fallback={<ExplorerSkeleton label={t.loading} />}>
         <ExplorerData />
       </Suspense>
     </div>
@@ -53,20 +54,22 @@ export default function ExplorePage() {
 async function ExplorerData() {
   await connection(); // market data is request-time: never fetched at build
   const [quotes, tvl] = await Promise.all([getCoverageQuotes(), getCoverageTvl()]);
-  const rows = buildExploreRows(quotes.data, tvl.data);
+  const dict = await getT();
+  const t = dict.explore.stats;
+  const rows = buildExploreRows(quotes.data, tvl.data, dict);
   const s = coverageSummary(rows);
   return (
     <>
       <DataNotice result={quotes} />
       <div>
         <StatStrip>
-          <Stat label="Coverage market cap" tip="Sum of the market capitalisation of the projects covered by Sensitor, not the whole market." value={formatUsdCompact(s.totalMarketCap)}>
-            <Delta value={s.weightedChange24h} className="text-[12.5px]" /> 24h, cap-weighted
+          <Stat label={t.cap} tip={t.capTip} value={formatUsdCompact(s.totalMarketCap)}>
+            <Delta value={s.weightedChange24h} className="text-[12.5px]" /> {t.capNote}
           </Stat>
-          <Stat label="Breadth 24h" tip="How many covered projects rose or fell over the last 24 hours." value={`${s.up} / ${s.count}`}>
-            up, <span className="num text-fg-2">{s.down}</span> down
+          <Stat label={t.breadth} tip={t.breadthTip} value={`${s.up} / ${s.count}`}>
+            {t.up} <span className="num text-fg-2">{s.down}</span> {t.down}
           </Stat>
-          <Stat label="Best 24h" value={s.best ? formatPercent(s.best.change, { digits: 1 }) : "n/a"}>
+          <Stat label={t.best} value={s.best ? formatPercent(s.best.change, { digits: 1 }) : "n/a"}>
             {s.best ? (
               <Link href={`/projects/${s.best.slug}`} className="text-fg-2 hover:text-fg">
                 {s.best.name}
@@ -75,7 +78,7 @@ async function ExplorerData() {
               "n/a"
             )}
           </Stat>
-          <Stat label="Worst 24h" value={s.worst ? formatPercent(s.worst.change, { digits: 1 }) : "n/a"}>
+          <Stat label={t.worst} value={s.worst ? formatPercent(s.worst.change, { digits: 1 }) : "n/a"}>
             {s.worst ? (
               <Link href={`/projects/${s.worst.slug}`} className="text-fg-2 hover:text-fg">
                 {s.worst.name}
@@ -86,8 +89,8 @@ async function ExplorerData() {
           </Stat>
         </StatStrip>
         <div className="mt-2 flex flex-wrap justify-end gap-x-4">
-          <SourceTag result={quotes} label="Prices" />
-          <SourceTag result={tvl} label="TVL" />
+          <SourceTag result={quotes} label={dict.ui.sources.prices} />
+          <SourceTag result={tvl} label={dict.ui.sources.tvl} />
         </div>
       </div>
       <ProjectsExplorer rows={rows} marketAvailable={quotes.status !== "unavailable"} />
@@ -95,9 +98,9 @@ async function ExplorerData() {
   );
 }
 
-function ExplorerSkeleton() {
+function ExplorerSkeleton({ label }: { label: string }) {
   return (
-    <div className="space-y-6" role="status" aria-label="Loading projects">
+    <div className="space-y-6" role="status" aria-label={label}>
       <div className="grid grid-cols-2 gap-6 border-y border-line py-5 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i}>
