@@ -56,3 +56,11 @@ Règles codées : `compositeScore()` (score retenu si pilier non noté ou confia
 Navigation clavier (⌘K / Ctrl+K / `/`, focus visibles, lien d'évitement), libellés ARIA sur graphiques et contrôles,
 infobulles accessibles au focus, palette catégorielle validée (contraste ≥ 3:1, séparation daltonisme) avec légendes
 systématiques, `prefers-reduced-motion` respecté. Mise en page vérifiée de 390 px à 1440 px sans défilement horizontal.
+
+## Langues
+
+- Pages sous `src/app/[locale]` (en, fr). L'anglais garde les URL sans préfixe grâce à une réécriture (`next.config.ts`), le français est servi sous `/fr`, et `/en/...` redirige vers l'URL sans préfixe.
+- Les Server Components lisent la langue avec `next/root-params` (`getLocale`, `getT` dans `src/i18n/server.ts`) ; les Client Components passent par un contexte (`useT`, `useLocale`).
+- Dictionnaires typés dans `src/i18n/dictionaries/{en,fr}` : le français doit reprendre exactement les clés anglaises (test `tests/i18n.test.ts`).
+- Page d'accueil : le proxy envoie vers `/fr` un visiteur qui a choisi le français (cookie `NEXT_LOCALE`) ou dont le navigateur préfère le français. Les autres pages gardent leur URL.
+- Les dossiers de recherche et les leçons restent rédigés en anglais pour l'instant ; les pages françaises l'indiquent. Le Copilot répond dans la langue de la question, avec la langue de l'interface comme arbitrage.

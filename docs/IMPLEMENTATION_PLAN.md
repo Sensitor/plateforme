@@ -29,7 +29,7 @@
 - [x] Alertes prix et volatilité, notifications in-app, e-mails Resend, planification pg_cron
 - Alertes éditoriales (mise à jour d'un dossier suivi, unlocks, gouvernance)
 - Snapshots quotidiens (`market_snapshots`) via cron pour construire un historique propre, y compris la capitalisation totale sans plan Pro
-- Localisation française de l'interface
+- [x] Localisation française de l'interface : `/fr`, sélecteur de langue, détection sur la page d'accueil, dictionnaires typés ; reste à traduire les dossiers et les leçons (contenu)
 
 ## Phase 3, Portfolio (version locale livrée)
 

@@ -74,7 +74,9 @@ Voir [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) et le plan d'implémentation
 
 ```
 src/
-  app/                    Routes (App Router). (platform)/ = application avec sidebar ; page.tsx = landing
+  app/[locale]/           Pages (App Router), en et fr. (platform)/ = application avec sidebar ; page.tsx = landing
+  app/api, app/auth       Routes serveur (hors langue)
+  i18n/                   Langues : config, chemins, dictionnaires en/fr, Link et router qui gardent la langue
   components/             UI : ui/ (primitives), shell/, charts/, research/, overview/, explore/, markets/
   content/                Contenu éditorial versionné : projects/*.ts (20 dossiers), concepts.ts, plans.ts, key-dates.ts
   lib/
@@ -86,7 +88,7 @@ src/
     sync/                 Synchronisation offline-first watchlist + portefeuille avec Supabase
     copilot/              Contexte d'ancrage (dossiers, concepts, prix), prompt, quotas
     alerts/, email/       Règles d'alerte, notifications, gabarit e-mail, envoi Resend
-  proxy.ts                Rafraîchissement de la session Supabase (routes /api)
+  proxy.ts                Langue sur la page d'accueil ; rafraîchissement de la session Supabase (routes /api)
 supabase/migrations/      0001_app.sql (schéma utilisé par l'app, RLS) ; 0003_academy.sql (progression Academy) ; 0002 modèle CMS pour plus tard
 supabase/schedule_alerts.sql  Planification pg_cron des alertes (facultatif)
 tests/                    vitest

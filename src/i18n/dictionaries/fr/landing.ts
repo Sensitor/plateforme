@@ -95,6 +95,8 @@ export const plans: Dictionary["plans"] = {
 
 export const ui: Dictionary["ui"] = {
   source: "Source",
+  /** Colon as typeset in this language (French puts a space before it). */
+  colon: " :",
   sources: {
     prices: "Prix",
     marketData: "Données de marché",

@@ -8,7 +8,8 @@ export function SourceTagView({ source, asOf, label, className }: { source: { na
   const t = useT().ui;
   return (
     <p className={cn("text-[11px] text-subtle", className)}>
-      {label ?? t.source}:{" "}
+      {label ?? t.source}
+      {t.colon}{" "}
       <a href={source.url} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:text-muted hover:underline">
         {source.name}
       </a>
