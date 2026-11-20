@@ -17,6 +17,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { TokenLogo } from "@/components/ui/token-logo";
+import { useLocale, useT } from "@/i18n/client";
 
 export interface AlertAsset {
   slug: string;
@@ -32,6 +33,7 @@ const label = "mb-1.5 block text-[12px] font-medium text-muted";
 
 export function AlertsApp({ assets, quoteSource }: { assets: AlertAsset[]; quoteSource: React.ReactNode }) {
   const { configured, loading, user } = useAuth();
+  const t = useT().alerts.signedOut;
 
   if (!configured || loading || !user) {
     return (
@@ -48,21 +50,19 @@ export function AlertsApp({ assets, quoteSource }: { assets: AlertAsset[]; quote
                 <span className="flex size-11 items-center justify-center rounded-xl bg-accent-soft text-accent">
                   <BellRing className="size-5" aria-hidden />
                 </span>
-                <h2 className="serif-display mt-4 text-[30px] leading-tight text-fg">{configured ? "Sign in to set alerts" : "Alerts need an account"}</h2>
-                <p className="mt-2 text-[14px] leading-relaxed text-fg-2">
-                  Alerts are checked on our servers, so they work even when Sensitor is closed. They are tied to your account and visible only to you.
-                </p>
+                <h2 className="serif-display mt-4 text-[30px] leading-tight text-fg">{configured ? t.signIn : t.needAccount}</h2>
+                <p className="mt-2 text-[14px] leading-relaxed text-fg-2">{t.text}</p>
                 {configured ? (
                   <div className="mt-5 flex flex-wrap gap-2">
                     <ButtonLink href="/login?next=/alerts" variant="primary">
-                      Sign in
+                      {t.signInCta}
                     </ButtonLink>
                     <ButtonLink href="/login?mode=signup&next=/alerts" variant="secondary">
-                      Create a free account
+                      {t.signUpCta}
                     </ButtonLink>
                   </div>
                 ) : (
-                  <p className="mt-4 text-[13px] text-muted">Accounts are not configured on this deployment.</p>
+                  <p className="mt-4 text-[13px] text-muted">{t.unconfigured}</p>
                 )}
               </div>
             )}
@@ -76,23 +76,17 @@ export function AlertsApp({ assets, quoteSource }: { assets: AlertAsset[]; quote
 }
 
 function HowItWorks() {
+  const t = useT().alerts.how;
   return (
     <Card>
-      <CardHeader title="How alerts work" />
+      <CardHeader title={t.title} />
       <CardBody>
         <ul className="space-y-3 text-[13px] leading-relaxed text-fg-2">
-          <li className="flex gap-2.5">
-            <Check className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden /> Three rules: price above, price below, or a 24h move larger than a percentage.
-          </li>
-          <li className="flex gap-2.5">
-            <Check className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden /> One-shot: an alert pauses once it triggers. Re-arm it in one click.
-          </li>
-          <li className="flex gap-2.5">
-            <Check className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden /> In-app notification every time, email only if enabled in your account.
-          </li>
-          <li className="flex gap-2.5">
-            <Check className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden /> Free plan: {ALERT_LIMITS.free} active alerts. Pro and Research Club: {ALERT_LIMITS.paid}.
-          </li>
+          {[...t.items, t.limits(ALERT_LIMITS.free, ALERT_LIMITS.paid)].map((item) => (
+            <li key={item} className="flex gap-2.5">
+              <Check className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden /> {item}
+            </li>
+          ))}
         </ul>
       </CardBody>
     </Card>
@@ -113,16 +107,18 @@ function useAlerts() {
   return { ...swr, alerts: swr.data ?? [] };
 }
 
-function distance(a: AlertRow, asset: AlertAsset | undefined): string | null {
+function distance(a: AlertRow, asset: AlertAsset | undefined, t: ReturnType<typeof useT>["alerts"]): string | null {
   if (!asset) return null;
-  if (a.kind === "move_24h") return asset.change24h == null ? null : `24h now ${formatPercent(asset.change24h)}`;
+  if (a.kind === "move_24h") return asset.change24h == null ? null : t.distance24h(formatPercent(asset.change24h));
   if (asset.price == null) return null;
   const gap = ((Number(a.threshold) - asset.price) / asset.price) * 100;
-  return `Now ${formatPrice(asset.price)}, ${formatPercent(Math.abs(gap), { signed: false, digits: 1 })} away`;
+  return t.distance(formatPrice(asset.price), formatPercent(Math.abs(gap), { signed: false, digits: 1 }));
 }
 
 function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSource: React.ReactNode }) {
   const { supabase, user, profile } = useAuth();
+  const t = useT().alerts;
+  const locale = useLocale();
   const { alerts, error, isLoading, mutate } = useAlerts();
   const notes = useNotifications();
   const bySlug = useMemo(() => new Map(assets.map((a) => [a.slug, a])), [assets]);
@@ -138,7 +134,7 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
     setActionError(null);
     const patch = value ? { active: true, triggered_at: null, triggered_value: null } : { active: false };
     const { error } = await supabase.from("alerts").update(patch).eq("id", a.id);
-    if (error) setActionError(error.message.includes("limit") ? `You already have ${limit} active alerts, the limit for your plan.` : error.message);
+    if (error) setActionError(error.message.includes("limit") ? t.limitError(limit) : error.message);
     await mutate();
     setBusyId(null);
   }
@@ -159,7 +155,7 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
         {schemaMissing ? (
           <Card className="border-warning/30">
             <CardBody className="pt-5 text-[13.5px] text-fg-2">
-              The alerts table is missing. Run <code className="num rounded bg-surface-2 px-1 text-[12px]">supabase/migrations/0001_app.sql</code> in the Supabase SQL editor.
+              {t.schemaMissing[0]} <code className="num rounded bg-surface-2 px-1 text-[12px]">supabase/migrations/0001_app.sql</code> {t.schemaMissing[1]}
             </CardBody>
           </Card>
         ) : null}
@@ -167,17 +163,17 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
 
         <Card>
           <CardHeader
-            title="Active alerts"
-            subtitle={`${active.length} of ${limit} on your plan`}
+            title={t.active.title}
+            subtitle={t.active.subtitle(active.length, limit)}
             icon={<BellRing className="size-4" />}
             action={
               profile?.email_alerts ? (
                 <Badge tone="positive">
-                  <Mail className="size-3" aria-hidden /> Email on
+                  <Mail className="size-3" aria-hidden /> {t.active.emailOn}
                 </Badge>
               ) : (
                 <Link href="/account" className="text-[12px] text-accent hover:text-accent-strong">
-                  Email off, change
+                  {t.active.emailOff}
                 </Link>
               )
             }
@@ -191,7 +187,7 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
             {isLoading ? (
               <Skeleton className="h-24 w-full" />
             ) : active.length === 0 ? (
-              <EmptyState icon={<BellPlus className="size-5" />} title="No active alert" description="Create one above. It keeps running when Sensitor is closed." className="py-6" />
+              <EmptyState icon={<BellPlus className="size-5" />} title={t.empty.title} description={t.empty.text} className="py-6" />
             ) : (
               <ul className="divide-y divide-line">
                 {active.map((a) => {
@@ -200,13 +196,13 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
                     <li key={a.id} className="flex items-center gap-3 py-3">
                       <TokenLogo src={asset?.logo} name={asset?.name ?? a.project_slug} size={30} />
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-[14px] text-fg">{describeRule(asset?.ticker ?? a.project_slug, a.kind, Number(a.threshold))}</div>
-                        <div className="num truncate text-[12px] text-muted">{distance(a, asset) ?? "Live price n/a"}</div>
+                        <div className="truncate text-[14px] text-fg">{describeRule(asset?.ticker ?? a.project_slug, a.kind, Number(a.threshold), locale)}</div>
+                        <div className="num truncate text-[12px] text-muted">{distance(a, asset, t) ?? t.livePriceNa}</div>
                       </div>
-                      <IconButton label="Pause alert" busy={busyId === a.id} onClick={() => setActive(a, false)}>
+                      <IconButton label={t.pause} busy={busyId === a.id} onClick={() => setActive(a, false)}>
                         <Pause className="size-4" />
                       </IconButton>
-                      <IconButton label="Delete alert" busy={busyId === a.id} onClick={() => remove(a)} danger>
+                      <IconButton label={t.delete} busy={busyId === a.id} onClick={() => remove(a)} danger>
                         <Trash2 className="size-4" />
                       </IconButton>
                     </li>
@@ -219,7 +215,7 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
 
         {paused.length ? (
           <Card>
-            <CardHeader title="Triggered and paused" subtitle="Re-arm an alert to watch the level again" icon={<RotateCcw className="size-4" />} />
+            <CardHeader title={t.paused.title} subtitle={t.paused.subtitle} icon={<RotateCcw className="size-4" />} />
             <CardBody className="pt-3">
               <ul className="divide-y divide-line">
                 {paused.map((a) => {
@@ -229,22 +225,22 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
                     <li key={a.id} className="flex items-center gap-3 py-3">
                       <TokenLogo src={asset?.logo} name={asset?.name ?? a.project_slug} size={30} className="opacity-70" />
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-[14px] text-fg-2">{describeRule(asset?.ticker ?? a.project_slug, a.kind, Number(a.threshold))}</div>
+                        <div className="truncate text-[14px] text-fg-2">{describeRule(asset?.ticker ?? a.project_slug, a.kind, Number(a.threshold), locale)}</div>
                         <div className="truncate text-[12px] text-muted">
                           {a.triggered_at ? (
                             <>
-                              Triggered <TimeAgo iso={a.triggered_at} /> at{" "}
+                              {t.paused.triggered} <TimeAgo iso={a.triggered_at} /> {t.paused.at}{" "}
                               <span className="num">{a.triggered_value == null ? "n/a" : unit === "usd" ? formatPrice(Number(a.triggered_value)) : formatPercent(Number(a.triggered_value))}</span>
                             </>
                           ) : (
-                            "Paused"
+                            t.paused.paused
                           )}
                         </div>
                       </div>
-                      <IconButton label="Re-arm alert" busy={busyId === a.id} onClick={() => setActive(a, true)}>
+                      <IconButton label={t.rearm} busy={busyId === a.id} onClick={() => setActive(a, true)}>
                         <Play className="size-4" />
                       </IconButton>
-                      <IconButton label="Delete alert" busy={busyId === a.id} onClick={() => remove(a)} danger>
+                      <IconButton label={t.delete} busy={busyId === a.id} onClick={() => remove(a)} danger>
                         <Trash2 className="size-4" />
                       </IconButton>
                     </li>
@@ -258,13 +254,13 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
 
       <Card>
         <CardHeader
-          title="Notifications"
-          subtitle={notes.unread ? `${notes.unread} unread` : "All caught up"}
+          title={t.notifications.title}
+          subtitle={notes.unread ? t.notifications.unread(notes.unread) : t.notifications.allRead}
           icon={<Inbox className="size-4" />}
           action={
             notes.unread ? (
               <button onClick={() => notes.markRead(notes.items.filter((n) => !n.read_at).map((n) => n.id))} className="inline-flex items-center gap-1.5 text-[12px] text-accent hover:text-accent-strong">
-                <CheckCheck className="size-3.5" aria-hidden /> Mark all read
+                <CheckCheck className="size-3.5" aria-hidden /> {t.notifications.markAll}
               </button>
             ) : null
           }
@@ -273,7 +269,7 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
           {notes.isLoading ? (
             <Skeleton className="h-24 w-full" />
           ) : notes.items.length === 0 ? (
-            <EmptyState icon={<Inbox className="size-5" />} title="Nothing yet" description="When an alert triggers, the notification appears here." className="py-6" />
+            <EmptyState icon={<Inbox className="size-5" />} title={t.notifications.emptyTitle} description={t.notifications.emptyText} className="py-6" />
           ) : (
             <ul className="space-y-1">
               {notes.items.map((n) => (
@@ -287,7 +283,7 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
                         className="block text-[13.5px] font-medium text-fg hover:text-accent-strong"
                       >
                         {n.title}
-                        {!n.read_at ? <span className="sr-only"> (unread)</span> : null}
+                        {!n.read_at ? <span className="sr-only"> {t.notifications.unreadSr}</span> : null}
                       </Link>
                       <p className="mt-0.5 text-[12.5px] leading-relaxed text-fg-2">{n.body}</p>
                       <TimeAgo iso={n.created_at} className="mt-1 block text-[11.5px] text-subtle" />
@@ -295,7 +291,7 @@ function SignedInAlerts({ assets, quoteSource }: { assets: AlertAsset[]; quoteSo
                     <button
                       onClick={() => notes.remove(n.id)}
                       className="flex size-7 shrink-0 items-center justify-center rounded-md text-subtle opacity-0 hover:bg-surface-2 hover:text-negative focus:opacity-100 group-hover:opacity-100"
-                      aria-label="Delete notification"
+                      aria-label={t.notifications.delete}
                     >
                       <Trash2 className="size-3.5" />
                     </button>
@@ -340,6 +336,8 @@ function NewAlertForm({
   quoteSource: React.ReactNode;
 }) {
   const { supabase } = useAuth();
+  const L = useT().alerts;
+  const locale = useLocale();
   const [slug, setSlug] = useState(assets.find((a) => a.slug === "ethereum")?.slug ?? assets[0]?.slug ?? "");
   const [kind, setKind] = useState<AlertKind>("price_above");
   const [threshold, setThreshold] = useState("");
@@ -363,30 +361,30 @@ function NewAlertForm({
     setError(null);
     setCreated(null);
     const t = Number(threshold.replace(",", "."));
-    if (!(t > 0)) return setError(unit === "pct" ? "Enter a percentage above 0." : "Enter a price above 0.");
-    if (unit === "pct" && t > 100) return setError("Use a percentage up to 100.");
+    if (!(t > 0)) return setError(unit === "pct" ? L.form.errPct : L.form.errPrice);
+    if (unit === "pct" && t > 100) return setError(L.form.errPctMax);
     if (asset?.price != null && unit === "usd") {
-      if (kind === "price_above" && t <= asset.price) return setError(`${asset.ticker} is already above this level (now ${formatPrice(asset.price)}).`);
-      if (kind === "price_below" && t >= asset.price) return setError(`${asset.ticker} is already below this level (now ${formatPrice(asset.price)}).`);
+      if (kind === "price_above" && t <= asset.price) return setError(L.form.errAbove(asset.ticker, formatPrice(asset.price)));
+      if (kind === "price_below" && t >= asset.price) return setError(L.form.errBelow(asset.ticker, formatPrice(asset.price)));
     }
     setBusy(true);
     const { error } = await supabase.from("alerts").insert({ user_id: userId, project_slug: slug, kind, threshold: t });
     setBusy(false);
-    if (error) return setError(error.message.includes("limit") ? `You already have ${limit} active alerts, the limit for your plan.` : error.message);
+    if (error) return setError(error.message.includes("limit") ? L.limitError(limit) : error.message);
     setThreshold("");
-    setCreated(describeRule(asset?.ticker ?? slug, kind, t));
+    setCreated(describeRule(asset?.ticker ?? slug, kind, t, locale));
     onCreated();
   }
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader title="New alert" icon={<BellPlus className="size-4" />} action={quoteSource} />
+      <CardHeader title={L.form.title} icon={<BellPlus className="size-4" />} action={quoteSource} />
       <CardBody>
         <form onSubmit={submit} className="space-y-4">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
             <div>
               <label htmlFor="al-asset" className={label}>
-                Project
+                {L.form.project}
               </label>
               <select id="al-asset" value={slug} onChange={(e) => setSlug(e.target.value)} className={field}>
                 {assets.map((a) => (
@@ -398,7 +396,7 @@ function NewAlertForm({
             </div>
             <div>
               <label htmlFor="al-kind" className={label}>
-                Rule
+                {L.form.rule}
               </label>
               <select
                 id="al-kind"
@@ -411,23 +409,23 @@ function NewAlertForm({
               >
                 {(Object.keys(ALERT_KIND_META) as AlertKind[]).map((k) => (
                   <option key={k} value={k}>
-                    {ALERT_KIND_META[k].label}
+                    {L.kinds[k] ?? ALERT_KIND_META[k].label}
                   </option>
                 ))}
               </select>
             </div>
             <div>
               <label htmlFor="al-threshold" className={label}>
-                {unit === "pct" ? "Threshold (%)" : "Price (USD)"}
+                {unit === "pct" ? L.form.threshold : L.form.price}
               </label>
               <input id="al-threshold" inputMode="decimal" value={threshold} onChange={(e) => setThreshold(e.target.value)} placeholder={unit === "pct" ? "10" : "0.00"} className={cn(field, "num")} />
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] text-muted">
             <span className="num">
-              {asset?.ticker} now {formatPrice(asset?.price)}, 24h {formatPercent(asset?.change24h)}
+              {L.form.now(asset?.ticker ?? "", formatPrice(asset?.price), formatPercent(asset?.change24h))}
             </span>
-            {suggestions.length ? <span className="text-subtle">Quick fill:</span> : null}
+            {suggestions.length ? <span className="text-subtle">{L.form.quickFill}</span> : null}
             {suggestions.map((s, i) => (
               <button
                 key={i}
@@ -446,17 +444,17 @@ function NewAlertForm({
           ) : null}
           {created ? (
             <p className="rounded-lg border border-positive/25 bg-positive-soft px-3 py-2 text-[13px] text-positive" role="status">
-              Alert created: {created}.
+              {L.form.created(created)}
             </p>
           ) : null}
           <div className="flex items-center justify-between gap-3">
-            <span className="text-[12px] text-subtle">{full ? `Limit reached: pause or delete an alert first.` : `${limit - activeCount} active alert${limit - activeCount === 1 ? "" : "s"} left on your plan`}</span>
+            <span className="text-[12px] text-subtle">{full ? L.form.full : L.form.left(limit - activeCount)}</span>
             <button
               type="submit"
               disabled={busy || full}
               className="inline-flex h-10 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-[#0d1020] hover:bg-accent-strong disabled:opacity-40"
             >
-              {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <BellPlus className="size-4" aria-hidden />} Create alert
+              {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <BellPlus className="size-4" aria-hidden />} {L.form.submit}
             </button>
           </div>
         </form>

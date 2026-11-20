@@ -8,24 +8,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SourceTag } from "@/components/ui/source-tag";
 import { DataNotice } from "@/components/ui/data-notice";
 import { AlertsApp, type AlertAsset } from "@/components/alerts/alerts-app";
+import { getT } from "@/i18n/server";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = { title: "Alerts", description: "Price and volatility alerts on the projects Sensitor covers, in-app and by email." };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("alerts", "/alerts");
+}
 
-export default function AlertsPage() {
+export default async function AlertsPage() {
+  const t = (await getT()).alerts;
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Manage"
-        title="Alerts"
-        description="Get told when a covered project crosses a price level or moves sharply in 24 hours. In-app notifications, plus email if you opt in."
-      />
+      <PageHeader eyebrow={t.eyebrow} title={t.title} description={t.description} />
       <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl" />}>
         <AlertsData />
       </Suspense>
-      <p className="text-[12px] leading-relaxed text-subtle">
-        Alerts are informative. They never recommend buying or selling. A scheduled job checks prices from our market data providers (CoinGecko, with CoinPaprika as fallback) every few minutes, so a short spike
-        between two checks can be missed and a notification can arrive a few minutes after the move.
-      </p>
+      <p className="text-[12px] leading-relaxed text-subtle">{t.footnote}</p>
     </div>
   );
 }
@@ -33,6 +31,7 @@ export default function AlertsPage() {
 async function AlertsData() {
   await connection();
   const quotes = await getCoverageQuotes();
+  const dict = await getT();
   const assets: AlertAsset[] = PROJECTS.map((p) => ({
     slug: p.slug,
     name: p.name,
@@ -44,7 +43,7 @@ async function AlertsData() {
   return (
     <>
       <DataNotice result={quotes} />
-      <AlertsApp assets={assets} quoteSource={<SourceTag result={quotes} label="Prices" />} />
+      <AlertsApp assets={assets} quoteSource={<SourceTag result={quotes} label={dict.ui.sources.prices} />} />
     </>
   );
 }

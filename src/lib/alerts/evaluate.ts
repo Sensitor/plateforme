@@ -29,13 +29,18 @@ export function evaluateAlert(kind: AlertKind, threshold: number, quote: AlertQu
   return { triggered: kind === "price_above" ? p >= threshold : p <= threshold, value: p };
 }
 
-/** Human description of an alert rule, e.g. "ETH above $3,000.00". */
-export function describeRule(ticker: string, kind: AlertKind, threshold: number): string {
-  if (kind === "move_24h") return `${ticker} moves more than ${formatPercent(threshold, { signed: false, digits: threshold % 1 ? 1 : 0 })} in 24h`;
+export type Locale = "en" | "fr";
+
+/** Human description of an alert rule, e.g. "ETH above $3,000.00" / "ETH au-dessus de $3,000.00". */
+export function describeRule(ticker: string, kind: AlertKind, threshold: number, locale: Locale = "en"): string {
+  const pct = formatPercent(threshold, { signed: false, digits: threshold % 1 ? 1 : 0 });
+  if (locale === "fr") {
+    if (kind === "move_24h") return `${ticker} varie de plus de ${pct} en 24 h`;
+    return `${ticker} ${kind === "price_above" ? "au-dessus de" : "en dessous de"} ${formatPrice(threshold)}`;
+  }
+  if (kind === "move_24h") return `${ticker} moves more than ${pct} in 24h`;
   return `${ticker} ${kind === "price_above" ? "above" : "below"} ${formatPrice(threshold)}`;
 }
-
-export type Locale = "en" | "fr";
 
 /** Notification copy for a triggered alert. Informative only, never a recommendation. */
 export function triggeredCopy(
