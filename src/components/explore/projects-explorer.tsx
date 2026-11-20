@@ -2,7 +2,7 @@
 
 import { SECTOR_COLORS } from "@/lib/brand";
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowDown, ArrowUp, ChevronRight, Scale, Search, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";

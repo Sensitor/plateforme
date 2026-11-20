@@ -1,23 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useT } from "@/i18n/client";
 import { BookOpen, Compass, FileText, Layers, Search, CornerDownLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { searchEntries, type SearchEntry } from "@/lib/search-index";
 import { TokenLogo } from "@/components/ui/token-logo";
 
-const TYPE_LABEL: Record<SearchEntry["type"], string> = {
-  project: "Projects",
-  sector: "Sectors",
-  page: "Pages",
-  concept: "Academy",
-};
-
 const TYPE_ICON = { sector: Layers, page: Compass, concept: BookOpen, project: FileText } as const;
 
 export function CommandPalette({ entries, open, onOpenChange }: { entries: SearchEntry[]; open: boolean; onOpenChange: (v: boolean) => void }) {
   const router = useRouter();
+  const t = useT().shell.palette;
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -73,7 +68,7 @@ export function CommandPalette({ entries, open, onOpenChange }: { entries: Searc
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Search"
+        aria-label={t.aria}
         className="w-full max-w-xl animate-fade-in overflow-hidden rounded-xl border border-line-strong bg-surface shadow-2xl shadow-black/50"
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -100,8 +95,8 @@ export function CommandPalette({ entries, open, onOpenChange }: { entries: Searc
                 close();
               }
             }}
-            placeholder="Search a project, a sector, a concept…"
-            aria-label="Search"
+            placeholder={t.placeholder}
+            aria-label={t.aria}
             role="combobox"
             aria-expanded="true"
             aria-controls="palette-results"
@@ -112,11 +107,11 @@ export function CommandPalette({ entries, open, onOpenChange }: { entries: Searc
         </div>
         <div id="palette-results" role="listbox" className="max-h-[60vh] overflow-y-auto p-2">
           {results.length === 0 ? (
-            <p className="px-3 py-8 text-center text-sm text-muted">No results for “{query}”.</p>
+            <p className="px-3 py-8 text-center text-sm text-muted">{t.noResults(query)}</p>
           ) : (
             groups.map((g) => (
               <div key={g.type} className="mb-1">
-                <div className="px-3 pb-1 pt-2 text-[10.5px] font-medium uppercase tracking-[0.12em] text-subtle">{TYPE_LABEL[g.type]}</div>
+                <div className="px-3 pb-1 pt-2 text-[10.5px] font-medium uppercase tracking-[0.12em] text-subtle">{t.groups[g.type]}</div>
                 {g.items.map(({ entry, index }) => {
                   const Icon = TYPE_ICON[entry.type];
                   return (

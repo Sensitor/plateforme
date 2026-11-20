@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { ArrowUp, CalendarClock } from "lucide-react";
 import { KEY_DATES } from "@/content/key-dates";
 import { PROJECT_BY_SLUG } from "@/content/projects";

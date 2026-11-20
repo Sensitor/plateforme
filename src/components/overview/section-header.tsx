@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { ArrowRight } from "lucide-react";
 
 /** Editorial section heading: hairline rule, serif title, optional link. */

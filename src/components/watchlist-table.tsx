@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { Star, Trash2 } from "lucide-react";
 import { useWatchlist } from "@/lib/watchlist/store";
 import { formatPrice, formatUsdCompact } from "@/lib/format";

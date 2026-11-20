@@ -1,5 +1,5 @@
 import { connection } from "next/server";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { readableAccent, tint } from "@/lib/brand";
 import { formatDate } from "@/lib/format";
 import { SECTOR_BY_ID } from "@/lib/research/taxonomy";

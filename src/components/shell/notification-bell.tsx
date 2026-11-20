@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { Bell } from "lucide-react";
 import { useUnreadCount } from "@/lib/alerts/use-notifications";
+import { useT } from "@/i18n/client";
 
 /** Topbar bell: unread in-app notifications for signed-in users. */
 export function NotificationBell() {
   const unread = useUnreadCount();
-  const label = unread ? `Alerts, ${unread} unread notification${unread === 1 ? "" : "s"}` : "Alerts";
+  const t = useT().shell;
+  const label = unread ? t.alertsUnread(unread) : t.alerts;
   return (
     <Link href="/alerts" className="relative flex size-9 items-center justify-center rounded-lg text-fg-2 hover:bg-surface-2" aria-label={label} title={label}>
       <Bell className="size-[18px]" />

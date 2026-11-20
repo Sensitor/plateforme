@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { CloudCheck, HardDrive, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { isCompleted, isPerfect, useAcademyProgress, useAcademySync } from "@/lib/academy/progress";

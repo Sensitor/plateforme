@@ -1,5 +1,5 @@
 import { connection } from "next/server";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { ArrowRight } from "lucide-react";
 import { PROJECTS } from "@/content/projects";
 import { getCoverageQuotes } from "@/lib/market/service";

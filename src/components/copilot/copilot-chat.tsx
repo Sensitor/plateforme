@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { ArrowUp, BookOpenText, Database, FileText, GitCompareArrows, GraduationCap, Plus, ScanSearch, Square, X } from "lucide-react";

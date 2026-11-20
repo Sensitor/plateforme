@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, ExternalLink, List, Network, RotateCcw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";

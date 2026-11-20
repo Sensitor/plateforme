@@ -1,5 +1,5 @@
 import { connection } from "next/server";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { KEY_DATES } from "@/content/key-dates";
 import { PROJECTS, PROJECT_BY_SLUG } from "@/content/projects";
 import { getCoverageQuotes, getCoverageTvl, getFearGreed, getMarketRegime, getPriceHistory } from "@/lib/market/service";

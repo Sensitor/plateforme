@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "@/i18n/link";
+import { usePathname } from "@/i18n/navigation";
+import { useT } from "@/i18n/client";
 import { ChevronRight, CircleUser } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-provider";
@@ -9,6 +10,7 @@ import { Logo } from "./logo";
 import { NAV_GROUPS, NAV_SECONDARY, isActive, type NavItem } from "./nav-config";
 
 function NavLink({ item, pathname, onNavigate }: { item: NavItem; pathname: string; onNavigate?: () => void }) {
+  const t = useT();
   const active = isActive(pathname, item.href);
   const Icon = item.icon;
   return (
@@ -22,23 +24,22 @@ function NavLink({ item, pathname, onNavigate }: { item: NavItem; pathname: stri
       )}
     >
       <Icon className={cn("size-[17px] shrink-0", active ? "text-accent" : "text-muted group-hover:text-fg-2")} aria-hidden />
-      <span className="flex-1 truncate">{item.label}</span>
+      <span className="flex-1 truncate">{t.nav.items[item.key]}</span>
       {item.soon ? (
-        <span className="rounded border border-line-strong px-1 text-[10px] uppercase tracking-wide text-subtle" title={`Planned, ${item.phase}`}>
-          Soon
+        <span className="rounded border border-line-strong px-1 text-[10px] uppercase tracking-wide text-subtle" title={t.nav.plannedFor(t.nav.phases[item.phase ?? ""] ?? item.phase ?? "")}>
+          {t.common.soon}
         </span>
       ) : null}
     </Link>
   );
 }
 
-const TIER_SHORT = { free: "Free", pro: "Pro", research_club: "Research Club" } as const;
-
 function AccountCard({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  const t = useT().shell;
   const { configured, loading, user, profile } = useAuth();
   const signedIn = Boolean(user);
-  const name = profile?.display_name || user?.email?.split("@")[0] || "My Account";
-  const subtitle = loading ? "Checking session" : signedIn ? `${TIER_SHORT[profile?.tier ?? "free"]} plan` : configured ? "Guest · Sign in" : "Guest · Free";
+  const name = profile?.display_name || user?.email?.split("@")[0] || t.myAccount;
+  const subtitle = loading ? t.checkingSession : signedIn ? t.plan(t.tiers[profile?.tier ?? "free"]) : configured ? t.guestSignIn : t.guestFree;
   return (
     <Link
       href={signedIn || !configured ? "/account" : "/login?next=/account"}
@@ -58,7 +59,7 @@ function AccountCard({ pathname, onNavigate }: { pathname: string; onNavigate?: 
         </span>
       )}
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13px] font-medium text-fg">{signedIn ? name : "My Account"}</span>
+        <span className="block truncate text-[13px] font-medium text-fg">{signedIn ? name : t.myAccount}</span>
         <span className="block truncate text-[11.5px] text-muted">{subtitle}</span>
       </span>
       <ChevronRight className="size-4 shrink-0 text-subtle" aria-hidden />
@@ -68,17 +69,18 @@ function AccountCard({ pathname, onNavigate }: { pathname: string; onNavigate?: 
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const t = useT();
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 pb-6 pt-6">
-        <Link href="/" onClick={onNavigate} aria-label="Sensitor home">
+        <Link href="/" onClick={onNavigate} aria-label={t.shell.home}>
           <Logo />
         </Link>
       </div>
-      <nav aria-label="Main" className="flex-1 space-y-6 overflow-y-auto px-3">
+      <nav aria-label={t.shell.mainNav} className="flex-1 space-y-6 overflow-y-auto px-3">
         {NAV_GROUPS.map((group) => (
           <div key={group.id}>
-            <div className="mb-1.5 px-3 text-[10.5px] font-medium uppercase tracking-[0.14em] text-subtle">{group.label}</div>
+            <div className="mb-1.5 px-3 text-[10.5px] font-medium uppercase tracking-[0.14em] text-subtle">{t.nav.groups[group.id]}</div>
             <div className="space-y-0.5">
               {group.items.map((item) => (
                 <NavLink key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />

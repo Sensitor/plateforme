@@ -1,5 +1,5 @@
 import { connection } from "next/server";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { getPriceHistory } from "@/lib/market/service";
 import { seriesChange } from "@/lib/market/series";
 import { readableAccent } from "@/lib/brand";

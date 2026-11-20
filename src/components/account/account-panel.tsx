@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BellRing, CircleUser, DatabaseZap, GraduationCap, KeyRound, Loader2, Lock, LogOut, Settings2 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { cn } from "@/lib/utils";
 import { useAuth, type Profile } from "@/lib/auth/auth-provider";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";

@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { getCoverageQuotes, getCoverageTvl } from "@/lib/market/service";
 import { formatUsdCompact } from "@/lib/format";
 import { PROJECT_BY_SLUG } from "@/content/projects";

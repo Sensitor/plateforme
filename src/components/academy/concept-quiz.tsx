@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { Check, RotateCcw, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { QuizQuestion } from "@/content/concepts";

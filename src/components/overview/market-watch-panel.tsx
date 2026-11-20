@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { ArrowRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/format";

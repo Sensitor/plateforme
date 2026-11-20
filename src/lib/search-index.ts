@@ -1,6 +1,7 @@
 import { PROJECTS } from "@/content/projects";
 import { CONCEPTS } from "@/content/concepts";
 import { SECTORS } from "@/lib/research/taxonomy";
+import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
 export interface SearchEntry {
   id: string;
@@ -12,29 +13,34 @@ export interface SearchEntry {
   logo?: string;
 }
 
-const PAGES: SearchEntry[] = [
-  { id: "p-overview", type: "page", title: "Overview", subtitle: "Dashboard", href: "/overview", keywords: "dashboard home" },
-  { id: "p-explore", type: "page", title: "Explore Projects", subtitle: "Project library", href: "/explore", keywords: "projects library screener" },
-  { id: "p-compare", type: "page", title: "Compare projects", subtitle: "Side-by-side comparison", href: "/compare", keywords: "comparator versus vs" },
-  { id: "p-graph", type: "page", title: "Knowledge Graph", subtitle: "Relationships between projects", href: "/graph", keywords: "map network ecosystem dependencies relationships oracle bridge" },
-  { id: "p-markets", type: "page", title: "Markets", subtitle: "Market intelligence", href: "/markets", keywords: "market cap dominance stablecoins defi sentiment fear greed" },
-  { id: "p-research", type: "page", title: "Research library", subtitle: "All dossiers", href: "/research", keywords: "reports dossiers analysis" },
-  { id: "p-method", type: "page", title: "Research methodology", subtitle: "Sensitor Research Framework", href: "/research/methodology", keywords: "framework score methodology pillars" },
-  { id: "p-portfolio", type: "page", title: "Portfolio Intelligence", subtitle: "Track your positions", href: "/portfolio", keywords: "portfolio holdings positions pnl allocation csv import" },
-  { id: "p-copilot", type: "page", title: "Research Copilot", subtitle: "Ask questions, grounded in the dossiers", href: "/copilot", keywords: "ask question assistant chat explain learn compare analyze" },
-  { id: "p-alerts", type: "page", title: "Alerts", subtitle: "Price and volatility alerts", href: "/alerts", keywords: "alert notification email price threshold" },
-  { id: "p-account", type: "page", title: "My Account", subtitle: "Profile and sign-in", href: "/account", keywords: "login sign in account profile password" },
-  { id: "p-watchlist", type: "page", title: "Watchlist", subtitle: "Your followed projects", href: "/watchlist", keywords: "favorites saved" },
-  { id: "p-academy", type: "page", title: "Academy", subtitle: "Concepts & courses", href: "/academy", keywords: "learn courses education" },
-  { id: "p-pricing", type: "page", title: "Plans", subtitle: "Free, Pro, Research Club", href: "/pricing", keywords: "pricing subscription pro premium" },
+const PAGES: (Omit<SearchEntry, "title" | "subtitle"> & { key: string })[] = [
+  { id: "p-overview", key: "overview", type: "page", href: "/overview", keywords: "dashboard home" },
+  { id: "p-explore", key: "explore", type: "page", href: "/explore", keywords: "projects library screener" },
+  { id: "p-compare", key: "compare", type: "page", href: "/compare", keywords: "comparator versus vs" },
+  { id: "p-graph", key: "graph", type: "page", href: "/graph", keywords: "map network ecosystem dependencies relationships oracle bridge" },
+  { id: "p-markets", key: "markets", type: "page", href: "/markets", keywords: "market cap dominance stablecoins defi sentiment fear greed" },
+  { id: "p-research", key: "research", type: "page", href: "/research", keywords: "reports dossiers analysis" },
+  { id: "p-method", key: "methodology", type: "page", href: "/research/methodology", keywords: "framework score methodology pillars" },
+  { id: "p-portfolio", key: "portfolio", type: "page", href: "/portfolio", keywords: "portfolio holdings positions pnl allocation csv import" },
+  { id: "p-copilot", key: "copilot", type: "page", href: "/copilot", keywords: "ask question assistant chat explain learn compare analyze" },
+  { id: "p-alerts", key: "alerts", type: "page", href: "/alerts", keywords: "alert notification email price threshold" },
+  { id: "p-account", key: "account", type: "page", href: "/account", keywords: "login sign in account profile password" },
+  { id: "p-watchlist", key: "watchlist", type: "page", href: "/watchlist", keywords: "favorites saved" },
+  { id: "p-academy", key: "academy", type: "page", href: "/academy", keywords: "learn courses education" },
+  { id: "p-pricing", key: "pricing", type: "page", href: "/pricing", keywords: "pricing subscription pro premium" },
 ];
 
-export function buildSearchIndex(): SearchEntry[] {
+/**
+ * Search entries in the interface language. Keywords also carry the English
+ * names, so a search works whichever language the visitor types in.
+ */
+export function buildSearchIndex(t: Dictionary = getDictionary("en")): SearchEntry[] {
+  const en = getDictionary("en");
   const projects: SearchEntry[] = PROJECTS.map((p) => ({
     id: `project-${p.slug}`,
     type: "project",
     title: p.name,
-    subtitle: `${p.ticker} · ${SECTORS.find((s) => s.id === p.sector)?.label}`,
+    subtitle: `${p.ticker} · ${t.labels.sectors[p.sector].label}`,
     href: `/projects/${p.slug}`,
     keywords: [p.ticker, p.sector, ...p.tags, p.oneLiner].join(" "),
     logo: p.logo,
@@ -42,20 +48,25 @@ export function buildSearchIndex(): SearchEntry[] {
   const sectors: SearchEntry[] = SECTORS.map((s) => ({
     id: `sector-${s.id}`,
     type: "sector",
-    title: s.label,
-    subtitle: "Sector",
+    title: t.labels.sectors[s.id].label,
+    subtitle: t.shell.palette.sector,
     href: `/explore?sector=${s.id}`,
-    keywords: `${s.short} ${s.description}`,
+    keywords: `${s.label} ${s.short} ${s.description} ${t.labels.sectors[s.id].description}`,
   }));
+  const pages: SearchEntry[] = PAGES.map(({ key, ...p }) => {
+    const [title, subtitle] = t.shell.palette.pages[key] ?? en.shell.palette.pages[key];
+    const [enTitle, enSubtitle] = en.shell.palette.pages[key];
+    return { ...p, title, subtitle, keywords: `${p.keywords} ${enTitle} ${enSubtitle}` };
+  });
   const concepts: SearchEntry[] = CONCEPTS.map((c) => ({
     id: `concept-${c.slug}`,
     type: "concept",
     title: c.title,
-    subtitle: "Academy concept",
+    subtitle: t.shell.palette.concept,
     href: `/academy/concepts/${c.slug}`,
     keywords: c.summary,
   }));
-  return [...projects, ...sectors, ...PAGES, ...concepts];
+  return [...projects, ...sectors, ...pages, ...concepts];
 }
 
 /** Rank entries for a query: prefix match on title/ticker first, then substring, then keywords. */

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { cn } from "@/lib/utils";
 import { SECTOR_COLORS, tint } from "@/lib/brand";
 import { SECTOR_BY_ID } from "@/lib/research/taxonomy";

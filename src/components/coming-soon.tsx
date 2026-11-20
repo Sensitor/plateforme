@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/badge";

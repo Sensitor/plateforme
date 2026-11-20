@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import useSWR from "swr";
 import { BellPlus, BellRing, Check, CheckCheck, Inbox, Loader2, Mail, Pause, Play, RotateCcw, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";

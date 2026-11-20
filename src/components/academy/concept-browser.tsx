@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { CircleCheck, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ACADEMY_CATEGORIES, type AcademyCategory, type Concept } from "@/content/concepts";

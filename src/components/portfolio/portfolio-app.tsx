@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { ArrowUpRight, Download, Eye, FileUp, Plus, ShieldCheck, Sparkles, Trash2, WalletMinimal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatNumber, formatPercent, formatPrice, formatUsdCompact } from "@/lib/format";

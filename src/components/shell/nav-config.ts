@@ -16,8 +16,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+export type NavKey = "overview" | "explore" | "markets" | "graph" | "research" | "copilot" | "academy" | "community" | "watchlist" | "portfolio" | "alerts" | "researchClub" | "privateProgram" | "settings";
+
 export interface NavItem {
-  label: string;
+  /** Key of the label in the `nav.items` dictionary. */
+  key: NavKey;
   href: string;
   icon: LucideIcon;
   /** Feature not available yet, shown with a "Soon" badge and a roadmap page. */
@@ -26,47 +29,43 @@ export interface NavItem {
 }
 
 export interface NavGroup {
-  id: string;
-  label: string;
+  id: "discover" | "understand" | "manage";
   items: NavItem[];
 }
 
 export const NAV_GROUPS: NavGroup[] = [
   {
     id: "discover",
-    label: "Discover",
     items: [
-      { label: "Overview", href: "/overview", icon: House },
-      { label: "Explore Projects", href: "/explore", icon: Compass },
-      { label: "Markets", href: "/markets", icon: LineChart },
-      { label: "Knowledge Graph", href: "/graph", icon: Network },
+      { key: "overview", href: "/overview", icon: House },
+      { key: "explore", href: "/explore", icon: Compass },
+      { key: "markets", href: "/markets", icon: LineChart },
+      { key: "graph", href: "/graph", icon: Network },
     ],
   },
   {
     id: "understand",
-    label: "Understand",
     items: [
-      { label: "Research", href: "/research", icon: FileText },
-      { label: "Research Copilot", href: "/copilot", icon: MessagesSquare },
-      { label: "Academy", href: "/academy", icon: GraduationCap },
-      { label: "Community", href: "/community", icon: Users, soon: true, phase: "Phase 4" },
+      { key: "research", href: "/research", icon: FileText },
+      { key: "copilot", href: "/copilot", icon: MessagesSquare },
+      { key: "academy", href: "/academy", icon: GraduationCap },
+      { key: "community", href: "/community", icon: Users, soon: true, phase: "Phase 4" },
     ],
   },
   {
     id: "manage",
-    label: "Manage",
     items: [
-      { label: "Watchlist", href: "/watchlist", icon: Star },
-      { label: "Portfolio", href: "/portfolio", icon: Wallet },
-      { label: "Alerts", href: "/alerts", icon: Bell },
+      { key: "watchlist", href: "/watchlist", icon: Star },
+      { key: "portfolio", href: "/portfolio", icon: Wallet },
+      { key: "alerts", href: "/alerts", icon: Bell },
     ],
   },
 ];
 
 export const NAV_SECONDARY: NavItem[] = [
-  { label: "Research Club", href: "/research-club", icon: BookOpen, soon: true, phase: "Phase 4" },
-  { label: "Private Program", href: "/private-program", icon: Gem, soon: true, phase: "Later" },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { key: "researchClub", href: "/research-club", icon: BookOpen, soon: true, phase: "Phase 4" },
+  { key: "privateProgram", href: "/private-program", icon: Gem, soon: true, phase: "Later" },
+  { key: "settings", href: "/settings", icon: Settings },
 ];
 
 export function isActive(pathname: string, href: string) {

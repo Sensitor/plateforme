@@ -1,5 +1,5 @@
 import { connection } from "next/server";
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { PROJECTS } from "@/content/projects";
 import { SECTOR_COLORS } from "@/lib/brand";
 import { formatUsdCompact } from "@/lib/format";

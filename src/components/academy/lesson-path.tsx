@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/i18n/link";
 import { CircleCheck, Clock } from "lucide-react";
 import { ACADEMY_COLORS, tint } from "@/lib/brand";
 import type { AcademyCategory } from "@/content/concepts";
