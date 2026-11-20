@@ -3,6 +3,8 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { SeriesPoint } from "@/lib/market/types";
 import { CHART } from "./palette";
+import { useLocale } from "@/i18n/client";
+import { INTL_LOCALE } from "@/i18n/config";
 
 export interface LineSeries {
   key: string;
@@ -17,7 +19,8 @@ export function MultiLineChart({ series, format, height = 240, label }: { series
   const map = new Map<number, Record<string, number>>();
   for (const s of series) for (const p of s.data) map.set(p.t, { ...(map.get(p.t) ?? { t: p.t }), [s.key]: p.v });
   const rows = [...map.values()].sort((a, b) => a.t - b.t);
-  const dateFmt = (t: number) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(t);
+  const tag = INTL_LOCALE[useLocale()];
+  const dateFmt = (t: number) => new Intl.DateTimeFormat(tag, { day: "numeric", month: "short", timeZone: "UTC" }).format(t);
   return (
     <div style={{ height }} role="img" aria-label={label}>
       <ResponsiveContainer width="100%" height="100%">

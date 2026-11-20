@@ -13,11 +13,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SourceTag } from "@/components/ui/source-tag";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { WatchlistButton } from "@/components/watchlist-button";
+import { getT } from "@/i18n/server";
 
 /** Selected projects: featured dossiers (minus today's lead) topped up by market cap. */
 export async function ProjectTiles({ count = 4 }: { count?: number }) {
   await connection();
   const quotes = await getCoverageQuotes();
+  const t = (await getT()).overview.tiles;
   const lead = featuredDossierFor(new Date()).slug;
   const cap = (slug: string) => quotes.data?.[slug]?.marketCap ?? 0;
   const featured = PROJECTS.filter((p) => p.featured && p.slug !== lead);
@@ -35,9 +37,9 @@ export async function ProjectTiles({ count = 4 }: { count?: number }) {
               <div className="relative h-[116px]" style={{ backgroundColor: tint(color, 0.07) }}>
                 <div className="absolute inset-x-4 top-3.5 flex items-center justify-between">
                   <TokenLogo src={p.logo} name={p.name} size={30} />
-                  <span className="num pr-8 text-[10px] uppercase tracking-wider text-subtle">{q?.sparkline7d ? "7d" : "7d n/a"}</span>
+                  <span className="num pr-8 text-[10px] uppercase tracking-wider text-subtle">{q?.sparkline7d ? "7d" : t.na7d}</span>
                 </div>
-                <SparkArea values={q?.sparkline7d} color={color} className="absolute inset-x-0 bottom-0 h-[58px] w-full" label={`${p.ticker} 7-day price trend`} />
+                <SparkArea values={q?.sparkline7d} color={color} className="absolute inset-x-0 bottom-0 h-[58px] w-full" label={t.trend(p.ticker)} />
               </div>
               <div className="absolute right-2 top-2.5 z-10">
                 <WatchlistButton slug={p.slug} name={p.name} />
@@ -57,7 +59,7 @@ export async function ProjectTiles({ count = 4 }: { count?: number }) {
                   </span>
                 </span>
                 <span className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] text-fg-2 group-hover:text-accent-strong">
-                  Read the dossier <ArrowRight className="size-3.5" aria-hidden />
+                  {t.read} <ArrowRight className="size-3.5" aria-hidden />
                 </span>
               </Link>
             </div>

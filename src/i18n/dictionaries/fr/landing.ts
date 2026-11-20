@@ -110,6 +110,15 @@ export const ui: Dictionary["ui"] = {
   risk: (level: string) => `Risque ${level.toLowerCase()}`,
   confidenceShort: { high: "Élevée", medium: "Moyenne", low: "Faible" },
   coverage: { full: "Dossier complet", partial: "Dossier partiel", limited: "Données limitées" },
+  chart: {
+    series: "Séries du graphique",
+    range: "Période",
+    sinceLaunch: "depuis le lancement",
+    over: (range: string) => `sur ${range.replace("D", " j").replace("W", " sem.").replace("M", " mois").replace("Y", " an")}`,
+    error: "Les données du graphique n'ont pas pu être chargées.",
+    empty: "Aucune donnée pour cette période.",
+  },
+  dataNotice: { unavailable: "Données temporairement indisponibles.", partial: "Données partielles." },
   sourcePending: "(source à venir)",
   sourcePendingTitle: "Ce fait n'a pas encore de source et attend sa vérification.",
   claims: {

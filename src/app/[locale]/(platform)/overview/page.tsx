@@ -12,25 +12,31 @@ import { ResearchList, ResearchListSkeleton } from "@/components/overview/resear
 import { AskResearch, KeyDatesList } from "@/components/overview/ask-research";
 import { Developments, MarketChart, PanelSkeleton, SectorTable } from "@/components/overview/market-intel";
 import { SectionHeader } from "@/components/overview/section-header";
+import { getT } from "@/i18n/server";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = { title: "Overview" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("overview", "/overview");
+}
 
 const QUICK_SECTORS = ["layer-1", "layer-2", "defi", "oracles", "rwa", "ai"] as const;
 
-export default function OverviewPage() {
+export default async function OverviewPage() {
+  const dict = await getT();
+  const t = dict.overview;
   const sectorsWithCoverage = SECTORS.filter((s) => QUICK_SECTORS.includes(s.id as (typeof QUICK_SECTORS)[number]) && PROJECTS.some((p) => p.sector === s.id));
   return (
     <div className="space-y-14">
       {/* 1. Market overview */}
       <header>
-        <h1 className="serif-display text-[38px] leading-none text-fg md:text-[44px]">Market overview</h1>
+        <h1 className="serif-display text-[38px] leading-none text-fg md:text-[44px]">{t.title}</h1>
         <Suspense fallback={<MarketPulseSkeleton />}>
           <MarketPulse />
         </Suspense>
       </header>
 
       {/* 2. Editorial feature + market watch */}
-      <section className="grid grid-cols-1 gap-y-10 xl:grid-cols-12 xl:gap-x-10" aria-label="Featured research and market watch">
+      <section className="grid grid-cols-1 gap-y-10 xl:grid-cols-12 xl:gap-x-10" aria-label={t.featuredAria}>
         <div className="xl:col-span-8">
           <Suspense fallback={<FeaturedResearchSkeleton />}>
             <FeaturedResearch />
@@ -45,12 +51,12 @@ export default function OverviewPage() {
 
       {/* 3. Explore projects */}
       <section aria-labelledby="explore-title">
-        <SectionHeader id="explore-title" title="Explore projects" href="/explore" linkLabel={`All ${PROJECTS.length} projects`}>
-          <nav aria-label="Browse by sector" className="hidden flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-muted md:flex">
+        <SectionHeader id="explore-title" title={t.explore.title} href="/explore" linkLabel={t.explore.all(PROJECTS.length)}>
+          <nav aria-label={t.explore.bySector} className="hidden flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-muted md:flex">
             {sectorsWithCoverage.map((s) => (
               <Link key={s.id} href={`/explore?sector=${s.id}`} className="inline-flex items-center gap-1.5 hover:text-fg">
                 <span className="size-1.5 rounded-full" style={{ backgroundColor: SECTOR_COLORS[s.id] }} aria-hidden />
-                {s.label}
+                {dict.labels.sectors[s.id].label}
               </Link>
             ))}
           </nav>
@@ -63,13 +69,13 @@ export default function OverviewPage() {
       {/* 4. Latest research + ask */}
       <section className="grid grid-cols-1 gap-y-10 xl:grid-cols-12 xl:gap-x-10">
         <div className="xl:col-span-8">
-          <SectionHeader title="Latest research" href="/research" linkLabel="Research library" />
+          <SectionHeader title={t.latest.title} href="/research" linkLabel={t.latest.link} />
           <Suspense fallback={<ResearchListSkeleton />}>
             <ResearchList />
           </Suspense>
         </div>
         <aside className="xl:col-span-4">
-          <SectionHeader title="Ask the research" href="/copilot" linkLabel="Copilot" />
+          <SectionHeader title={t.ask.title} href="/copilot" linkLabel={t.ask.link} />
           <AskResearch />
           <KeyDatesList />
         </aside>
@@ -77,7 +83,7 @@ export default function OverviewPage() {
 
       {/* 5. Market intelligence */}
       <section aria-labelledby="intel-title">
-        <SectionHeader id="intel-title" title="Market intelligence" href="/markets" linkLabel="Open Markets" />
+        <SectionHeader id="intel-title" title={t.intel.title} href="/markets" linkLabel={t.intel.link} />
         <div className="grid grid-cols-1 gap-y-10 xl:grid-cols-12 xl:gap-x-10">
           <div className="space-y-10 xl:col-span-8">
             <Suspense fallback={<PanelSkeleton chart />}>

@@ -3,12 +3,14 @@
 import { Area, AreaChart as RAreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { SeriesPoint } from "@/lib/market/types";
 import { CHART } from "./palette";
+import { useLocale } from "@/i18n/client";
+import { INTL_LOCALE } from "@/i18n/config";
 
 export type ValueFormatter = (v: number) => string;
 
-const dateFmt = (t: number, spanDays: number) =>
+const dateFmt = (t: number, spanDays: number, tag: string) =>
   new Intl.DateTimeFormat(
-    "en-GB",
+    tag,
     spanDays <= 2
       ? { hour: "2-digit", minute: "2-digit", timeZone: "UTC" }
       : spanDays > 1100
@@ -18,8 +20,8 @@ const dateFmt = (t: number, spanDays: number) =>
           : { day: "numeric", month: "short", timeZone: "UTC" },
   ).format(t);
 
-const tooltipDate = (t: number, spanDays: number) =>
-  new Intl.DateTimeFormat("en-GB", spanDays <= 7 ? { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" } : { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(t);
+const tooltipDate = (t: number, spanDays: number, tag: string) =>
+  new Intl.DateTimeFormat(tag, spanDays <= 7 ? { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" } : { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(t);
 
 /**
  * Single-series area chart: 2px line, faint fill, crosshair + tooltip,
@@ -47,6 +49,7 @@ export function AreaChart({
 }) {
   if (data.length < 2) return null;
   const spanDays = (data[data.length - 1].t - data[0].t) / 86400_000;
+  const tag = INTL_LOCALE[useLocale()];
   const values = data.map((d) => d.v);
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -68,7 +71,7 @@ export function AreaChart({
             scale="time"
             domain={["dataMin", "dataMax"]}
             hide={!showAxes}
-            tickFormatter={(t: number) => dateFmt(t, spanDays)}
+            tickFormatter={(t: number) => dateFmt(t, spanDays, tag)}
             tick={{ fill: CHART.axis, fontSize: 11 }}
             axisLine={false}
             tickLine={false}
@@ -91,7 +94,7 @@ export function AreaChart({
               const p = payload[0].payload as SeriesPoint;
               return (
                 <div className="rounded-lg border border-line-strong bg-surface-2 px-3 py-2 shadow-xl shadow-black/40">
-                  <div className="text-[11px] text-muted">{tooltipDate(p.t, spanDays)}</div>
+                  <div className="text-[11px] text-muted">{tooltipDate(p.t, spanDays, tag)}</div>
                   <div className="num mt-0.5 text-sm text-fg">{format(p.v)}</div>
                 </div>
               );

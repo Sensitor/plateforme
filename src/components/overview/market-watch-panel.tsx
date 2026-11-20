@@ -10,6 +10,7 @@ import { Sparkline } from "@/components/charts/sparkline";
 import { Delta } from "@/components/ui/delta";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { StorageNote } from "@/components/storage-note";
+import { useT } from "@/i18n/client";
 
 export interface WatchRow {
   slug: string;
@@ -43,6 +44,7 @@ function Row({ r }: { r: WatchRow }) {
 
 export function MarketWatchPanel({ rows, leaders, unavailable, source }: { rows: WatchRow[]; leaders: string[]; unavailable: string | null; source: React.ReactNode }) {
   const [tab, setTab] = useState<"leaders" | "watchlist">("leaders");
+  const t = useT().overview.watch;
   const { slugs, ready } = useWatchlist();
   const bySlug = new Map(rows.map((r) => [r.slug, r]));
   const list = (tab === "leaders" ? leaders : slugs).map((s) => bySlug.get(s)).filter((r): r is WatchRow => Boolean(r));
@@ -50,12 +52,12 @@ export function MarketWatchPanel({ rows, leaders, unavailable, source }: { rows:
   return (
     <div className="@container">
       <div className="flex items-center justify-between gap-3 border-b border-line pb-3">
-        <h2 className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Market watch</h2>
-        <div className="flex gap-1 text-[12.5px]" role="tablist" aria-label="Market watch list">
+        <h2 className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">{t.title}</h2>
+        <div className="flex gap-1 text-[12.5px]" role="tablist" aria-label={t.listAria}>
           {(
             [
-              ["leaders", "Leaders"],
-              ["watchlist", `Watchlist${ready && slugs.length ? ` (${slugs.length})` : ""}`],
+              ["leaders", t.leaders],
+              ["watchlist", `${t.watchlist}${ready && slugs.length ? ` (${slugs.length})` : ""}`],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -71,9 +73,9 @@ export function MarketWatchPanel({ rows, leaders, unavailable, source }: { rows:
         </div>
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)_auto_64px] gap-x-3 pt-3 text-[10.5px] uppercase tracking-[0.1em] text-subtle @min-[336px]:grid-cols-[minmax(0,1fr)_56px_auto_64px]">
-        <span>{tab === "leaders" ? "By market cap" : "Followed"}</span>
+        <span>{tab === "leaders" ? t.byCap : t.followed}</span>
         <span className="hidden @min-[336px]:block">7d</span>
-        <span className="text-right">Price</span>
+        <span className="text-right">{t.price}</span>
         <span className="text-right">24h</span>
       </div>
 
@@ -82,10 +84,10 @@ export function MarketWatchPanel({ rows, leaders, unavailable, source }: { rows:
       ) : tab === "watchlist" && ready && list.length === 0 ? (
         <div className="py-8 text-center">
           <Star className="mx-auto size-5 text-subtle" aria-hidden />
-          <p className="mt-2 text-[13.5px] text-fg">No projects followed yet</p>
-          <p className="mt-1 text-[12.5px] text-muted">Bookmark projects from Explore or a dossier.</p>
+          <p className="mt-2 text-[13.5px] text-fg">{t.emptyTitle}</p>
+          <p className="mt-1 text-[12.5px] text-muted">{t.emptyText}</p>
           <Link href="/explore" className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] text-accent hover:text-accent-strong">
-            Explore projects <ArrowRight className="size-3.5" aria-hidden />
+            {t.explore} <ArrowRight className="size-3.5" aria-hidden />
           </Link>
         </div>
       ) : (
@@ -99,7 +101,7 @@ export function MarketWatchPanel({ rows, leaders, unavailable, source }: { rows:
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
         {tab === "watchlist" ? <StorageNote className="text-[11px] text-subtle" /> : source}
         <Link href={tab === "leaders" ? "/explore" : "/watchlist"} className="inline-flex items-center gap-1.5 text-[12.5px] text-fg-2 hover:text-fg">
-          {tab === "leaders" ? "All prices" : "Manage"} <ArrowRight className="size-3.5" aria-hidden />
+          {tab === "leaders" ? t.allPrices : t.manage} <ArrowRight className="size-3.5" aria-hidden />
         </Link>
       </div>
     </div>

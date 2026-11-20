@@ -108,6 +108,15 @@ export const ui = {
   risk: (level: string) => `${level} risk`,
   confidenceShort: { high: "High", medium: "Medium", low: "Low" },
   coverage: { full: "Full dossier", partial: "Partial dossier", limited: "Limited data" },
+  chart: {
+    series: "Chart series",
+    range: "Time range",
+    sinceLaunch: "since launch",
+    over: (range: string) => `over ${range}`,
+    error: "Chart data could not be loaded.",
+    empty: "No data for this range.",
+  },
+  dataNotice: { unavailable: "Data temporarily unavailable.", partial: "Partial data." },
   sourcePending: "(source pending)",
   sourcePendingTitle: "This fact has no source attached yet and is pending verification.",
   claims: {

@@ -22,7 +22,7 @@ export function Stat({ label, tip, value, children, size = "lg" }: { label: stri
       <dt className="flex items-center gap-1.5 text-[12px] text-muted">
         {label}
         {tip ? (
-          <InfoTip label={`About ${label}`} align="start">
+          <InfoTip label={label} align="start">
             {tip}
           </InfoTip>
         ) : null}

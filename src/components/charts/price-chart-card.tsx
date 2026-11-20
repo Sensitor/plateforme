@@ -10,6 +10,7 @@ import { AreaChart } from "./area-chart";
 import { Delta } from "@/components/ui/delta";
 import { SourceTag } from "@/components/ui/source-tag";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/i18n/client";
 
 const fetcher = (url: string) =>
   fetch(url).then((r) => {
@@ -46,6 +47,7 @@ export function PriceChartCard({
 }) {
   const [asset, setAsset] = useState(initialAsset ?? assets[0].key);
   const [range, setRange] = useState<ChartRange>(initialRange);
+  const t = useT().ui.chart;
   const [mounted, setMounted] = useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- loading dim only after hydration
   useEffect(() => setMounted(true), []);
@@ -67,7 +69,7 @@ export function PriceChartCard({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           {assets.length > 1 ? (
-            <div className="mb-2 flex flex-wrap gap-1" role="tablist" aria-label="Chart series">
+            <div className="mb-2 flex flex-wrap gap-1" role="tablist" aria-label={t.series}>
               {assets.map((a) => (
                 <button
                   key={a.key}
@@ -90,11 +92,11 @@ export function PriceChartCard({
             <div className="flex items-baseline gap-3">
               <span className="num text-2xl font-semibold text-fg">{series ? fmt(series[series.length - 1].v) : "n/a"}</span>
               <Delta value={change} className="text-sm" />
-              <span className="text-xs text-subtle">{range === "ALL" ? "since launch" : `over ${range}`}</span>
+              <span className="text-xs text-subtle">{range === "ALL" ? t.sinceLaunch : t.over(range)}</span>
             </div>
           )}
         </div>
-        <div className="flex shrink-0 gap-0.5 rounded-lg border border-line bg-surface-2 p-0.5" role="tablist" aria-label="Time range">
+        <div className="flex shrink-0 gap-0.5 rounded-lg border border-line bg-surface-2 p-0.5" role="tablist" aria-label={t.range}>
           {CHART_RANGES.map((r) => (
             <button
               key={r}
@@ -118,7 +120,7 @@ export function PriceChartCard({
           <div style={{ height }}><Skeleton className="h-full w-full rounded-lg" /></div>
         ) : (
           <div style={{ height }} className="flex items-center justify-center rounded-lg border border-dashed border-line-strong text-center text-[13px] text-muted">
-            {error ? "Chart data could not be loaded." : (data?.note ?? "No data for this range.")}
+            {error ? t.error : (data?.note ?? t.empty)}
           </div>
         )}
       </div>

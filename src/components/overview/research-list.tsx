@@ -2,7 +2,8 @@ import { connection } from "next/server";
 import Link from "@/i18n/link";
 import { readableAccent, tint } from "@/lib/brand";
 import { formatDate } from "@/lib/format";
-import { SECTOR_BY_ID } from "@/lib/research/taxonomy";
+import { getLocale } from "@/i18n/server";
+import { getDictionary } from "@/i18n/dictionaries";
 import { dossierTitle, featuredDossierFor, readingMinutes, researchFeed } from "@/lib/research/editorial";
 import type { Project } from "@/lib/research/types";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,8 @@ function Thumb({ project }: { project: Project }) {
 /** Research feed as compact editorial rows (excludes today's featured dossier). */
 export async function ResearchList({ limit = 5 }: { limit?: number }) {
   await connection();
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
   const lead = featuredDossierFor(new Date()).slug;
   const items = researchFeed()
     .filter((p) => p.slug !== lead)
@@ -33,15 +36,15 @@ export async function ResearchList({ limit = 5 }: { limit?: number }) {
           <Link href={`/projects/${p.slug}`} className="group grid grid-cols-[84px_minmax(0,1fr)] items-center gap-4 py-4 first:pt-0 sm:grid-cols-[112px_minmax(0,1fr)]">
             <Thumb project={p} />
             <span className="min-w-0">
-              <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">{SECTOR_BY_ID[p.sector].label}</span>
+              <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">{dict.labels.sectors[p.sector].label}</span>
               <span className="mt-1 block text-[15.5px] font-medium leading-snug text-fg group-hover:text-accent-strong">{dossierTitle(p)}</span>
               <span className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted">
                 <span>{p.editorial.author}</span>
                 <span aria-hidden>·</span>
-                <time dateTime={p.editorial.lastUpdated}>{formatDate(p.editorial.lastUpdated)}</time>
+                <time dateTime={p.editorial.lastUpdated}>{formatDate(p.editorial.lastUpdated, locale)}</time>
                 <span aria-hidden>·</span>
-                <span>{readingMinutes(p)} min read</span>
-                {p.editorial.status === "draft" ? <Badge tone="warning">Draft</Badge> : null}
+                <span>{dict.overview.dossierMeta.minRead(readingMinutes(p))}</span>
+                {p.editorial.status === "draft" ? <Badge tone="warning">{dict.overview.dossierMeta.draft}</Badge> : null}
               </span>
             </span>
           </Link>

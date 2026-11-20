@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWatchlist } from "@/lib/watchlist/store";
+import { useT } from "@/i18n/client";
 
 export function WatchlistButton({ slug, name, variant = "icon", className }: { slug: string; name: string; variant?: "icon" | "button"; className?: string }) {
   const { has, toggle, ready, limit } = useWatchlist();
+  const t = useT().watchlistUi;
   const [message, setMessage] = useState<string | null>(null);
   const active = ready && has(slug);
   const Icon = active ? BookmarkCheck : Bookmark;
@@ -16,12 +18,12 @@ export function WatchlistButton({ slug, name, variant = "icon", className }: { s
     e.stopPropagation();
     const res = toggle(slug);
     if (res === "limit") {
-      setMessage(`Free plan watchlists are limited to ${limit} projects.`);
+      setMessage(t.limit(limit));
       setTimeout(() => setMessage(null), 3500);
     }
   }
 
-  const label = active ? `Remove ${name} from watchlist` : `Add ${name} to watchlist`;
+  const label = active ? t.remove(name) : t.add(name);
 
   return (
     <span className="relative inline-flex">
@@ -52,7 +54,7 @@ export function WatchlistButton({ slug, name, variant = "icon", className }: { s
           )}
         >
           <Icon className="size-4" aria-hidden />
-          {active ? "In watchlist" : "Add to watchlist"}
+          {active ? t.inList : t.addShort}
         </button>
       )}
       {message ? (

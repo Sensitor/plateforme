@@ -17,6 +17,9 @@ import { Delta } from "@/components/ui/delta";
 import { SectorBadge } from "@/components/ui/sector-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TokenLogo } from "@/components/ui/token-logo";
+import { getLocale } from "@/i18n/server";
+import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/config";
 
 /**
  * Editorial cover built from real data: the asset's one-year price history,
@@ -25,9 +28,13 @@ import { TokenLogo } from "@/components/ui/token-logo";
 function ChartCover({
   project,
   history,
+  t,
+  locale,
 }: {
   project: Project;
   history: DataResult<SeriesPoint[]>;
+  t: Dictionary["overview"]["featured"];
+  locale: Locale;
 }) {
   const color = readableAccent(project.accent);
   const series = history.data ?? [];
@@ -51,7 +58,7 @@ function ChartCover({
           fillOpacity={0.1}
           strokeWidth={1.75}
           className="absolute inset-x-0 bottom-0 h-[62%] w-full sm:h-[74%]"
-          label={`${project.ticker} price over one year`}
+          label={t.chartLabel(project.ticker)}
         />
         <div className="absolute left-5 top-5 flex items-center gap-3">
           <TokenLogo src={project.logo} name={project.name} size={36} />
@@ -68,15 +75,13 @@ function ChartCover({
           <div className="absolute right-5 top-5 text-right">
             <div className="num text-[18px] text-fg">{formatPrice(last)}</div>
             <div className="text-[11.5px] text-muted">
-              <Delta value={change} className="text-[11.5px]" /> over 1 year
+              <Delta value={change} className="text-[11.5px]" /> {t.overYear}
             </div>
           </div>
         ) : null}
       </div>
       <figcaption className="mt-2 text-[11px] text-subtle">
-        {values.length
-          ? `${project.ticker}/USD daily price, one year. Source: ${history.source?.name ?? "n/a"}${history.asOf ? `, ${formatDate(history.asOf)}` : ""}.`
-          : "Price history unavailable right now."}
+        {values.length ? t.caption(project.ticker, history.source?.name ?? "n/a", history.asOf ? formatDate(history.asOf, locale) : "") : t.unavailable}
       </figcaption>
     </figure>
   );
@@ -87,15 +92,18 @@ export async function FeaturedResearch() {
   await connection();
   const project = featuredDossierFor(new Date());
   const history = await getPriceHistory(project.slug, "1Y");
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const t = dict.overview;
   const href = `/projects/${project.slug}`;
   return (
     <article className="group">
       <Link href={href} className="block" tabIndex={-1} aria-hidden>
-        <ChartCover project={project} history={history} />
+        <ChartCover project={project} history={history} t={t.featured} locale={locale} />
       </Link>
       <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px]">
         <span className="font-medium uppercase tracking-[0.14em] text-accent">
-          Featured dossier
+          {t.featured.kicker}
         </span>
         <span className="text-line-strong" aria-hidden>
           /
@@ -117,18 +125,18 @@ export async function FeaturedResearch() {
         <span className="text-fg-2">{project.editorial.author}</span>
         <span aria-hidden>·</span>
         <time dateTime={project.editorial.lastUpdated}>
-          {formatDate(project.editorial.lastUpdated)}
+          {formatDate(project.editorial.lastUpdated, locale)}
         </time>
         <span aria-hidden>·</span>
-        <span>{readingMinutes(project)} min read</span>
+        <span>{t.dossierMeta.minRead(readingMinutes(project))}</span>
         <span aria-hidden>·</span>
-        <span>{project.dossier.sources.length} sources</span>
+        <span>{t.dossierMeta.sources(project.dossier.sources.length)}</span>
         {project.editorial.status === "draft" ? (
           <Badge
             tone="warning"
-            title="Prepared from public documentation, not yet peer-reviewed"
+            title={t.dossierMeta.draftTitle}
           >
-            Draft
+            {t.dossierMeta.draft}
           </Badge>
         ) : null}
       </div>
