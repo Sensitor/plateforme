@@ -11,8 +11,11 @@ la synchronisation, le Research Copilot et les alertes en production. Compter 15
 3. Même chose avec [`supabase/migrations/0003_academy.sql`](../supabase/migrations/0003_academy.sql) :
    progression de l'Academy et badges synchronisés avec le compte. Sans ce fichier, la progression reste
    dans le navigateur et la page Academy l'indique.
-4. Vérifier dans **Table Editor** : `profiles`, `watchlist_items`, `portfolio_transactions`, `alerts`,
-   `notifications`, `copilot_usage`, `academy_progress`, toutes avec RLS activé.
+4. Même chose avec [`supabase/migrations/0004_market_snapshots.sql`](../supabase/migrations/0004_market_snapshots.sql) :
+   snapshots de marché quotidiens (tables `market_daily` et `asset_daily`, lecture publique, écriture par le
+   planificateur uniquement). Ils construisent l'historique de la capitalisation totale sans clé CoinGecko Pro.
+5. Vérifier dans **Table Editor** : `profiles`, `watchlist_items`, `portfolio_transactions`, `alerts`,
+   `notifications`, `copilot_usage`, `academy_progress`, `market_daily`, `asset_daily`, toutes avec RLS activé.
 
 `0002_research_cms.sql` est un modèle pour une phase ultérieure (contenu éditorial en base) : ne pas l'appliquer.
 
@@ -84,6 +87,23 @@ curl -s -H "Authorization: Bearer $CRON_SECRET" https://votre-domaine/api/cron/a
 
 Réponse attendue : `{"checked":N,"triggered":0,...}`. Une alerte déclenchée se met en pause, crée une
 notification in-app et, si l'utilisateur l'a activé dans son compte, envoie un e-mail récapitulatif.
+
+## 4 bis. Snapshots de marché quotidiens
+
+`/api/cron/snapshots` enregistre une fois par jour la capitalisation totale, le volume, les dominances, la TVL
+DeFi, l'offre de stablecoins, le Fear & Greed et une ligne par projet couvert (prix, capitalisation, FDV,
+volume, TVL), chaque valeur avec son fournisseur et son horodatage. Même authentification que les alertes
+(`Authorization: Bearer <CRON_SECRET>`, clé secrète Supabase côté serveur).
+
+- **Par défaut : Vercel Cron.** `vercel.json` planifie la route chaque jour vers 23 h 40 UTC ; le plan Hobby
+  autorise un passage quotidien, ce qui suffit. Vercel envoie `CRON_SECRET` automatiquement.
+- **Alternative : Supabase pg_cron** avec [`supabase/schedule_snapshots.sql`](../supabase/schedule_snapshots.sql)
+  (réutilise le secret de `schedule_alerts.sql` s'il existe).
+
+Test manuel : `curl -s -H "Authorization: Bearer $CRON_SECRET" https://votre-domaine/api/cron/snapshots`.
+Réponse attendue : `{"day":"…","market":true,"assets":20,"unavailable":[],"errors":[]}`. Relancer le même jour
+remplace simplement les lignes du jour. Dès deux jours d'historique, Overview et Markets affichent la
+capitalisation totale « Sensitor daily snapshots » avec la date de début.
 
 ## 5. Vérifications
 

@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { timingSafeEqual } from "node:crypto";
 import { PROJECT_BY_SLUG } from "@/content/projects";
 import { getCoverageQuotes } from "@/lib/market/service";
 import { getAdminSupabase } from "@/lib/supabase/admin";
@@ -7,6 +6,7 @@ import { evaluateAlert, triggeredCopy, type Locale } from "@/lib/alerts/evaluate
 import { renderAlertEmail, type EmailItem } from "@/lib/alerts/email";
 import type { AlertRow } from "@/lib/alerts/types";
 import { emailConfigured, sendEmail } from "@/lib/email/resend";
+import { cronAuthorised } from "@/lib/cron/auth";
 
 /**
  * Alert checker. Called on a schedule (Supabase pg_cron, Vercel Cron or any
@@ -14,18 +14,9 @@ import { emailConfigured, sendEmail } from "@/lib/email/resend";
  * paused (one-shot), a notification row is written and, if the user opted in,
  * one summary email is sent through Resend.
  */
-function authorised(request: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const given = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  const a = Buffer.from(given);
-  const b = Buffer.from(secret);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
 async function run(request: NextRequest) {
   if (!process.env.CRON_SECRET) return NextResponse.json({ error: "CRON_SECRET is not set" }, { status: 503 });
-  if (!authorised(request)) return NextResponse.json({ error: "unauthorised" }, { status: 401 });
+  if (!cronAuthorised(request)) return NextResponse.json({ error: "unauthorised" }, { status: 401 });
   const admin = getAdminSupabase();
   if (!admin) return NextResponse.json({ error: "SUPABASE_SECRET_KEY is not set" }, { status: 503 });
 

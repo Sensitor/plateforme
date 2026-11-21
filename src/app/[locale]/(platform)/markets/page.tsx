@@ -14,10 +14,11 @@ import {
   getPriceHistory,
   getStablecoinOverview,
   getTotalMarketCapHistory,
-  totalMarketCapHistoryAvailable,
+  totalMarketCapHistorySource,
 } from "@/lib/market/service";
 import { sectorPerformance } from "@/lib/sectors";
-import { formatNumber, formatPercent, formatPrice, formatUsdCompact } from "@/lib/format";
+import { formatDate, formatNumber, formatPercent, formatPrice, formatUsdCompact } from "@/lib/format";
+import { getSnapshotCoverage } from "@/lib/market/snapshots";
 import { cn } from "@/lib/utils";
 import { CardSkeleton, Skeleton } from "@/components/ui/skeleton";
 import { Stat, StatStrip } from "@/components/ui/stat-strip";
@@ -132,8 +133,8 @@ async function GlobalStrip() {
 
 async function MarketChart() {
   await connection(); // market data is request-time: never fetched at build
-  const pro = totalMarketCapHistoryAvailable();
-  const t = (await getT()).markets.chart;
+  const [historySource, coverage, t, locale] = await Promise.all([totalMarketCapHistorySource(), getSnapshotCoverage(), getT().then((d) => d.markets.chart), getLocale()]);
+  const pro = historySource != null;
   const assets: ChartAsset[] = [
     ...(pro ? [{ key: "total-mcap", label: t.totalCap, format: "usd-compact" as const }] : []),
     { key: "bitcoin", label: "Bitcoin", format: "price" },
@@ -144,6 +145,7 @@ async function MarketChart() {
   return (
     <div>
       <PriceChartCard assets={assets} initialAsset={assets[0].key} initialData={initial} height={280} />
+      {historySource === "snapshots" && coverage.firstDay ? <p className="mt-2 text-[11px] text-subtle">{t.snapshotNote(formatDate(coverage.firstDay, locale))}</p> : null}
       {!pro ? <p className="mt-2 text-[11px] text-subtle">{t.proNote}</p> : null}
     </div>
   );

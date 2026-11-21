@@ -2,7 +2,8 @@ import { connection } from "next/server";
 import Link from "@/i18n/link";
 import { PROJECTS } from "@/content/projects";
 import { SECTOR_COLORS } from "@/lib/brand";
-import { formatUsdCompact } from "@/lib/format";
+import { formatDate, formatUsdCompact } from "@/lib/format";
+import { getSnapshotCoverage } from "@/lib/market/snapshots";
 import { buildDevelopments } from "@/lib/overview";
 import { sectorPerformance } from "@/lib/sectors";
 import {
@@ -14,7 +15,7 @@ import {
   getPriceHistory,
   getStablecoinOverview,
   getTotalMarketCapHistory,
-  totalMarketCapHistoryAvailable,
+  totalMarketCapHistorySource,
 } from "@/lib/market/service";
 import { PriceChartCard, type ChartAsset } from "@/components/charts/price-chart-card";
 import { Delta } from "@/components/ui/delta";
@@ -22,13 +23,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SourceTag } from "@/components/ui/source-tag";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { PanelLabel } from "./section-header";
-import { getT } from "@/i18n/server";
+import { getLocale, getT } from "@/i18n/server";
 
 /** Compact history chart: total market cap with a CoinGecko Pro key, otherwise BTC and ETH. */
 export async function MarketChart() {
   await connection();
-  const t = (await getT()).overview.chart;
-  const proTotal = totalMarketCapHistoryAvailable();
+  const [t, historySource, coverage, locale] = await Promise.all([getT().then((d) => d.overview.chart), totalMarketCapHistorySource(), getSnapshotCoverage(), getLocale()]);
+  const proTotal = historySource != null;
   const assets: ChartAsset[] = [
     ...(proTotal ? [{ key: "total-mcap", label: t.totalCap, format: "usd-compact" as const }] : []),
     { key: "bitcoin", label: "BTC", format: "price" },
@@ -39,6 +40,7 @@ export async function MarketChart() {
   return (
     <div>
       <PriceChartCard assets={assets} initialAsset={assets[0].key} initialRange="3M" initialData={initial} height={200} />
+      {historySource === "snapshots" && coverage.firstDay ? <p className="mt-1 text-[11px] text-subtle">{t.snapshotNote(formatDate(coverage.firstDay, locale))}</p> : null}
       {!proTotal ? <p className="mt-1 text-[11px] text-subtle">{t.proNote}</p> : null}
     </div>
   );

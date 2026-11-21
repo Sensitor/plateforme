@@ -76,7 +76,7 @@ export const overview = {
     kinds: { unlock: "Unlock", halving: "Halving", "vesting-end": "Vesting end" },
     note: "Schedules from the dossiers. Exact unlock amounts need a licensed data feed (planned).",
   },
-  chart: { totalCap: "Total market cap", proNote: "Total market cap history is a CoinGecko Pro dataset, so asset prices are shown." },
+  chart: { totalCap: "Total market cap", proNote: "Total market cap history builds up from Sensitor's daily snapshots and appears after two days; asset prices are shown until then.", snapshotNote: (since: string) => `Total market cap from Sensitor's daily snapshots since ${since}.` },
   sectors: {
     title: "Sector performance",
     note: (n: number) => `Market-cap weighted, ${n} covered projects`,

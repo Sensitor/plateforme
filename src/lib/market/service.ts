@@ -28,6 +28,7 @@ import type {
   StablecoinOverview,
 } from "./types";
 import { changeOverWindow, downsampleSeries, movingAverage } from "./series";
+import { getSnapshotTotalMarketCap, snapshotHistoryAvailable } from "./snapshots";
 
 /*
  * Market data service.
@@ -170,18 +171,23 @@ export async function getPriceHistory(
   }
 }
 
+/** True when a CoinGecko Pro key provides the full total market cap history. */
 export function totalMarketCapHistoryAvailable() {
   return hasCoinGeckoPro();
 }
 
-/** Historical total crypto market cap, requires a CoinGecko Pro key. */
+/** Where total market cap history comes from: CoinGecko Pro, Sensitor's daily snapshots, or nowhere yet. */
+export async function totalMarketCapHistorySource(): Promise<"pro" | "snapshots" | null> {
+  if (hasCoinGeckoPro()) return "pro";
+  return (await snapshotHistoryAvailable()) ? "snapshots" : null;
+}
+
+/** Historical total crypto market cap: CoinGecko Pro when configured, otherwise Sensitor's daily snapshots. */
 export async function getTotalMarketCapHistory(range: ChartRange): Promise<DataResult<SeriesPoint[]>> {
   "use cache";
   cacheLife({ stale: 60, revalidate: 240, expire: 290 });
 
-  if (!hasCoinGeckoPro()) {
-    return unavailable("Historical total market cap requires a CoinGecko Pro API key (COINGECKO_PRO_API_KEY).");
-  }
+  if (!hasCoinGeckoPro()) return getSnapshotTotalMarketCap(range);
   try {
     const days = range === "ALL" ? "max" : RANGE_PARAMS[range].cgDays;
     const series = await cgGlobalMarketCapChart(days);

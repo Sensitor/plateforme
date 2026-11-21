@@ -14,7 +14,7 @@ export const markets: Dictionary["markets"] = {
     tracked: "Actifs suivis",
     listed: "Référencés par CoinGecko",
   },
-  chart: { totalCap: "Capitalisation totale", proNote: "L'historique de la capitalisation totale est un jeu de données CoinGecko Pro : les prix des actifs sont affichés à la place." },
+  chart: { totalCap: "Capitalisation totale", proNote: "L'historique de la capitalisation totale se construit à partir des snapshots quotidiens de Sensitor et apparaît après deux jours ; les prix des actifs sont affichés en attendant.", snapshotNote: (since: string) => `Capitalisation totale issue des snapshots quotidiens de Sensitor depuis le ${since}.` },
   sentiment: {
     title: "Sentiment",
     intro: "Indice Crypto Fear & Greed, 90 derniers jours.",

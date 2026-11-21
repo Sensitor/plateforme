@@ -1,6 +1,6 @@
 # Plan d'implémentation
 
-État au 18/11/2026. Projet démarré de zéro (dépôt vide) : aucune contrainte d'existant.
+État au 21/11/2026. Projet démarré de zéro (dépôt vide) : aucune contrainte d'existant.
 
 ## Phase 1, MVP ✅ (livré)
 
@@ -17,7 +17,8 @@
 - [x] Tests (205), vérification automatique des sources, build sans avertissement
 - [x] **Authentification (Phase 1b)** : Supabase Auth (mot de passe, lien magique, réinitialisation), `proxy.ts`, `/login`, `/auth/callback`, `/auth/confirm`, page compte
 - [x] Watchlist et portefeuille synchronisés (offline-first, fusion à la connexion, nettoyage à la déconnexion)
-- [ ] Relecture éditoriale des 20 dossiers (passage `draft` → `reviewed`)
+- [x] Passe de vérification sur sources primaires (21/11/2026) : 12 dossiers mis à jour (incidents Sui 2026, Alpenglow actif, UNIfication exécutée, fee switch Ethena, allocations Ethena / Immutable / LayerZero, Dual Governance active, inflation Celestia), plus aucune mention « à vérifier »
+- [ ] Relecture éditoriale des 20 dossiers (passage `draft` → `reviewed`, validation par le fondateur)
 
 ## Phase 2, Intelligence
 
@@ -28,8 +29,9 @@
 - [x] Research Copilot (Learn / Analyze / Compare) adossé aux dossiers Sensitor, citations obligatoires, quotas par plan
 - [x] Alertes prix et volatilité, notifications in-app, e-mails Resend, planification pg_cron
 - Alertes éditoriales (mise à jour d'un dossier suivi, unlocks, gouvernance)
-- Snapshots quotidiens (`market_snapshots`) via cron pour construire un historique propre, y compris la capitalisation totale sans plan Pro
-- [x] Localisation française de l'interface : `/fr`, sélecteur de langue, détection sur la page d'accueil, dictionnaires typés ; reste à traduire les dossiers et les leçons (contenu)
+- [x] Snapshots quotidiens (`market_daily`, `asset_daily`, migration `0004`) via Vercel Cron ou pg_cron : historique propre de la capitalisation totale sans plan Pro, affiché dès deux jours de données
+- [x] Localisation française de l'interface : `/fr`, sélecteur de langue, détection sur la page d'accueil, dictionnaires typés
+- [x] Contenu traduit : 32 leçons de l'Academy et 20 dossiers de recherche, avec tests de parité de structure
 
 ## Phase 3, Portfolio (version locale livrée)
 

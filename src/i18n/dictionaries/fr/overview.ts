@@ -78,7 +78,7 @@ export const overview: Dictionary["overview"] = {
     kinds: { unlock: "Déblocage", halving: "Halving", "vesting-end": "Fin de vesting" },
     note: "Calendriers tirés des dossiers. Les montants exacts des déblocages nécessitent un flux de données sous licence (prévu).",
   },
-  chart: { totalCap: "Capitalisation totale", proNote: "L'historique de la capitalisation totale est un jeu de données CoinGecko Pro : les prix des actifs sont affichés à la place." },
+  chart: { totalCap: "Capitalisation totale", proNote: "L'historique de la capitalisation totale se construit à partir des snapshots quotidiens de Sensitor et apparaît après deux jours ; les prix des actifs sont affichés en attendant.", snapshotNote: (since: string) => `Capitalisation totale issue des snapshots quotidiens de Sensitor depuis le ${since}.` },
   sectors: {
     title: "Performance par secteur",
     note: (n: number) => `Pondérée par la capitalisation, ${n} projets couverts`,
