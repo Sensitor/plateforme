@@ -21,7 +21,7 @@ export const hyperliquid: Project = {
     explorer: "https://app.hyperliquid.xyz/explorer",
   },
   data: { coingeckoId: "hyperliquid", coinpaprikaId: "hype-hyperliquid", llamaProtocol: "hyperliquid", llamaFees: "hyperliquid" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Hyperliquid: can a fully on-chain order book compete with centralised venues?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "Hyperliquid: can a fully on-chain order book compete with centralised venues?" },
   dossier: {
     overview: {
       summary:
@@ -109,7 +109,7 @@ export const hyperliquid: Project = {
       source("docs", "Hyperliquid documentation", "Hyperliquid", "https://hyperliquid.gitbook.io/hyperliquid-docs", "documentation", "Overview and team."),
       source("docs-core", "HyperCore overview", "Hyperliquid documentation", "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/overview", "documentation", "Order book, consensus, HyperEVM."),
       source("docs-fees", "Fees", "Hyperliquid documentation", "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees", "documentation", "Fee distribution and Assistance Fund."),
-      source("docs-tokenomics", "HYPE genesis and allocation", "Hyper Foundation", "https://hyperfoundation.org", "primary", "Allocation and vesting announced at genesis (Nov 2024).", { reliability: "medium", limitations: "Allocation figures are rendered client-side on the Foundation site; transcribed from the genesis announcement, to be re-verified at editorial review." }),
+      source("docs-tokenomics", "HYPE genesis and allocation", "Hyper Foundation", "https://hyperfoundation.org", "primary", "Allocation and vesting announced at genesis (Nov 2024).", { reliability: "medium", accessed: "2026-11-21", limitations: "The Foundation site renders the figures client-side; transcribed from the genesis announcement and consistent with exchange and press disclosures." }),
       source("docs-hip3", "HIP-3: Builder-deployed perpetuals", "Hyperliquid documentation", "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-3-builder-deployed-perpetuals", "documentation", "Permissionless market deployment."),
       coingecko("hyperliquid", "Hyperliquid"),
       defillamaProtocol("hyperliquid", "Hyperliquid"),

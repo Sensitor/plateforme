@@ -21,7 +21,7 @@ export const immutable: Project = {
     explorer: "https://explorer.immutable.com",
   },
   data: { coingeckoId: "immutable-x", coinpaprikaId: "imx-immutable-x", llamaChain: "Immutable zkEVM", llamaFees: "immutable-zkevm" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Immutable: how much of web3 gaming can one infrastructure stack capture?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "Immutable: how much of web3 gaming can one infrastructure stack capture?" },
   dossier: {
     overview: {
       summary:
@@ -45,11 +45,18 @@ export const immutable: Project = {
       supplyModel: "fixed-cap",
       supplyModelNote: "Fixed maximum supply of 2 billion IMX.",
       maxSupply: 2_000_000_000,
-      distributionNote: "No allocation chart in this release: published allocation pending verification against primary documentation.",
-      distributionSources: ["docs-imx"],
+      distribution: [
+        { label: "Ecosystem development", pct: 51.72 },
+        { label: "Project development", pct: 25 },
+        { label: "Private sale", pct: 13.86 },
+        { label: "Public sale", pct: 5.42 },
+        { label: "Foundation reserve", pct: 4 },
+      ],
+      distributionNote: "Allocation published by the IMX token issuer (Digital Worlds NFTs Ltd). Its unlock table swaps the two sale labels; the shares above follow the allocation section, which matches the vesting terms of each sale.",
+      distributionSources: ["imx-tokenomics"],
       utility: [fact("IMX is used for gas on Immutable zkEVM, staking and governance.", "docs-imx")],
       emissions: [view("No inflation beyond the cap; circulating supply has grown through scheduled unlocks.")],
-      vesting: [view("Most insider unlocks have been completed; check the official schedule for any remaining tranches.")],
+      vesting: [fact("All scheduled unlocks have ended: the sale tranches by April 2024, ecosystem and project development on 31 October 2025.", "imx-tokenomics")],
       valueAccrual: [view("A share of protocol fees is used for staking rewards; fee volume is small relative to market capitalisation.")],
     },
     adoption: {
@@ -72,7 +79,7 @@ export const immutable: Project = {
     risks: [
       { category: "technology", level: "moderate", claims: [view("Platform transitions (Immutable X → zkEVM) add migration risk.")] },
       { category: "economic", level: "high", claims: [view("Fee revenue minimal; value depends on gaming adoption.")] },
-      { category: "regulatory", level: "moderate", claims: [fact("Immutable disclosed receiving an SEC Wells notice in November 2024.", "wells")] },
+      { category: "regulatory", level: "moderate", claims: [fact("Immutable disclosed an SEC Wells notice at the end of October 2024; the SEC closed its investigation in March 2025 without enforcement action.", "wells", "sec-closed")] },
       { category: "governance", level: "elevated", claims: [view("Company-controlled platform decisions.")] },
       { category: "liquidity", level: "moderate", claims: [fact("Mid-cap token on major exchanges.", "coingecko")] },
       { category: "centralization", level: "elevated", claims: [view("Operator and company control of core infrastructure.")] },
@@ -89,7 +96,7 @@ export const immutable: Project = {
     },
     framework: [
       { pillar: "technology", rating: 3, confidence: "medium", summary: "Solid developer tooling; chain decentralisation limited.", dataUsed: ["Docs"], limitations: "Limited independent assessment.", sources: ["docs-zkevm"] },
-      { pillar: "tokenomics", rating: 3, confidence: "low", summary: "Fixed cap; utility for gas and staking.", dataUsed: ["Token docs"], limitations: "Allocation pending verification.", sources: ["docs-imx"] },
+      { pillar: "tokenomics", rating: 3, confidence: "low", summary: "Fixed cap, unlocks complete; utility for gas and staking.", dataUsed: ["Token docs", "Issuer unlock table"], limitations: "Sale labels swapped in the issuer's unlock table.", sources: ["docs-imx", "imx-tokenomics"] },
       { pillar: "adoption", rating: 2, confidence: "medium", summary: "Pipeline large, usage modest.", dataUsed: ["DefiLlama"], limitations: "Bot-inflated metrics.", sources: ["defillama"] },
       { pillar: "financials", rating: 1, confidence: "medium", summary: "Minimal fee revenue.", dataUsed: ["DefiLlama fees"], limitations: "Off-chain revenue not attributable.", sources: ["defillama"] },
       { pillar: "governance", rating: 2, confidence: "medium", summary: "Company-led.", dataUsed: ["Docs"], limitations: "Qualitative.", sources: ["docs"] },
@@ -104,7 +111,9 @@ export const immutable: Project = {
       source("docs-bridging", "Bridging to Immutable Chain", "Immutable documentation", "https://docs.immutable.com/docs/products/immutable-chain/bridging", "documentation", "Bridge between Ethereum and Immutable."),
       source("imx-deprecation", "Immutable X deprecation", "Immutable documentation", "https://docs.immutable.com/docs/products/immutable-chain/immutable-x-deprecation", "documentation", "Migration from Immutable X to Immutable Chain."),
       source("docs-imx", "IMX token", "Immutable", "https://www.immutable.com/token", "primary", "IMX utility and supply.", { reliability: "medium" }),
-      source("wells", "Immutable statement on SEC Wells notice", "Immutable", "https://www.immutable.com/blog", "primary", "Wells notice disclosure (Nov 2024).", { reliability: "medium", limitations: "Links to company blog index; statement post to be pinned." }),
+      source("imx-tokenomics", "IMX tokenomics", "Digital Worlds NFTs Ltd (IMX issuer)", "https://imx.community/tokenomics", "primary", "Allocation and unlock schedule.", { accessed: "2026-11-21", limitations: "The unlock table swaps the private and public sale labels." }),
+      source("wells", "Immutable says it received a Wells notice from the US SEC", "The Block", "https://www.theblock.co/post/324087/immutable-says-it-received-a-wells-notice-from-the-us-sec-over-securities-law-violations-potentially-involving-imx", "press", "Wells notice disclosure (October 2024).", { published: "2024-10-31", accessed: "2026-11-21", limitations: "Press report; Immutable's own statement was published on its social channels." }),
+      source("sec-closed", "SEC drops investigation into Web3 gaming firm Immutable", "Decrypt", "https://decrypt.co/311606/sec-drops-investigation-into-web3-gaming-firm-immutable", "press", "Closure of the SEC investigation without enforcement action (March 2025).", { published: "2025-03-25", accessed: "2026-11-21", limitations: "Press report of the company's announcement." }),
       coingecko("immutable-x", "Immutable"),
       defillamaChain("immutable-zkevm", "Immutable zkEVM"),
     ],

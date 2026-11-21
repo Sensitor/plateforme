@@ -118,7 +118,7 @@ export const bittensorFr: ProjectText = {
     { supports: "Répartition des émissions entre les mineurs.", limitations: "La structure des URL de la documentation peut changer." },
     { supports: "Tokens alpha des subnets et émissions.", limitations: "La structure des URL de la documentation peut changer." },
     { supports: "Répartition des émissions et halving.", limitations: "La structure des URL de la documentation peut changer." },
-    { supports: "Mode sécurisé après l'exploit des wallets.", limitations: "Renvoie vers le blog de la fondation ; l'article sur l'incident reste à épingler." },
+    { supports: "Mode sécurisé après l'exploit des wallets, attribué à un paquet PyPI malveillant." },
     { supports: "Données de mise, d'émissions et de subnets." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
   ],

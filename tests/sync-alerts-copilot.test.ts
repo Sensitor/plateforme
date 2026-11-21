@@ -176,6 +176,12 @@ describe("overview and editorial", async () => {
       expect(p.editorial.headline).not.toMatch(/\$|\d+(\.\d+)?%/);
       expect(readingMinutes(p)).toBeGreaterThanOrEqual(1);
     }
-    expect(researchFeed()[0].featured).toBe(true);
+    // Most recently updated first; on the same date, featured dossiers come first.
+    const feed = researchFeed();
+    for (let i = 1; i < feed.length; i++) {
+      const [a, b] = [feed[i - 1], feed[i]];
+      expect(a.editorial.lastUpdated >= b.editorial.lastUpdated).toBe(true);
+      if (a.editorial.lastUpdated === b.editorial.lastUpdated) expect(Number(Boolean(a.featured)) >= Number(Boolean(b.featured))).toBe(true);
+    }
   });
 });

@@ -22,7 +22,7 @@ export const celestia: Project = {
     explorer: "https://celenium.io",
   },
   data: { coingeckoId: "celestia", coinpaprikaId: "tia-celestia", llamaFees: "celestia" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Celestia: can data availability be a durable business?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "Celestia: can data availability be a durable business?" },
   dossier: {
     overview: {
       summary:
@@ -43,7 +43,7 @@ export const celestia: Project = {
     },
     tokenomics: {
       supplyModel: "disinflationary",
-      supplyModelNote: "1 billion TIA at genesis plus staking inflation. The original schedule started at 8% and declined 10% per year to a 1.5% floor; governance has since reduced issuance, verify current parameters.",
+      supplyModelNote: "1 billion TIA at genesis plus staking inflation. Inflation started at 8% with a 10% yearly decline; the Lotus upgrade (CIP-29, July 2025) cut it from about 7.2% to about 5%, and v6 (CIP-41, November 2025) to about 2.5%, now declining 6.7% a year towards a 1.5% floor.",
       maxSupply: null,
       distribution: [
         { label: "R&D & ecosystem", pct: 26.79 },
@@ -109,7 +109,7 @@ export const celestia: Project = {
       source("docs", "Celestia documentation", "Celestia", "https://docs.celestia.org", "documentation", "Architecture and network."),
       source("docs-das", "Data availability sampling", "Celestia documentation", "https://docs.celestia.org/learn/how-celestia-works/data-availability-layer", "documentation", "DAS and erasure coding.", { limitations: "Docs URL structure may change." }),
       source("docs-blobstream", "Blobstream", "Celestia documentation", "https://docs.celestia.org/learn/blobstream/", "documentation", "Data commitments relay.", { limitations: "Docs URL structure may change." }),
-      source("docs-tokenomics", "TIA staking, governance & supply", "Celestia documentation", "https://docs.celestia.org/learn/TIA/staking-governance-supply/", "documentation", "Allocation, inflation and unlocks.", { limitations: "Verify latest issuance changes." }),
+      source("docs-tokenomics", "TIA staking, governance & supply", "Celestia documentation", "https://docs.celestia.org/learn/TIA/staking-governance-supply/", "documentation", "Allocation, inflation (including CIP-29 and CIP-41) and unlocks.", { accessed: "2026-11-21" }),
       source("celenium", "Celenium explorer", "Celenium", "https://celenium.io", "data", "Blob and namespace data.", { reliability: "medium" }),
       coingecko("celestia", "Celestia"),
       defillamaChain("celestia", "Celestia"),

@@ -27,14 +27,14 @@ export const solanaFr: ProjectText = {
   technology: {
     blocks: [
       ["Modèle fondé sur des comptes où les programmes sont sans état et où les données vivent dans des comptes séparés ; les transactions indiquent leurs comptes à l'avance, ce qui permet l'exécution parallèle."],
-      ["Preuve d'enjeu déléguée avec Tower BFT, un consensus de type PBFT qui utilise l'horloge de la Proof of History pour ordonner les événements."],
+      ["Preuve d'enjeu déléguée. Jusqu'en octobre 2026, elle reposait sur Tower BFT, un consensus de type PBFT qui utilise l'horloge de la Proof of History pour ordonner les événements ; Alpenglow l'a remplacé à partir de l'époque 1064."],
       ["Passe à l'échelle verticalement en exigeant un matériel de validation puissant et une bande passante élevée ; le débit croît avec les progrès du matériel plutôt que par le sharding ou les rollups."],
       [
         "Le réseau a subi plusieurs pannes en 2021-2022 et un arrêt d'environ 5 heures en février 2024 ; la stabilité s'est améliorée depuis, mais les incidents de disponibilité restent la principale préoccupation technique.",
         "Un second client validateur écrit de façon indépendante (Firedancer, de Jump Crypto) réduit le risque lié à un client unique.",
       ],
       ["Le nombre de validateurs est important, mais les coûts matériels sont élevés et la mise est concentrée entre de gros opérateurs ; le coefficient de Nakamoto mérite d'être surveillé."],
-      ["Les validateurs ont approuvé en 2025 la refonte du consensus Alpenglow (SIMD-0326), qui vise une finalité beaucoup plus rapide ; vérifiez son statut d'activation sur le réseau principal."],
+      ["Alpenglow (SIMD-0326), approuvé par les validateurs en 2025, est entré en service sur le réseau principal à l'époque 1064, ouverte le 21 octobre 2026 : son protocole de vote Votor a remplacé Tower BFT et vise une finalité d'environ 150 millisecondes, contre environ 12,8 secondes auparavant. Rotor, qui doit remplacer la propagation des blocs par Turbine, n'est pas encore planifié."],
     ],
     limitations: ["Les exigences élevées en matériel et en bande passante augmentent le coût de fonctionnement d'un validateur.", "La disponibilité du réseau a historiquement été moins robuste que celle de chaînes plus prudentes."],
   },
@@ -130,20 +130,20 @@ export const solanaFr: ProjectText = {
   thesis: {
     bull: [
       "Solana devient la chaîne par défaut de la finance grand public et du trading on-chain grâce à son expérience utilisateur et à sa vitesse.",
-      "Alpenglow et Firedancer améliorent nettement la finalité et la résilience, ce qui lève la principale objection technique.",
+      "Alpenglow, en service depuis octobre 2026, et Firedancer améliorent nettement la finalité et la résilience, ce qui lève la principale objection technique.",
     ],
     neutral: ["Solana reste l'une des trois premières plateformes de smart contracts, avec une activité cyclique liée à la spéculation des particuliers."],
     bear: [
       "L'activité se révèle surtout spéculative et migre vers des chaînes plus récentes quand les incitations s'estompent.",
       "Une panne majeure pendant un épisode de tension entame la confiance des institutions.",
     ],
-    catalysts: ["Mise à jour du consensus Alpenglow approuvée par les validateurs.", "Croissance des paiements en stablecoins sur Solana par des fintechs grand public."],
+    catalysts: ["Le déploiement de Rotor, la seconde moitié d'Alpenglow, pour remplacer la propagation des blocs par Turbine.", "Croissance des paiements en stablecoins sur Solana par des fintechs grand public."],
     assumptions: ["Les coûts du matériel continuent de baisser plus vite que la demande de débit n'augmente.", "Les utilisateurs privilégient la vitesse et le coût plutôt qu'une décentralisation maximale."],
     monitor: ["Disponibilité et rapports d'incidents", "Part de l'activité non spéculative", "Concentration des validateurs", "Adoption de Firedancer"],
     invalidation: ["Des pannes répétées de plusieurs heures après Alpenglow et Firedancer", "Un recul durable des utilisateurs payant des frais sur un cycle complet"],
   },
   framework: [
-    { summary: "Haute performance ; historique de disponibilité en amélioration mais imparfait.", dataUsed: ["Historique des pannes", "Développement des clients"], limitations: "Des mises à jour majeures encore en cours de déploiement." },
+    { summary: "Haute performance ; historique de disponibilité en amélioration mais imparfait.", dataUsed: ["Historique des pannes", "Développement des clients"], limitations: "Alpenglow est récent sur le réseau principal ; Rotor n'est pas encore planifié." },
     { summary: "Désinflation transparente ; initiés débloqués ; staking financé par l'inflation.", dataUsed: ["Calendrier d'inflation", "Allocation de genèse"], limitations: "Une large allocation initiale aux initiés." },
     { summary: "Forte activité et fort intérêt des développeurs ; qualité de l'usage inégale.", dataUsed: ["TVL et frais DefiLlama"], limitations: "L'activité des bots gonfle les indicateurs." },
     { summary: "Une large base de frais quand les marchés sont actifs.", dataUsed: ["Frais DefiLlama"], limitations: "Très cyclique." },
@@ -159,6 +159,7 @@ export const solanaFr: ProjectText = {
     { supports: "Principal client validateur." },
     { supports: "Client validateur indépendant." },
     { supports: "Propositions de changement du protocole, dont Alpenglow (SIMD-0326)." },
+    { supports: "Activation sur le réseau principal à l'époque 1064 (21 octobre 2026), statut de Votor et de Rotor, objectif de finalité." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
     { supports: "TVL, frais et offre de stablecoins au niveau de la chaîne.", limitations: "La TVL ne compte que les dépôts DeFi ; ce n'est pas une mesure de la valeur du réseau." },
   ],

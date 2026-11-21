@@ -32,15 +32,15 @@ export const uniswapFr: ProjectText = {
   },
   tokenomics: {
     supplyModelNote:
-      "1 milliard d'UNI émis à la genèse (septembre 2020), avec une inflation perpétuelle pouvant aller jusqu'à 2 % par an, activable par la gouvernance après la période initiale de quatre ans.",
+      "1 milliard d'UNI émis à la genèse (septembre 2020), avec une inflation perpétuelle pouvant aller jusqu'à 2 % par an, activable par la gouvernance après la période initiale de quatre ans. 100 millions d'UNI ont été brûlés depuis la trésorerie en décembre 2025 dans le cadre d'UNIfication, et les frais de protocole financent désormais d'autres burns.",
     distribution: [{ label: "Communauté (airdrop, minage de liquidité, trésorerie)" }, { label: "Équipe et futurs employés" }, { label: "Investisseurs" }, { label: "Conseillers" }],
     distributionNote: "Allocation de genèse (septembre 2020). Le vesting des initiés s'est terminé en 2024.",
     utility: ["L'UNI sert à voter dans la gouvernance du protocole, notamment sur le réglage des frais et l'usage de la trésorerie."],
     emissions: ["Un mécanisme d'inflation annuelle de 2 % existe dans le contrat du token, à la discrétion de la gouvernance."],
     vesting: ["Les allocations de l'équipe, des investisseurs et des conseillers ont été acquises sur quatre ans, jusqu'en septembre 2024."],
     valueAccrual: [
-      "En novembre 2025, Uniswap Labs et l'Uniswap Foundation ont proposé « UNIfication » : activer les frais de protocole et les utiliser pour brûler des UNI, et diriger les frais du séquenceur d'Unichain vers le même burn.",
-      "Vérifiez le résultat on-chain et les paramètres de frais actuels sur le portail de gouvernance ; la captation de valeur dépend des niveaux de frais fixés par la gouvernance.",
+      "UNIfication a été adoptée et exécutée on-chain (proposition 93) le 29 décembre 2025 : les frais de protocole des pools v2 et d'une sélection de pools v3 sur le réseau principal d'Ethereum financent des burns d'UNI, les frais du séquenceur d'Unichain alimentent le même burn, et 100 millions d'UNI ont été brûlés depuis la trésorerie.",
+      "En mars 2026, la gouvernance a étendu les frais de protocole à tous les pools v3 du réseau principal d'Ethereum et à huit autres chaînes (Arbitrum, Base, Celo, OP Mainnet, Soneium, X Layer, Worldchain et Zora).",
     ],
   },
   adoption: {
@@ -57,8 +57,8 @@ export const uniswapFr: ProjectText = {
       { label: "Volume / TVL", why: "L'efficacité du capital de la liquidité." },
     ],
     claims: [
-      "Historiquement, presque tous les frais allaient aux fournisseurs de liquidité, si bien que l'UNI ne captait aucun flux de trésorerie ; l'activation des frais de protocole est le principal changement fondamental à surveiller.",
-      "Les frais d'interface encaissés par Uniswap Labs sont distincts des revenus du protocole.",
+      "Jusqu'à UNIfication, presque tous les frais allaient aux fournisseurs de liquidité, si bien que l'UNI ne captait aucun flux de trésorerie ; le volume des burns dépend désormais des niveaux de frais de protocole fixés par la gouvernance.",
+      "Dans le cadre d'UNIfication, Uniswap Labs a supprimé ses frais d'interface, de wallet et d'API.",
     ],
   },
   onchain: {
@@ -70,10 +70,10 @@ export const uniswapFr: ProjectText = {
       {
         technology: "AMM v2-v4, hooks, UniswapX",
         adoption: "Plus grand DEX",
-        tokenomics: "Gouvernance, proposition d'activation des frais",
+        tokenomics: "Gouvernance, les frais financent des burns d'UNI",
         economics: "Importants frais versés aux fournisseurs de liquidité",
         strengths: "Liquidité, marque, multi-chaînes",
-        weaknesses: "Absence historique de captation de valeur",
+        weaknesses: "Captation de valeur encore récente",
         positioning: "Protocole DEX de référence",
       },
       {
@@ -112,14 +112,14 @@ export const uniswapFr: ProjectText = {
       "Le flux d'ordres migre vers les solveurs et des plateformes privées ; les frais des fournisseurs de liquidité se compriment.",
       "Les frais de protocole réduisent le rendement des fournisseurs de liquidité, ce qui pousse la liquidité vers les concurrents.",
     ],
-    catalysts: ["Proposition UNIfication pour activer les frais de protocole et les burns d'UNI.", "Croissance d'Unichain."],
+    catalysts: ["Extension des frais de protocole à d'autres pools et chaînes après UNIfication.", "Croissance d'Unichain."],
     assumptions: ["Les fournisseurs de liquidité restent disposés à fournir de la liquidité après l'activation des frais de protocole.", "La part des DEX dans le volume au comptant continue de croître."],
     monitor: ["Revenus des frais de protocole et burns", "Liquidité après les changements de frais", "Part de marché des DEX", "Évolutions réglementaires"],
     invalidation: ["Une perte significative de liquidité après l'activation des frais", "Une perte durable du leadership en volume parmi les DEX"],
   },
   framework: [
     { summary: "Contrats immuables et éprouvés.", dataUsed: ["Livres blancs", "Historique"], limitations: "Les hooks sont récents." },
-    { summary: "Initiés entièrement acquis ; l'activation des frais changerait la captation de valeur.", dataUsed: ["Allocation", "Propositions de gouvernance"], limitations: "Résultat des paramètres de frais à vérifier." },
+    { summary: "Initiés entièrement acquis ; les frais de protocole financent désormais des burns d'UNI.", dataUsed: ["Allocation", "Propositions de gouvernance exécutées"], limitations: "Le volume des burns dépend des niveaux de frais fixés par la gouvernance." },
     { summary: "Plus grand DEX par le volume.", dataUsed: ["DefiLlama"], limitations: "Volume cyclique." },
     { summary: "Des frais importants, des revenus de protocole historiquement limités.", dataUsed: ["Frais et revenus DefiLlama"], limitations: "Les revenus dépendent de la gouvernance." },
     { summary: "Gouvernance déléguée avec une forte influence de l'entreprise.", dataUsed: ["Portail de gouvernance"], limitations: "Qualitatif." },
@@ -134,7 +134,9 @@ export const uniswapFr: ProjectText = {
     { supports: "L2 Unichain." },
     { supports: "Allocation, vesting et inflation du token." },
     { supports: "Processus de gouvernance." },
-    { supports: "Proposition conjointe d'activer les frais de protocole, de brûler des UNI et de diriger les frais du séquenceur d'Unichain vers les burns.", limitations: "Texte de la proposition ; consultez la gouvernance pour le résultat du vote et les paramètres en vigueur." },
+    { supports: "Proposition conjointe d'activer les frais de protocole, de brûler des UNI et de diriger les frais du séquenceur d'Unichain vers les burns." },
+    { supports: "Exécution on-chain (proposition 93, 29 décembre 2025) et conditions de la proposition." },
+    { supports: "Frais de protocole étendus en mars 2026 (propositions 94 et 95)." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
     { supports: "Chiffres de TVL, de frais et de revenus.", limitations: "Adaptateurs open source ; la méthodologie diffère selon les protocoles et peut être révisée." },
   ],

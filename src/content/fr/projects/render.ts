@@ -30,7 +30,7 @@ export const renderFr: ProjectText = {
   tokenomics: {
     supplyModelNote:
       "Équilibre burn-and-mint (BME) : des tokens sont brûlés quand les utilisateurs paient le travail et émis pour les opérateurs de nœuds selon un calendrier d'émissions décroissant, dans la limite d'une offre maximale publiée.",
-    distributionNote: "Pas de graphique de répartition : les données d'allocation de la vente de tokens de 2017 et de la migration qui a suivi sont en attente de vérification.",
+    distributionNote: "Pas de graphique de répartition : les RNP définissent les émissions du modèle burn-and-mint, mais pas l'allocation de genèse de 2017, qu'aucune source primaire actuelle ne publie.",
     utility: ["Le RENDER est le token de paiement et de récompense du réseau ; le travail est facturé en monnaie classique et réglé par des burns de tokens."],
     emissions: ["Les émissions destinées aux opérateurs de nœuds, à la liquidité et à l'écosystème suivent le calendrier défini dans la RNP-001."],
     vesting: ["Aucun calendrier de vesting d'initiés important ne reste significatif par rapport aux émissions."],
@@ -105,7 +105,7 @@ export const renderFr: ProjectText = {
   },
   framework: [
     { summary: "Réseau opérationnel ; vérification fondée sur la confiance.", dataUsed: ["RNP", "Documentation"], limitations: "Peu de publications techniques." },
-    { summary: "Le BME relie l'usage à l'offre.", dataUsed: ["RNP-001"], limitations: "Allocation en attente de vérification." },
+    { summary: "Le BME relie l'usage à l'offre.", dataUsed: ["RNP-001"], limitations: "Allocation de genèse non publiée dans les sources primaires actuelles." },
     { summary: "Un usage faible par rapport à la valorisation.", dataUsed: ["Statistiques de Render"], limitations: "Peu de données standardisées." },
     { summary: "Données de revenus ouvertes insuffisantes.", dataUsed: [], limitations: "Pas de couverture DefiLlama." },
     { summary: "Processus public des RNP.", dataUsed: ["Dépôt des RNP"], limitations: "Influence de la Fondation." },
@@ -115,8 +115,8 @@ export const renderFr: ProjectText = {
   sources: [
     { supports: "Présentation et usage du réseau." },
     { supports: "Processus de gouvernance." },
-    { supports: "Modèle BME et émissions.", limitations: "Renvoie vers le dépôt des RNP ; ouvrir la RNP-001 dans le dossier des RNP finalisées." },
-    { supports: "Migration du token vers Solana.", limitations: "Renvoie vers le dépôt des RNP ; ouvrir la RNP-002 dans le dossier des RNP finalisées." },
+    { supports: "Modèle BME et émissions." },
+    { supports: "Migration du token vers Solana." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
   ],
 };

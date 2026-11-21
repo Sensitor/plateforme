@@ -24,7 +24,7 @@ export const solana: Project = {
     governance: "https://github.com/solana-foundation/solana-improvement-documents",
   },
   data: { coingeckoId: "solana", coinpaprikaId: "sol-solana", llamaChain: "Solana", llamaFees: "solana" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Solana: what does a high-performance monolithic design trade away?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "Solana: what does a high-performance monolithic design trade away?" },
   dossier: {
     overview: {
       summary:
@@ -49,7 +49,7 @@ export const solana: Project = {
     technology: {
       blocks: [
         { topic: "architecture", claims: [fact("Account-based model where programs are stateless and data lives in separate accounts; transactions specify accounts in advance, enabling parallel execution.", "docs-core")] },
-        { topic: "consensus", claims: [fact("Delegated proof of stake with Tower BFT, a PBFT-style consensus that uses the Proof of History clock to order events.", "whitepaper")] },
+        { topic: "consensus", claims: [fact("Delegated proof of stake. Until October 2026 it ran Tower BFT, a PBFT-style consensus that uses the Proof of History clock to order events; Alpenglow replaced it from epoch 1064.", "whitepaper", "alpenglow")] },
         { topic: "scalability", claims: [view("Scales vertically by requiring powerful validator hardware and high bandwidth; throughput grows with hardware improvements rather than sharding or rollups.")] },
         {
           topic: "security",
@@ -59,7 +59,7 @@ export const solana: Project = {
           ],
         },
         { topic: "decentralization", claims: [view("Validator count is substantial, but hardware costs are high and stake is concentrated among large operators; the Nakamoto coefficient is worth monitoring.")] },
-        { topic: "innovation", claims: [fact("Validators approved the Alpenglow consensus redesign (SIMD-0326) in 2025, targeting much faster finality; check activation status on mainnet.", "simd")] },
+        { topic: "innovation", claims: [fact("Alpenglow (SIMD-0326), approved by validators in 2025, went live on mainnet in epoch 1064, which began on 21 October 2026: its Votor voting protocol replaced Tower BFT and targets finality of about 150 milliseconds instead of about 12.8 seconds. Rotor, which would replace Turbine block propagation, is not yet scheduled.", "alpenglow", "simd")] },
       ],
       limitations: [
         view("High hardware and bandwidth requirements raise the cost of running a validator."),
@@ -140,16 +140,16 @@ export const solana: Project = {
       { category: "competition", level: "moderate", claims: [view("Faces Ethereum L2s on one side and newer high-performance L1s (Sui, others) on the other.")] },
     ],
     thesis: {
-      bull: [view("Solana becomes the default chain for consumer finance and on-chain trading thanks to UX and speed."), hyp("Alpenglow and Firedancer materially improve finality and resilience, removing the main technical objection.")],
+      bull: [view("Solana becomes the default chain for consumer finance and on-chain trading thanks to UX and speed."), hyp("Alpenglow, live since October 2026, and Firedancer materially improve finality and resilience, removing the main technical objection.")],
       neutral: [view("Solana remains a top-3 smart-contract platform with cyclical activity tied to retail speculation.")],
       bear: [view("Activity proves mostly speculative and migrates to newer chains when incentives fade."), hyp("A major outage during a stress event damages institutional trust.")],
-      catalysts: [fact("Alpenglow consensus upgrade approved by validators.", "simd"), hyp("Growth of stablecoin payments on Solana by mainstream fintechs.")],
+      catalysts: [hyp("Rollout of Rotor, the second half of Alpenglow, to replace Turbine block propagation.", "alpenglow"), hyp("Growth of stablecoin payments on Solana by mainstream fintechs.")],
       assumptions: [hyp("Hardware costs keep falling faster than demand for throughput."), hyp("Users prioritise speed and cost over maximal decentralisation.")],
       monitor: ["Uptime and incident reports", "Share of non-speculative activity", "Validator concentration", "Firedancer adoption"],
       invalidation: ["Repeated multi-hour outages after Alpenglow/Firedancer", "Sustained decline in fee-paying users across a full cycle"],
     },
     framework: [
-      { pillar: "technology", rating: 4, confidence: "medium", summary: "High performance; liveness record improving but imperfect.", dataUsed: ["Outage history", "Client development"], limitations: "Major upgrades still rolling out.", sources: ["firedancer", "simd"] },
+      { pillar: "technology", rating: 4, confidence: "medium", summary: "High performance; liveness record improving but imperfect.", dataUsed: ["Outage history", "Client development"], limitations: "Alpenglow is new on mainnet; Rotor not yet scheduled.", sources: ["firedancer", "simd", "alpenglow"] },
       { pillar: "tokenomics", rating: 3, confidence: "high", summary: "Transparent disinflation; insiders unlocked; inflation-funded staking.", dataUsed: ["Inflation schedule", "Genesis allocation"], limitations: "Large early insider allocation.", sources: ["docs-inflation"] },
       { pillar: "adoption", rating: 4, confidence: "medium", summary: "High activity and developer interest; quality of usage mixed.", dataUsed: ["DefiLlama TVL & fees"], limitations: "Bot activity inflates metrics.", sources: ["defillama"] },
       { pillar: "financials", rating: 4, confidence: "medium", summary: "Large fee base in active markets.", dataUsed: ["DefiLlama fees"], limitations: "Highly cyclical.", sources: ["defillama"] },
@@ -166,6 +166,7 @@ export const solana: Project = {
       source("agave", "Agave validator client", "Anza (GitHub)", "https://github.com/anza-xyz/agave", "primary", "Main validator client."),
       source("firedancer", "Firedancer", "Jump Crypto", "https://github.com/firedancer-io/firedancer", "primary", "Independent validator client."),
       source("simd", "Solana Improvement Documents", "Solana Foundation (GitHub)", "https://github.com/solana-foundation/solana-improvement-documents", "governance", "Protocol change proposals including Alpenglow (SIMD-0326)."),
+      source("alpenglow", "Alpenglow", "Solana Foundation", "https://solana.com/upgrades/alpenglow", "documentation", "Mainnet activation in epoch 1064 (21 October 2026), Votor and Rotor status, finality target.", { accessed: "2026-11-21" }),
       coingecko("solana", "Solana"),
       defillamaChain("solana", "Solana"),
     ],

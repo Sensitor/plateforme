@@ -22,7 +22,7 @@ export const layerzero: Project = {
     explorer: "https://layerzeroscan.com",
   },
   data: { coingeckoId: "layerzero", coinpaprikaId: "zro-layerzero", llamaFees: "layerzero" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "LayerZero: who secures omnichain messages?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "LayerZero: who secures omnichain messages?" },
   dossier: {
     overview: {
       summary:
@@ -45,12 +45,20 @@ export const layerzero: Project = {
       supplyModel: "fixed-cap",
       supplyModelNote: "Fixed supply of 1 billion ZRO.",
       maxSupply: 1_000_000_000,
-      distributionNote: "Not charted in this release: allocation (community, strategic partners, core contributors, repurchased tokens) pending primary-source verification.",
-      distributionSources: ["zro-launch"],
+      distribution: [
+        { label: "LayerZero Foundation", pct: 43.3 },
+        { label: "Strategic partners", pct: 31.2 },
+        { label: "Core contributors", pct: 25.5 },
+      ],
+      distributionNote: "Current allocation as published by LayerZero (June 2026): the Foundation's original 383 million plus 50 million bought back from strategic partners in September 2025; strategic partners at 312 million after a legal settlement returned the 40 million repurchased from FTX / Alameda at launch.",
+      distributionSources: ["zro-blog"],
       utility: [fact("ZRO is a governance token; the protocol design includes a fee switch that governance can activate, requiring fees to be paid in ZRO.", "zro-launch")],
       emissions: [view("No inflation; circulating supply grows with unlocks.")],
-      vesting: [view("Insider allocations follow multi-year vesting after a one-year cliff from June 2024; large monthly unlocks relative to circulating supply.")],
-      valueAccrual: [hyp("Value accrual depends on governance activating the fee switch; previous fee-switch votes should be checked for outcome.")],
+      vesting: [view("Insider allocations follow multi-year vesting after a one-year cliff from June 2024; large monthly unlocks relative to circulating supply."), fact("The September 2025 buyback lowered the gross monthly strategic-partner unlock from 15 million to 12.7 million ZRO, and the Foundation's remaining 183 million are re-locked until Zero's mainnet launch.", "zro-blog")],
+      valueAccrual: [
+        fact("Three fee-switch referendums (December 2024, June 2025, December 2025) each won more than 96% approval, but turnout of 10.96%, 13.01% and 3.71% did not meet the quorum, which has had a 20% floor since the second vote; the fee switch is not active.", "zro-blog"),
+        fact("Stargate revenue already funds ZRO buybacks, and the Foundation bought back 50 million ZRO (5% of supply) from strategic partners in September 2025.", "zro-blog"),
+      ],
     },
     adoption: {
       claims: [view("Widely used for omnichain token deployments (OFTs) and by bridges such as Stargate."), fact("Messages and volumes are visible on LayerZero Scan.", "scan")],
@@ -89,7 +97,7 @@ export const layerzero: Project = {
     },
     framework: [
       { pillar: "technology", rating: 4, confidence: "medium", summary: "Flexible design; security depends on configuration.", dataUsed: ["Whitepaper", "Docs"], limitations: "App-level configs vary.", sources: ["whitepaper", "docs-protocol"] },
-      { pillar: "tokenomics", rating: 2, confidence: "low", summary: "Unlock overhang, value accrual pending.", dataUsed: ["Launch docs"], limitations: "Allocation pending verification.", sources: ["zro-launch"] },
+      { pillar: "tokenomics", rating: 2, confidence: "low", summary: "Unlocks continue; buybacks active, fee switch short of quorum.", dataUsed: ["Launch docs", "LayerZero token post"], limitations: "Contributor unlock terms vary by individual.", sources: ["zro-launch", "zro-blog"] },
       { pillar: "adoption", rating: 4, confidence: "medium", summary: "Broad integrations.", dataUsed: ["LayerZero Scan"], limitations: "Message counts vs value.", sources: ["scan"] },
       { pillar: "financials", rating: 2, confidence: "low", summary: "Limited revenue to token holders.", dataUsed: ["DefiLlama"], limitations: "Thin data.", sources: ["defillama"] },
       { pillar: "governance", rating: 2, confidence: "medium", summary: "Labs/Foundation-led.", dataUsed: ["Docs"], limitations: "Qualitative.", sources: ["zro-launch"] },
@@ -101,7 +109,8 @@ export const layerzero: Project = {
       source("whitepaper", "LayerZero V2 whitepaper", "LayerZero Labs", "https://layerzero.network/publications/LayerZero_Whitepaper_V2.1.0.pdf", "primary", "Protocol design.", { published: "2024" }),
       source("docs-protocol", "LayerZero protocol overview", "LayerZero documentation", "https://docs.layerzero.network/v2/concepts/protocol/protocol-overview", "documentation", "Endpoints, DVNs, executors."),
       source("docs-oft", "Omnichain Fungible Token (OFT) standard", "LayerZero documentation", "https://docs.layerzero.network/v2/concepts/applications/oft-standard", "documentation", "OFT design."),
-      source("zro-launch", "ZRO token", "LayerZero Foundation", "https://layerzero.foundation", "primary", "Token, governance and fee switch.", { reliability: "medium", limitations: "Foundation site; check for allocation updates." }),
+      source("zro-launch", "ZRO token", "LayerZero Foundation", "https://layerzero.foundation", "primary", "Token, governance and fee switch.", { reliability: "medium", accessed: "2026-11-21" }),
+      source("zro-blog", "All Roads Lead to ZRO", "LayerZero Labs blog", "https://layerzero.network/blog/the-zro-token", "primary", "Current allocation, buybacks, unlocks and fee-switch referendums.", { published: "2026-06-03", accessed: "2026-11-21" }),
       source("scan", "LayerZero Scan", "LayerZero Labs", "https://layerzeroscan.com", "data", "Message explorer."),
       coingecko("layerzero", "LayerZero"),
       defillamaProtocol("layerzero", "LayerZero"),

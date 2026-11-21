@@ -30,10 +30,11 @@ export const immutableFr: ProjectText = {
   },
   tokenomics: {
     supplyModelNote: "Offre maximale fixe de 2 milliards d'IMX.",
-    distributionNote: "Pas de graphique d'allocation dans cette version : l'allocation publiée est en attente de vérification auprès de la documentation primaire.",
+    distribution: [{ label: "Développement de l'écosystème" }, { label: "Développement du projet" }, { label: "Vente privée" }, { label: "Vente publique" }, { label: "Réserve de la fondation" }],
+    distributionNote: "Allocation publiée par l'émetteur du token IMX (Digital Worlds NFTs Ltd). Son tableau de déblocage inverse les libellés des deux ventes ; les parts ci-dessus suivent la section d'allocation, cohérente avec les conditions de vesting de chaque vente.",
     utility: ["L'IMX sert au gas sur Immutable zkEVM, au staking et à la gouvernance."],
     emissions: ["Pas d'inflation au-delà du plafond ; l'offre en circulation a augmenté via des déblocages programmés."],
-    vesting: ["La plupart des déblocages des initiés sont terminés ; consultez le calendrier officiel pour d'éventuelles tranches restantes."],
+    vesting: ["Tous les déblocages programmés sont terminés : les tranches des ventes avant avril 2024, le développement de l'écosystème et du projet le 31 octobre 2025."],
     valueAccrual: ["Une part des frais du protocole sert aux récompenses de staking ; le volume de frais est faible par rapport à la capitalisation."],
   },
   adoption: {
@@ -88,7 +89,7 @@ export const immutableFr: ProjectText = {
   risks: [
     ["Les transitions de plateforme (d'Immutable X au zkEVM) ajoutent un risque de migration."],
     ["Revenus de frais minimes ; la valeur dépend de l'adoption du jeu vidéo."],
-    ["Immutable a annoncé avoir reçu une Wells notice de la SEC en novembre 2024."],
+    ["Immutable a annoncé une Wells notice de la SEC fin octobre 2024 ; la SEC a clos son enquête en mars 2025 sans aucune poursuite."],
     ["Des décisions de plateforme contrôlées par l'entreprise."],
     ["Token de capitalisation moyenne sur les grandes plateformes d'échange."],
     ["Contrôle de l'infrastructure centrale par l'opérateur et l'entreprise."],
@@ -105,7 +106,7 @@ export const immutableFr: ProjectText = {
   },
   framework: [
     { summary: "De solides outils pour les développeurs ; décentralisation de la chaîne limitée.", dataUsed: ["Documentation"], limitations: "Peu d'évaluations indépendantes." },
-    { summary: "Plafond fixe ; utilité pour le gas et le staking.", dataUsed: ["Documentation du token"], limitations: "Allocation en attente de vérification." },
+    { summary: "Plafond fixe, déblocages terminés ; utilité pour le gas et le staking.", dataUsed: ["Documentation du token", "Tableau de déblocage de l'émetteur"], limitations: "Libellés des ventes inversés dans le tableau de déblocage de l'émetteur." },
     { summary: "Large portefeuille, usage modeste.", dataUsed: ["DefiLlama"], limitations: "Indicateurs gonflés par les bots." },
     { summary: "Revenus de frais minimes.", dataUsed: ["Frais DefiLlama"], limitations: "Revenus hors chaîne non attribuables." },
     { summary: "Pilotage par l'entreprise.", dataUsed: ["Documentation"], limitations: "Qualitatif." },
@@ -119,7 +120,9 @@ export const immutableFr: ProjectText = {
     { supports: "Bridge entre Ethereum et Immutable." },
     { supports: "Migration d'Immutable X vers Immutable Chain." },
     { supports: "Utilité et offre de l'IMX." },
-    { supports: "Annonce de la Wells notice (novembre 2024).", limitations: "Renvoie vers l'index du blog de l'entreprise ; la déclaration précise reste à épingler." },
+    { supports: "Allocation et calendrier de déblocage.", limitations: "Le tableau de déblocage inverse les libellés de la vente privée et de la vente publique." },
+    { supports: "Annonce de la Wells notice (octobre 2024).", limitations: "Article de presse ; la déclaration d'Immutable a été publiée sur ses réseaux sociaux." },
+    { supports: "Clôture de l'enquête de la SEC sans poursuite (mars 2025).", limitations: "Article de presse relayant l'annonce de l'entreprise." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
     { supports: "TVL, frais et offre de stablecoins au niveau de la chaîne.", limitations: "La TVL ne compte que les dépôts DeFi ; ce n'est pas une mesure de la valeur du réseau." },
   ],

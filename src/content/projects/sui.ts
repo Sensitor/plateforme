@@ -22,7 +22,7 @@ export const sui: Project = {
     explorer: "https://suiscan.xyz",
   },
   data: { coingeckoId: "sui", coinpaprikaId: "sui-sui", llamaChain: "Sui", llamaFees: "sui" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Sui: can parallel execution and Move win developers?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "Sui: can parallel execution and Move win developers?" },
   dossier: {
     overview: {
       summary:
@@ -37,8 +37,15 @@ export const sui: Project = {
         { topic: "architecture", claims: [fact("Object-centric data model with owned and shared objects; Move language adapted for Sui.", "docs-objects")] },
         { topic: "consensus", claims: [fact("Mysticeti, a DAG-based consensus protocol, orders transactions involving shared objects.", "docs-consensus")] },
         { topic: "scalability", claims: [view("Parallel execution and low-latency consensus target high throughput; capacity scales with validator hardware.")] },
-        { topic: "security", claims: [fact("Mainnet halted for roughly two hours in November 2024 due to a validator software bug.", "incident-halt"), view("Move's resource model reduces some classes of smart-contract bugs, but application-level exploits still occur.")] },
-        { topic: "decentralization", claims: [fact("After the May 2025 Cetus exploit, validators coordinated to freeze a large part of the stolen funds, prompting debate about Sui's censorship resistance.", "cetus")] },
+        { topic: "security", claims: [
+            fact("Mainnet halted for about two and a half hours on 21 November 2024 after an assertion in congestion-control code sent every validator into a crash loop.", "incident-halt"),
+            fact("On 14 January 2026 an edge-case bug in consensus commit logic stopped checkpoint certification for about six hours; no certified transaction was rolled back.", "stall-2026"),
+            fact("On 28 and 29 May 2026 mainnet suffered three outages after the 1.72 release: two from gas-charging bugs linked to the new address balances, one from a latent bug in how validators restore randomness state.", "halts-2026"),
+            view("Move's resource model reduces some classes of smart-contract bugs, but application-level exploits still occur.")] },
+        { topic: "decentralization", claims: [
+            fact("After the May 2025 Cetus exploit, validators coordinated to freeze a large part of the stolen funds, prompting debate about Sui's censorship resistance.", "cetus"),
+            fact("An on-chain vote to recover the frozen funds passed with validators representing 90.9% of stake.", "cetus"),
+          ] },
       ],
       limitations: [view("Younger ecosystem with less battle-tested DeFi."), view("Demonstrated validator coordination capability raises neutrality questions.")],
     },
@@ -78,7 +85,7 @@ export const sui: Project = {
       ],
     },
     risks: [
-      { category: "technology", level: "moderate", claims: [fact("One notable mainnet halt (Nov 2024).", "incident-halt")] },
+      { category: "technology", level: "moderate", claims: [fact("Four mainnet outages since November 2024, three of them in 2026 (a six-hour stall in January, three halts in May).", "incident-halt", "stall-2026", "halts-2026")] },
       { category: "economic", level: "elevated", claims: [view("Large future unlocks relative to circulating supply.")] },
       { category: "regulatory", level: "moderate", claims: [view("Standard L1 token regulatory exposure.")] },
       { category: "governance", level: "elevated", claims: [view("Mysten Labs and the Sui Foundation have strong influence.")] },
@@ -96,7 +103,7 @@ export const sui: Project = {
       invalidation: ["Sustained decline in ecosystem activity while unlocks continue"],
     },
     framework: [
-      { pillar: "technology", rating: 4, confidence: "medium", summary: "Modern design with good performance.", dataUsed: ["Whitepaper", "Docs"], limitations: "Short history.", sources: ["whitepaper", "docs-consensus"] },
+      { pillar: "technology", rating: 4, confidence: "medium", summary: "Modern design with good performance.", dataUsed: ["Whitepaper", "Docs"], limitations: "Short history; four outages since November 2024.", sources: ["whitepaper", "docs-consensus", "halts-2026"] },
       { pillar: "tokenomics", rating: 2, confidence: "medium", summary: "Large insider allocation and long unlocks.", dataUsed: ["Tokenomics docs"], limitations: "Schedule details.", sources: ["docs-tokenomics"] },
       { pillar: "adoption", rating: 3, confidence: "medium", summary: "Growing ecosystem.", dataUsed: ["DefiLlama"], limitations: "Young.", sources: ["defillama"] },
       { pillar: "financials", rating: 2, confidence: "medium", summary: "Small fees vs valuation.", dataUsed: ["DefiLlama fees"], limitations: "Early.", sources: ["defillama"] },
@@ -112,8 +119,10 @@ export const sui: Project = {
       source("docs-consensus", "Consensus (Mysticeti)", "Sui documentation", "https://docs.sui.io/concepts/sui-architecture/consensus", "documentation", "Consensus protocol."),
       source("docs-zklogin", "zkLogin", "Sui documentation", "https://docs.sui.io/concepts/cryptography/zklogin", "documentation", "Login-based wallets."),
       source("docs-tokenomics", "Sui tokenomics", "Sui documentation", "https://docs.sui.io/concepts/tokenomics", "documentation", "Supply, staking, storage fund."),
-      source("incident-halt", "Sui mainnet incident (21 Nov 2024)", "Sui Foundation", "https://blog.sui.io", "primary", "Network halt post-mortem.", { reliability: "medium", limitations: "Links to the blog index; post-mortem to be pinned." }),
-      source("cetus", "Cetus incident and validator response (May 2025)", "Sui Foundation", "https://blog.sui.io", "primary", "Exploit and freezing of funds.", { reliability: "medium", limitations: "Links to the blog index; statement to be pinned." }),
+      source("incident-halt", "Sui Mainnet Outage Resolution", "Sui Foundation", "https://www.sui.io/blog/sui-mainnet-outage-resolution", "primary", "Network halt of 21 November 2024 and its cause.", { published: "2024-11-21", accessed: "2026-11-21" }),
+      source("stall-2026", "Sui Mainnet Network Stall Resolution", "Sui Foundation", "https://www.sui.io/blog/sui-mainnet-network-stall-resolution", "primary", "Six-hour stall of 14 January 2026.", { published: "2026-01-15", accessed: "2026-11-21" }),
+      source("halts-2026", "Sui Mainnet Halts Resolved After Major Upgrade", "Sui Foundation", "https://www.sui.io/blog/sui-mainnet-halts-resolved-after-major-upgrade", "primary", "Three outages of 28-29 May 2026 after the 1.72 release.", { published: "2026-05-31", accessed: "2026-11-21" }),
+      source("cetus", "Response to the Cetus Incident: Onchain Community Vote", "Sui Foundation", "https://www.sui.io/blog/cetus-incident-response-onchain-community-vote", "primary", "Freeze of stolen funds and the recovery vote.", { published: "2025-05-27", accessed: "2026-11-21" }),
       coingecko("sui", "Sui"),
       defillamaChain("sui", "Sui"),
     ],

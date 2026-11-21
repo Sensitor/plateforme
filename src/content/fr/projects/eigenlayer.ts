@@ -39,7 +39,7 @@ export const eigenlayerFr: ProjectText = {
       "L'EIGEN peut être restaké auprès des AVS aux côtés de l'ETH.",
     ],
     emissions: ["Des incitations programmées augmentent l'offre chaque année pour récompenser les stakers et les opérateurs."],
-    vesting: ["Les allocations des investisseurs et des premiers contributeurs se débloquent sur plusieurs années après une période de blocage initiale ; consultez le calendrier officiel pour les déblocages restants."],
+    vesting: ["Les premiers contributeurs, les investisseurs et les prestataires de la Fondation ont été bloqués un an après que l'EIGEN est devenu transférable ; 4 % de chaque allocation se sont débloqués à cette date anniversaire puis 4 % de plus chaque mois, si bien que ces allocations finissent de se débloquer environ deux ans plus tard, en 2027."],
     valueAccrual: ["La captation de valeur dépend du paiement par les AVS de frais de sécurité d'une manière qui crée une demande d'EIGEN ; ce lien n'est pas encore prouvé."],
   },
   adoption: {
@@ -124,7 +124,8 @@ export const eigenlayerFr: ProjectText = {
     { supports: "Operator sets, mise unique, slashing.", limitations: "Documentation réorganisée sous EigenCloud." },
     { supports: "AVS de disponibilité des données." },
     { supports: "Slashing intersubjectif et conception du token." },
-    { supports: "Allocation et incitations.", limitations: "Annonce de la Fondation ; vérifier les mises à jour ultérieures." },
+    { supports: "Allocation et incitations." },
+    { supports: "Offre initiale, allocation et calendrier de déblocage des premiers contributeurs et des investisseurs." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
     { supports: "Chiffres de TVL, de frais et de revenus.", limitations: "Adaptateurs open source ; la méthodologie diffère selon les protocoles et peut être révisée." },
   ],

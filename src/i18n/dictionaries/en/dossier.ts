@@ -163,7 +163,7 @@ export const dossier = {
     invalidated: "Thesis invalidated if",
   },
   sources: {
-    types: { primary: "Primary", documentation: "Docs", data: "Data", research: "Research", governance: "Governance" },
+    types: { primary: "Primary", documentation: "Docs", data: "Data", research: "Research", governance: "Governance", press: "Press" },
     source: "Source",
     supports: "Supports",
     published: "Published",

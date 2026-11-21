@@ -165,7 +165,7 @@ export const dossier: Dictionary["dossier"] = {
     invalidated: "Thèse invalidée si",
   },
   sources: {
-    types: { primary: "Primaire", documentation: "Docs", data: "Données", research: "Recherche", governance: "Gouvernance" },
+    types: { primary: "Primaire", documentation: "Docs", data: "Données", research: "Recherche", governance: "Gouvernance", press: "Presse" },
     source: "Source",
     supports: "Appuie",
     published: "Publiée",

@@ -130,7 +130,7 @@ export const hyperliquidFr: ProjectText = {
     { supports: "Présentation et équipe." },
     { supports: "Carnet d'ordres, consensus, HyperEVM." },
     { supports: "Distribution des frais et Assistance Fund." },
-    { supports: "Allocation et vesting annoncés à la genèse (novembre 2024).", limitations: "Les chiffres d'allocation sont affichés côté navigateur sur le site de la Fondation ; transcrits depuis l'annonce de genèse, à revérifier lors de la relecture éditoriale." },
+    { supports: "Allocation et vesting annoncés à la genèse (novembre 2024).", limitations: "Le site de la Fondation affiche les chiffres côté navigateur ; transcrits depuis l'annonce de genèse et cohérents avec les publications des plateformes d'échange et de la presse." },
     { supports: "Déploiement de marchés ouvert à tous." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
     { supports: "Chiffres de TVL, de frais et de revenus.", limitations: "Adaptateurs open source ; la méthodologie diffère selon les protocoles et peut être révisée." },

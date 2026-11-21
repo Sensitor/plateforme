@@ -15,8 +15,9 @@ export interface KeyDate {
 
 export const KEY_DATES: KeyDate[] = [
   { slug: "arbitrum", title: "Team & investor monthly unlocks", when: "Monthly until Mar 2027", kind: "unlock" },
-  { slug: "ethena", title: "Core contributor & investor vesting", when: "Monthly until Mar 2028", kind: "unlock" },
+  { slug: "ethena", title: "Core contributor vesting (investor unlocks accelerated in 2026)", when: "Monthly until Mar 2028", kind: "unlock" },
   { slug: "ondo", title: "Annual unlock tranche", when: "Every January", kind: "unlock" },
+  { slug: "eigenlayer", title: "Early contributor & investor monthly unlocks (4% a month)", when: "Monthly until 2027", kind: "unlock" },
   { slug: "hyperliquid", title: "Core contributor vesting", when: "Ongoing since Nov 2025", kind: "unlock" },
   { slug: "celestia", title: "Initial insider vesting completes", when: "Late 2026", kind: "vesting-end" },
   { slug: "bitcoin", title: "Next halving (block 1,050,000)", when: "Expected ~2028", kind: "halving" },

@@ -20,7 +20,7 @@ export interface Claim {
   sources?: string[];
 }
 
-export type SourceType = "primary" | "documentation" | "data" | "research" | "governance";
+export type SourceType = "primary" | "documentation" | "data" | "research" | "governance" | "press";
 
 export interface ResearchSource {
   id: string;

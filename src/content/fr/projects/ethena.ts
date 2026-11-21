@@ -35,15 +35,22 @@ export const ethenaFr: ProjectText = {
   },
   tokenomics: {
     supplyModelNote: "Offre maximale de 15 milliards d'ENA.",
+    distribution: [{ label: "Contributeurs principaux" }, { label: "Développement de l'écosystème et airdrops" }, { label: "Investisseurs" }, { label: "Fondation" }],
     distributionNote:
-      "Non représenté en graphique : la documentation d'Ethena indique dans son texte 30 % pour les contributeurs principaux et 30 % pour le développement de l'écosystème et les airdrops ; les parts des investisseurs et de la fondation n'apparaissent que dans un graphique et n'ont pas été transcrites.",
+      "Les parts des contributeurs principaux et de l'écosystème figurent dans le texte de la documentation d'Ethena ; celles des investisseurs et de la fondation sont lues sur le graphique de vesting de cette même documentation (3,75 et 2,25 milliards d'ENA une fois entièrement acquis) et concordent avec les publications des plateformes d'échange.",
     utility: ["L'ENA sert à la gouvernance ; le sENA (ENA staké) participe à la gouvernance et aux incitations de l'écosystème."],
-    emissions: ["Pas d'inflation au-delà du plafond fixe ; l'offre en circulation augmente à mesure que les allocations se débloquent."],
+    emissions: [
+      "Pas d'inflation au-delà du plafond fixe ; l'offre en circulation augmente à mesure que les allocations se débloquent.",
+      "Ethena a annoncé la fin des incitations et de l'inflation en tokens liées à l'USDe à partir de fin septembre 2026.",
+    ],
     vesting: [
       "Contributeurs principaux et investisseurs : un cliff d'un an libérant 25 %, puis trois ans de vesting mensuel linéaire, à partir de l'émission du token en mars 2024.",
-      "Les déblocages sont importants par rapport à l'offre en circulation jusqu'en 2028.",
+      "Le 27 août 2026, l'Ethena Foundation a racheté les tokens bloqués de certains investisseurs seed et annoncé une libération accélérée des tokens restants des investisseurs ; les contributeurs principaux conservent leur calendrier d'origine jusqu'en mars 2028.",
     ],
-    valueAccrual: ["La gouvernance a discuté d'une activation des frais (« fee switch ») partageant les revenus du protocole avec le sENA selon des conditions prédéfinies ; vérifiez le statut actuel dans les archives de gouvernance."],
+    valueAccrual: [
+      "Les détenteurs d'ENA ont approuvé l'activation des frais par un vote Snapshot clos le 2 septembre 2026 : un prélèvement sur les revenus bruts du protocole augmente avec l'offre moyenne d'USDe sur 14 jours (5 % à 7,5 milliards, 10 % à 10 milliards, 15 % à 15 milliards, 20 % à 20 milliards), et 95 % des revenus nets versés à la Fondation financent des rachats d'ENA.",
+      "En octobre 2026, l'offre d'USDe est restée sous le premier palier de 7,5 milliards : aucun rachat n'avait donc été exécuté.",
+    ],
   },
   adoption: {
     claims: [
@@ -106,17 +113,17 @@ export const ethenaFr: ProjectText = {
     ["Stablecoins adossés à des devises qui partagent leur rendement, et autres dollars synthétiques."],
   ],
   thesis: {
-    bull: ["La demande de levier maintient un funding positif et l'USDe devient un dollar central de la DeFi ; le partage des revenus s'active pour le sENA."],
+    bull: ["La demande de levier maintient un funding positif et l'USDe devient un dollar central de la DeFi ; l'offre franchit les paliers de l'activation des frais et les rachats commencent."],
     neutral: ["L'USDe reste un produit cyclique, qui grandit dans les marchés haussiers et rétrécit dans les marchés baissiers."],
     bear: ["Un régime prolongé de funding négatif ou la faillite d'une plateforme provoque une perte de parité et de confiance."],
-    catalysts: ["Activation des frais du protocole.", "Intégration dans les systèmes de garantie des plateformes d'échange centralisées."],
+    catalysts: ["L'offre d'USDe atteint le premier palier de l'activation des frais (7,5 milliards), ce qui déclenche les rachats d'ENA.", "Intégration dans les systèmes de garantie des plateformes d'échange centralisées."],
     assumptions: ["Le funding des futures perpétuels reste positif en moyenne sur un cycle.", "Les dépositaires et les plateformes d'échange fonctionnent sans défaillance."],
     monitor: ["Taux de funding", "Fonds de réserve", "Tendance de l'offre d'USDe", "Traitement réglementaire"],
     invalidation: ["Une perte de parité durable sur le remboursement primaire", "Un fonds de réserve épuisé pendant une période de funding négatif"],
   },
   framework: [
     { summary: "Contrats simples, opérations hors chaîne complexes.", dataUsed: ["Documentation"], limitations: "Processus hors chaîne pas entièrement vérifiables." },
-    { summary: "Larges allocations aux initiés ; captation de valeur en attente.", dataUsed: ["Documentation du token"], limitations: "Allocation en attente de vérification." },
+    { summary: "Larges allocations aux initiés ; rachats approuvés mais conditionnés à l'offre d'USDe.", dataUsed: ["Documentation du token", "Votes de gouvernance"], limitations: "Parts des investisseurs et de la fondation lues sur le graphique de vesting." },
     { summary: "Croissance rapide, cyclique.", dataUsed: ["DefiLlama"], limitations: "Offre procyclique." },
     { summary: "Des revenus élevés mais volatils.", dataUsed: ["Frais DefiLlama"], limitations: "Dépend du régime de marché." },
     { summary: "Pilotage par la Fondation.", dataUsed: ["Documentation de gouvernance"], limitations: "Qualitatif." },
@@ -130,7 +137,10 @@ export const ethenaFr: ProjectText = {
     { supports: "Dispositif de conservation et de plateformes d'échange." },
     { supports: "Rôle du fonds de réserve." },
     { supports: "Stablecoin adossé à des bons du Trésor." },
-    { supports: "Offre et allocation de l'ENA." },
+    { supports: "Offre, allocation et vesting de l'ENA." },
+    { supports: "Approbation de l'activation des frais et de ses paliers." },
+    { supports: "Conception de l'activation des frais, rachat des investisseurs seed, déblocages accélérés des investisseurs, fin des incitations liées à l'USDe." },
+    { supports: "Statut de l'activation des frais : offre sous le premier palier." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
     { supports: "Chiffres de TVL, de frais et de revenus.", limitations: "Adaptateurs open source ; la méthodologie diffère selon les protocoles et peut être révisée." },
   ],

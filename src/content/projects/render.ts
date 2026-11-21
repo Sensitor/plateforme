@@ -21,7 +21,7 @@ export const render: Project = {
     governance: "https://github.com/rendernetwork/RNPs",
   },
   data: { coingeckoId: "render-token", coinpaprikaId: "rndr-render-token" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Render: can one GPU network serve both rendering and AI compute?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "Render: can one GPU network serve both rendering and AI compute?" },
   dossier: {
     overview: {
       summary:
@@ -44,7 +44,7 @@ export const render: Project = {
       supplyModel: "capped-emissions",
       supplyModelNote: "Burn-and-mint equilibrium (BME): tokens are burned when users pay for work and minted to node operators on a declining emissions schedule, within a published maximum supply.",
       maxSupply: 644_168_762,
-      distributionNote: "No distribution chart: allocation data from the 2017 token sale and subsequent migration is pending verification.",
+      distributionNote: "No distribution chart: the RNPs define emissions under burn-and-mint equilibrium but not the 2017 genesis allocation, and no current primary source publishes it.",
       distributionSources: ["rnp-001"],
       utility: [fact("RENDER is the payment and reward token of the network; work is priced in fiat terms and settled via token burns.", "rnp-001")],
       emissions: [fact("Emissions to node operators, liquidity and ecosystem follow the schedule defined in RNP-001.", "rnp-001")],
@@ -88,7 +88,7 @@ export const render: Project = {
     },
     framework: [
       { pillar: "technology", rating: 3, confidence: "medium", summary: "Working network; trusted verification.", dataUsed: ["RNPs", "Docs"], limitations: "Limited technical disclosure.", sources: ["rnp-001"] },
-      { pillar: "tokenomics", rating: 3, confidence: "medium", summary: "BME links usage to supply.", dataUsed: ["RNP-001"], limitations: "Allocation pending verification.", sources: ["rnp-001"] },
+      { pillar: "tokenomics", rating: 3, confidence: "medium", summary: "BME links usage to supply.", dataUsed: ["RNP-001"], limitations: "Genesis allocation not published in current primary sources.", sources: ["rnp-001"] },
       { pillar: "adoption", rating: 2, confidence: "low", summary: "Usage small relative to valuation.", dataUsed: ["Render statistics"], limitations: "Limited standardised data.", sources: ["docs"] },
       { pillar: "financials", rating: null, confidence: "low", summary: "Insufficient open revenue data.", dataUsed: [], limitations: "No DefiLlama coverage.", sources: [] },
       { pillar: "governance", rating: 3, confidence: "medium", summary: "Public RNP process.", dataUsed: ["RNP repository"], limitations: "Foundation influence.", sources: ["rnps"] },
@@ -99,8 +99,8 @@ export const render: Project = {
     sources: [
       source("docs", "Render Network knowledge base", "Render Network Foundation", "https://know.rendernetwork.com", "documentation", "Network overview and usage."),
       source("rnps", "Render Network Proposals", "Render Network (GitHub)", "https://github.com/rendernetwork/RNPs", "governance", "Governance process."),
-      source("rnp-001", "RNP-001: Burn-and-mint equilibrium", "Render Network (GitHub)", "https://github.com/rendernetwork/RNPs", "governance", "BME model and emissions.", { published: "2023", limitations: "Links to the RNP repository; open RNP-001 in the Final RNPs folder." }),
-      source("rnp-002", "RNP-002: Migration to Solana", "Render Network (GitHub)", "https://github.com/rendernetwork/RNPs", "governance", "Token migration to Solana.", { published: "2023", limitations: "Links to the RNP repository; open RNP-002 in the Final RNPs folder." }),
+      source("rnp-001", "RNP-001: Burn-and-mint equilibrium", "Render Network (GitHub)", "https://github.com/rendernetwork/RNPs/blob/main/RNP-001.md", "governance", "BME model and emissions.", { published: "2022", accessed: "2026-11-21" }),
+      source("rnp-002", "RNP-002: Migration to Solana", "Render Network (GitHub)", "https://github.com/rendernetwork/RNPs/blob/main/RNP-002.md", "governance", "Token migration to Solana.", { published: "2023", accessed: "2026-11-21" }),
       coingecko("render-token", "Render"),
     ],
   },

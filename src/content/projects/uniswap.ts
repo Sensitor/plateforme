@@ -22,7 +22,7 @@ export const uniswap: Project = {
     governance: "https://gov.uniswap.org",
   },
   data: { coingeckoId: "uniswap", coinpaprikaId: "uni-uniswap", llamaProtocol: "uniswap", llamaFees: "uniswap" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Uniswap: how do fees reach UNI holders after UNIfication?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "Uniswap: how do fees reach UNI holders after UNIfication?" },
   dossier: {
     overview: {
       summary:
@@ -43,7 +43,7 @@ export const uniswap: Project = {
     },
     tokenomics: {
       supplyModel: "fixed-genesis-plus-inflation",
-      supplyModelNote: "1 billion UNI minted at genesis (September 2020), with a perpetual inflation of up to 2% per year enabled by governance after the initial four-year period.",
+      supplyModelNote: "1 billion UNI minted at genesis (September 2020), with a perpetual inflation of up to 2% per year enabled by governance after the initial four-year period. 100 million UNI were burned from the treasury in December 2025 under UNIfication, and protocol fees now fund further burns.",
       maxSupply: null,
       distribution: [
         { label: "Community (airdrop, mining, treasury)", pct: 60 },
@@ -57,8 +57,8 @@ export const uniswap: Project = {
       emissions: [fact("A 2% annual inflation mechanism exists in the token contract, at governance's discretion.", "uni-launch")],
       vesting: [fact("Team, investor and advisor allocations vested over four years ending September 2024.", "uni-launch")],
       valueAccrual: [
-        fact("In November 2025, Uniswap Labs and the Uniswap Foundation proposed 'UNIfication': turning on protocol fees and using them to burn UNI, and routing Unichain sequencer fees to the same burn.", "unification"),
-        view("Verify the on-chain outcome and the current fee parameters on the governance portal; value accrual depends on fee levels set by governance."),
+        fact("UNIfication passed and was executed on-chain as Proposal 93 on 29 December 2025: protocol fees on v2 and selected v3 pools on Ethereum mainnet fund UNI burns, Unichain sequencer fees go to the same burn, and 100 million UNI were burned from the treasury.", "unification", "unification-executed"),
+        fact("In March 2026 governance extended protocol fees to all v3 pools on Ethereum mainnet and to eight more chains (Arbitrum, Base, Celo, OP Mainnet, Soneium, X Layer, Worldchain and Zora).", "fee-expansion"),
       ],
     },
     adoption: {
@@ -72,7 +72,7 @@ export const uniswap: Project = {
         { label: "Protocol revenue", why: "Share retained for UNI holders (if fee switch active)." },
         { label: "Volume / TVL", why: "Capital efficiency of liquidity." },
       ],
-      claims: [view("Historically nearly all fees went to LPs, so UNI captured no cash flow; activation of protocol fees is the main fundamental change to monitor."), view("Interface fees collected by Uniswap Labs are separate from protocol revenue.")],
+      claims: [view("Until UNIfication nearly all fees went to LPs, so UNI captured no cash flow; burn volume now depends on protocol fee levels set by governance."), fact("Under UNIfication, Uniswap Labs turned off its interface, wallet and API fees.", "unification-executed")],
     },
     onchain: {
       claims: [view("Pool-level data is fully public; volume can include wash trading on long-tail tokens.")],
@@ -80,7 +80,7 @@ export const uniswap: Project = {
     },
     competitors: {
       columns: [
-        { name: "Uniswap", slug: "uniswap", technology: "AMM v2-v4, hooks, UniswapX", adoption: "Largest DEX", tokenomics: "Governance, fee switch proposal", economics: "Large LP fees", strengths: "Liquidity, brand, multichain", weaknesses: "Historic lack of value accrual", positioning: "Reference DEX protocol" },
+        { name: "Uniswap", slug: "uniswap", technology: "AMM v2-v4, hooks, UniswapX", adoption: "Largest DEX", tokenomics: "Governance, fees fund UNI burns", economics: "Large LP fees", strengths: "Liquidity, brand, multichain", weaknesses: "Value accrual still young", positioning: "Reference DEX protocol" },
         { name: "PancakeSwap", technology: "AMM (v3-style)", adoption: "Strong on BNB Chain", tokenomics: "CAKE burns", economics: "High volume on BNB Chain", strengths: "Retail distribution", weaknesses: "Chain concentration", positioning: "Retail multichain DEX" },
         { name: "Curve", technology: "StableSwap AMM", adoption: "Stablecoin liquidity", tokenomics: "veCRV locking", economics: "Fees to veCRV", strengths: "Stable pairs", weaknesses: "Complex tokenomics", positioning: "Stablecoin exchange" },
       ],
@@ -98,14 +98,14 @@ export const uniswap: Project = {
       bull: [view("Protocol fees turn UNI into a cash-flow asset backed by the largest DEX."), hyp("v4 hooks and Unichain create new revenue streams.")],
       neutral: [view("Uniswap remains the leading DEX; fee capture is modest relative to valuation.")],
       bear: [view("Order flow migrates to solvers and private venues; LP fees compress."), view("Protocol fees reduce LP returns, pushing liquidity to competitors.")],
-      catalysts: [fact("UNIfication proposal to activate protocol fees and UNI burns.", "unification"), hyp("Growth of Unichain.")],
+      catalysts: [fact("Protocol fees extended to more pools and chains after UNIfication.", "fee-expansion"), hyp("Growth of Unichain.")],
       assumptions: [hyp("LPs remain willing to provide liquidity after protocol fees."), hyp("DEX share of spot volume keeps growing.")],
       monitor: ["Protocol fee revenue and burns", "LP liquidity after fee changes", "DEX market share", "Regulatory developments"],
       invalidation: ["Material loss of liquidity after fee activation", "Sustained loss of leadership in DEX volume"],
     },
     framework: [
       { pillar: "technology", rating: 5, confidence: "high", summary: "Immutable, battle-tested contracts.", dataUsed: ["Whitepapers", "Track record"], limitations: "Hooks are new.", sources: ["v3-paper", "v4-paper"] },
-      { pillar: "tokenomics", rating: 3, confidence: "medium", summary: "Insiders fully vested; fee switch would change value accrual.", dataUsed: ["Allocation", "Governance proposals"], limitations: "Outcome of fee parameters to verify.", sources: ["uni-launch", "unification"] },
+      { pillar: "tokenomics", rating: 3, confidence: "medium", summary: "Insiders fully vested; protocol fees now fund UNI burns.", dataUsed: ["Allocation", "Executed governance proposals"], limitations: "Burn volume depends on fee levels set by governance.", sources: ["uni-launch", "unification-executed"] },
       { pillar: "adoption", rating: 5, confidence: "medium", summary: "Largest DEX by volume.", dataUsed: ["DefiLlama"], limitations: "Volume cyclical.", sources: ["defillama"] },
       { pillar: "financials", rating: 3, confidence: "medium", summary: "Large fees, limited protocol revenue historically.", dataUsed: ["DefiLlama fees/revenue"], limitations: "Revenue depends on governance.", sources: ["defillama"] },
       { pillar: "governance", rating: 3, confidence: "medium", summary: "Delegated governance with strong company influence.", dataUsed: ["Governance portal"], limitations: "Qualitative.", sources: ["docs-gov"] },
@@ -121,7 +121,9 @@ export const uniswap: Project = {
       source("unichain", "Unichain documentation", "Unichain", "https://docs.unichain.org", "documentation", "Unichain L2."),
       source("uni-launch", "Introducing UNI", "Uniswap Labs blog", "https://blog.uniswap.org/uni", "primary", "Token allocation, vesting and inflation.", { published: "2020-09-16" }),
       source("docs-gov", "Uniswap governance", "Uniswap documentation", "https://docs.uniswap.org/concepts/governance/overview", "governance", "Governance process."),
-      source("unification", "UNIfication", "Uniswap Labs blog", "https://blog.uniswap.org/unification", "primary", "Joint proposal to turn on protocol fees, burn UNI and route Unichain sequencer fees to burns.", { published: "2025-11-10", limitations: "Proposal text; check governance for the vote outcome and live parameters." }),
+      source("unification", "UNIfication", "Uniswap Labs blog", "https://blog.uniswap.org/unification", "primary", "Joint proposal to turn on protocol fees, burn UNI and route Unichain sequencer fees to burns.", { published: "2025-11-10", accessed: "2026-11-21" }),
+      source("unification-executed", "[Executed] UNIfication Proposal", "Uniswap governance forum", "https://gov.uniswap.org/t/executed-unification-proposal/25881", "governance", "On-chain execution as Proposal 93 (29 December 2025) and its terms.", { published: "2025-12-29", accessed: "2026-11-21" }),
+      source("fee-expansion", "[Executed] Protocol Fee Expansion: Eight More Chains and Remaining Mainnet v3 Pools", "Uniswap governance forum", "https://gov.uniswap.org/t/26035", "governance", "Protocol fees extended in March 2026 (Proposals 94 and 95).", { published: "2026-03-08", accessed: "2026-11-21" }),
       coingecko("uniswap", "Uniswap"),
       defillamaProtocol("uniswap", "Uniswap"),
     ],

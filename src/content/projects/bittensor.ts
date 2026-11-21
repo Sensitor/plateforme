@@ -22,7 +22,7 @@ export const bittensor: Project = {
     explorer: "https://taostats.io",
   },
   data: { coingeckoId: "bittensor", coinpaprikaId: "tao-bittensor" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "Bittensor: can token incentives produce useful machine intelligence?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "Bittensor: can token incentives produce useful machine intelligence?" },
   dossier: {
     overview: {
       summary:
@@ -103,7 +103,7 @@ export const bittensor: Project = {
       source("docs-yuma", "Yuma Consensus", "Bittensor documentation", "https://docs.learnbittensor.org/yuma-consensus", "documentation", "Emission distribution among miners.", { limitations: "Docs URL structure may change." }),
       source("docs-dtao", "Dynamic TAO", "Bittensor documentation", "https://docs.learnbittensor.org/dynamic-tao", "documentation", "Subnet alpha tokens and emissions.", { limitations: "Docs URL structure may change." }),
       source("docs-emissions", "Emissions", "Bittensor documentation", "https://docs.learnbittensor.org/emissions", "documentation", "Emission split and halving.", { limitations: "Docs URL structure may change." }),
-      source("incident", "Bittensor network incident (July 2024)", "Opentensor Foundation", "https://blog.bittensor.com", "primary", "Safe mode after wallet exploit.", { reliability: "medium", limitations: "Links to the foundation blog; incident post to be pinned." }),
+      source("incident", "Bittensor Community Update: July 3, 2024", "Opentensor Foundation", "https://blog.bittensor.com/bittnesor-community-update-july-3-2024-45661b1d542d", "primary", "Safe mode after the wallet exploit, traced to a malicious PyPI package.", { published: "2024-07-03", accessed: "2026-11-21" }),
       source("taostats", "taostats explorer", "taostats", "https://taostats.io", "data", "Stake, emissions and subnet data.", { reliability: "medium" }),
       coingecko("bittensor", "Bittensor"),
     ],

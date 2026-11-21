@@ -29,11 +29,18 @@ export const layerzeroFr: ProjectText = {
   },
   tokenomics: {
     supplyModelNote: "Offre fixe de 1 milliard de ZRO.",
-    distributionNote: "Non représenté en graphique dans cette version : l'allocation (communauté, partenaires stratégiques, contributeurs principaux, tokens rachetés) est en attente de vérification auprès d'une source primaire.",
+    distribution: [{ label: "LayerZero Foundation" }, { label: "Partenaires stratégiques" }, { label: "Contributeurs principaux" }],
+    distributionNote: "Allocation actuelle publiée par LayerZero (juin 2026) : les 383 millions d'origine de la Fondation plus 50 millions rachetés aux partenaires stratégiques en septembre 2025 ; les partenaires stratégiques à 312 millions après un règlement juridique qui leur a rendu les 40 millions rachetés à FTX / Alameda au lancement.",
     utility: ["Le ZRO est un token de gouvernance ; la conception du protocole prévoit une activation des frais que la gouvernance peut déclencher, imposant alors le paiement des frais en ZRO."],
     emissions: ["Pas d'inflation ; l'offre en circulation augmente avec les déblocages."],
-    vesting: ["Les allocations des initiés suivent un vesting pluriannuel après un cliff d'un an à partir de juin 2024 ; d'importants déblocages mensuels par rapport à l'offre en circulation."],
-    valueAccrual: ["La captation de valeur dépend de l'activation des frais par la gouvernance ; le résultat des votes précédents sur ce sujet doit être vérifié."],
+    vesting: [
+      "Les allocations des initiés suivent un vesting pluriannuel après un cliff d'un an à partir de juin 2024 ; d'importants déblocages mensuels par rapport à l'offre en circulation.",
+      "Le rachat de septembre 2025 a ramené le déblocage mensuel brut des partenaires stratégiques de 15 à 12,7 millions de ZRO, et les 183 millions restants de la Fondation sont rebloqués jusqu'au lancement du réseau principal de Zero.",
+    ],
+    valueAccrual: [
+      "Trois référendums sur l'activation des frais (décembre 2024, juin 2025, décembre 2025) ont chacun obtenu plus de 96 % d'approbation, mais une participation de 10,96 %, 13,01 % et 3,71 % n'a pas atteint le quorum, doté d'un plancher de 20 % depuis le deuxième vote ; l'activation des frais n'est pas en vigueur.",
+      "Les revenus de Stargate financent déjà des rachats de ZRO, et la Fondation a racheté 50 millions de ZRO (5 % de l'offre) aux partenaires stratégiques en septembre 2025.",
+    ],
   },
   adoption: {
     claims: [
@@ -104,7 +111,7 @@ export const layerzeroFr: ProjectText = {
   },
   framework: [
     { summary: "Conception flexible ; la sécurité dépend de la configuration.", dataUsed: ["Livre blanc", "Documentation"], limitations: "Les configurations varient selon les applications." },
-    { summary: "Surplomb des déblocages, captation de valeur en attente.", dataUsed: ["Documentation du lancement"], limitations: "Allocation en attente de vérification." },
+    { summary: "Les déblocages continuent ; rachats actifs, activation des frais sous le quorum.", dataUsed: ["Documentation du lancement", "Article de LayerZero sur le token"], limitations: "Les conditions de déblocage des contributeurs varient selon les personnes." },
     { summary: "De nombreuses intégrations.", dataUsed: ["LayerZero Scan"], limitations: "Nombre de messages face à la valeur." },
     { summary: "Revenus limités pour les détenteurs du token.", dataUsed: ["DefiLlama"], limitations: "Données minces." },
     { summary: "Pilotage par Labs et la Fondation.", dataUsed: ["Documentation"], limitations: "Qualitatif." },
@@ -115,7 +122,8 @@ export const layerzeroFr: ProjectText = {
     { supports: "Conception du protocole." },
     { supports: "Endpoints, DVN, exécuteurs." },
     { supports: "Conception des OFT." },
-    { supports: "Token, gouvernance et activation des frais.", limitations: "Site de la Fondation ; vérifier les mises à jour de l'allocation." },
+    { supports: "Token, gouvernance et activation des frais." },
+    { supports: "Allocation actuelle, rachats, déblocages et référendums sur l'activation des frais." },
     { supports: "Explorateur de messages." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
     { supports: "Chiffres de TVL, de frais et de revenus.", limitations: "Adaptateurs open source ; la méthodologie diffère selon les protocoles et peut être révisée." },

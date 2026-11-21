@@ -21,7 +21,7 @@ export const eigenlayer: Project = {
     github: "https://github.com/Layr-Labs",
   },
   data: { coingeckoId: "eigenlayer", coinpaprikaId: "eigen-eigenlayer", llamaProtocol: "eigenlayer", llamaFees: "eigenlayer" },
-  editorial: { status: "draft", lastUpdated: "2026-11-17", author: "Sensitor Research", version: "0.1", headline: "EigenLayer: what is shared security worth, and what does it risk?" },
+  editorial: { status: "draft", lastUpdated: "2026-11-21", author: "Sensitor Research", version: "0.2", headline: "EigenLayer: what is shared security worth, and what does it risk?" },
   dossier: {
     overview: {
       summary:
@@ -55,7 +55,7 @@ export const eigenlayer: Project = {
       distributionSources: ["token-overview"],
       utility: [fact("EIGEN is designed as a 'universal intersubjective work token' used to secure tasks whose faults are not provable on-chain.", "token-paper"), fact("EIGEN can be restaked to AVSs alongside ETH.", "docs")],
       emissions: [fact("Programmatic incentives inflate supply annually to reward stakers and operators.", "token-overview")],
-      vesting: [view("Investor and early-contributor allocations unlock over multiple years after an initial lockup; check the official schedule for remaining unlocks.")],
+      vesting: [fact("Early contributors, investors and Foundation service providers were locked for one year after EIGEN became transferable; 4% of each allocation unlocked on that anniversary and 4% more each month, so these allocations finish unlocking about two years later, in 2027.", "eigen-key-info")],
       valueAccrual: [hyp("Accrual depends on AVSs paying fees for security in a way that creates demand for EIGEN; this link is not yet proven.")],
     },
     adoption: {
@@ -115,7 +115,8 @@ export const eigenlayer: Project = {
       source("docs-slashing", "Slashing on EigenLayer", "EigenCloud documentation", "https://docs.eigencloud.xyz/products/eigenlayer/concepts/slashing/slashing-concept", "documentation", "Operator sets, unique stake, slashing.", { limitations: "Documentation reorganised under EigenCloud." }),
       source("docs-eigenda", "EigenDA", "EigenCloud documentation", "https://docs.eigencloud.xyz/products/eigenda/core-concepts/overview", "documentation", "Data-availability AVS."),
       source("token-paper", "EIGEN: The Universal Intersubjective Work Token", "Eigen Labs", "https://github.com/Layr-Labs/whitepaper/blob/master/EIGEN_Token_Whitepaper.pdf", "primary", "Intersubjective slashing and token design.", { published: "2024-04" }),
-      source("token-overview", "EIGEN tokenomics", "Eigen Foundation", "https://blog.eigenfoundation.org/announcement/", "primary", "Allocation and incentives.", { reliability: "medium", limitations: "Foundation announcement; check for later updates." }),
+      source("token-overview", "EIGEN tokenomics", "Eigen Foundation", "https://blog.eigenfoundation.org/announcement/", "primary", "Allocation and incentives.", { reliability: "medium", accessed: "2026-11-21" }),
+      source("eigen-key-info", "EIGEN key information", "Eigen Foundation", "https://docs.eigenfoundation.org/eigen-token/key-info", "documentation", "Initial supply, allocation and the unlock schedule for early contributors and investors.", { accessed: "2026-11-21" }),
       coingecko("eigenlayer", "EigenLayer"),
       defillamaProtocol("eigenlayer", "EigenLayer"),
     ],

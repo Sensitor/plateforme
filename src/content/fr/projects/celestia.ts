@@ -29,7 +29,7 @@ export const celestiaFr: ProjectText = {
   },
   tokenomics: {
     supplyModelNote:
-      "1 milliard de TIA à la genèse plus une inflation de staking. Le calendrier d'origine démarrait à 8 % et baissait de 10 % par an jusqu'à un plancher de 1,5 % ; la gouvernance a depuis réduit l'émission, vérifiez les paramètres actuels.",
+      "1 milliard de TIA à la genèse plus une inflation de staking. L'inflation a démarré à 8 % avec une baisse de 10 % par an ; la mise à jour Lotus (CIP-29, juillet 2025) l'a ramenée d'environ 7,2 % à environ 5 %, puis la v6 (CIP-41, novembre 2025) à environ 2,5 %, avec désormais une baisse de 6,7 % par an jusqu'à un plancher de 1,5 %.",
     distribution: [
       { label: "R&D et écosystème" },
       { label: "Allocation publique" },
@@ -124,7 +124,7 @@ export const celestiaFr: ProjectText = {
     { supports: "Architecture et réseau." },
     { supports: "DAS et codage d'effacement.", limitations: "La structure des URL de la documentation peut changer." },
     { supports: "Relais des engagements de données.", limitations: "La structure des URL de la documentation peut changer." },
-    { supports: "Allocation, inflation et déblocages.", limitations: "Vérifier les derniers changements d'émission." },
+    { supports: "Allocation, inflation (dont CIP-29 et CIP-41) et déblocages." },
     { supports: "Données sur les blobs et les espaces de noms." },
     { supports: "Données de marché live : prix, capitalisation, FDV, offre en circulation et offre totale.", limitations: "Agrégateur ; les chiffres d'offre dépendent des déclarations des émetteurs et de la méthodologie de CoinGecko." },
     { supports: "TVL, frais et offre de stablecoins au niveau de la chaîne.", limitations: "La TVL ne compte que les dépôts DeFi ; ce n'est pas une mesure de la valeur du réseau." },
