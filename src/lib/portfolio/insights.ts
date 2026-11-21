@@ -1,5 +1,6 @@
 import { RELATIONSHIPS, RELATION_META } from "@/content/relationships";
-import { KEY_DATES } from "@/content/key-dates";
+import { keyDatesFor } from "@/content/key-dates";
+import type { Locale } from "@/i18n/config";
 import { concentrationLevel, STABLE_ASSET } from "./engine";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
@@ -29,7 +30,7 @@ export interface Insight {
 const pct = (x: number) => `${(x * 100).toFixed(0)}%`;
 const DEPENDENCY_KINDS = new Set(["settles-on", "deployed-on", "stakes", "uses-oracle", "bridge", "uses-stack"]);
 
-export function buildInsights(holdings: HoldingView[], names: Record<string, string>, dict: Dictionary = getDictionary("en")): Insight[] {
+export function buildInsights(holdings: HoldingView[], names: Record<string, string>, dict: Dictionary = getDictionary("en"), locale: Locale = "en"): Insight[] {
   const t = dict.portfolio.insights;
   const total = holdings.reduce((s, h) => s + h.value, 0);
   if (total <= 0) return [];
@@ -96,7 +97,7 @@ export function buildInsights(holdings: HoldingView[], names: Record<string, str
 
   // Scheduled supply events
   const EVENT_DETAIL = t.events;
-  for (const d of KEY_DATES.filter((k) => held.has(k.slug))) {
+  for (const d of keyDatesFor(locale).filter((k) => held.has(k.slug))) {
     out.push({
       id: `event-${d.slug}-${d.kind}`,
       tone: d.kind === "unlock" ? "watch" : "info",

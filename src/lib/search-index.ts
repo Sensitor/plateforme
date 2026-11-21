@@ -1,4 +1,5 @@
 import { PROJECTS } from "@/content/projects";
+import { localizedProject } from "@/lib/research/localized";
 import { CONCEPTS } from "@/content/concepts";
 import { SECTORS } from "@/lib/research/taxonomy";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
@@ -44,7 +45,7 @@ export function buildSearchIndex(t: Dictionary = getDictionary("en"), locale: Lo
     title: p.name,
     subtitle: `${p.ticker} · ${t.labels.sectors[p.sector].label}`,
     href: `/projects/${p.slug}`,
-    keywords: [p.ticker, p.sector, ...p.tags, p.oneLiner].join(" "),
+    keywords: [p.ticker, p.sector, ...p.tags, p.oneLiner, ...(locale === "en" ? [] : [...localizedProject(p, locale).tags, localizedProject(p, locale).oneLiner])].join(" "),
     logo: p.logo,
   }));
   const sectors: SearchEntry[] = SECTORS.map((s) => ({

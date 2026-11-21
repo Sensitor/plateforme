@@ -18,6 +18,7 @@ import { SectorBadge } from "@/components/ui/sector-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { getLocale } from "@/i18n/server";
+import { localizedProject } from "@/lib/research/localized";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/config";
 
@@ -90,7 +91,7 @@ function ChartCover({
 /** Featured dossier presented as the lead research article (rotates daily). */
 export async function FeaturedResearch() {
   await connection();
-  const project = featuredDossierFor(new Date());
+  const project = localizedProject(featuredDossierFor(new Date()), await getLocale());
   const history = await getPriceHistory(project.slug, "1Y");
   const locale = await getLocale();
   const dict = getDictionary(locale);

@@ -1,6 +1,8 @@
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY, type SimulationLinkDatum, type SimulationNodeDatum } from "d3-force";
 import { ECOSYSTEMS, RELATIONSHIPS, type RelationKind } from "@/content/relationships";
 import { PROJECTS } from "@/content/projects";
+import { localizedProjects } from "@/lib/research/localized";
+import type { Locale } from "@/i18n/config";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import type { SectorId } from "@/lib/research/types";
 
@@ -59,7 +61,8 @@ type SimNode = SimulationNodeDatum & { id: string; r: number; eco: string };
  * Deterministic force layout (d3-force uses a seeded random source), computed
  * on the server so the client renders exactly the same positions.
  */
-export function buildGraph(market: Record<string, { marketCap: number | null; price: number | null; change24h: number | null }> | null, dict: Dictionary = getDictionary("en")) {
+export function buildGraph(market: Record<string, { marketCap: number | null; price: number | null; change24h: number | null }> | null, dict: Dictionary = getDictionary("en"), locale: Locale = "en") {
+  const text = localizedProjects(locale);
   const ecoOf = new Map<string, string>();
   for (const e of ECOSYSTEMS) for (const m of e.members) ecoOf.set(m, e.id);
 
@@ -101,7 +104,7 @@ export function buildGraph(market: Record<string, { marketCap: number | null; pr
       logo: p.logo,
       sector: p.sector,
       sectorLabel: dict.labels.sectors[p.sector].label,
-      oneLiner: p.oneLiner,
+      oneLiner: text[i].oneLiner,
       ecosystem: s.eco,
       marketCap: m?.marketCap ?? null,
       price: m?.price ?? null,

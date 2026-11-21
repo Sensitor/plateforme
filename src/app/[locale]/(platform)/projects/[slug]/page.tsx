@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import Link from "@/i18n/link";
 import { notFound } from "next/navigation";
 import { BookOpen, ChevronRight, CodeXml, ExternalLink, FileText, Globe, MessagesSquare, Scale, SearchCode } from "lucide-react";
-import { PROJECTS, getProject } from "@/content/projects";
+import { PROJECTS } from "@/content/projects";
+import { isProjectTranslated, localizedProjectBySlug } from "@/lib/research/localized";
 import { localizedConceptBySlug } from "@/lib/academy/localized";
 import type { Concept } from "@/content/concepts";
 import { ACADEMY_COLORS, SECTOR_COLORS } from "@/lib/brand";
@@ -46,8 +47,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/projects/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProject(slug);
   const locale = await getLocale();
+  const project = localizedProjectBySlug(slug, locale);
   const t = getDictionary(locale).dossier;
   if (!project) return { title: t.notFound };
   return { title: t.metaTitle(project.name, project.ticker), description: project.oneLiner, alternates: alternatesFor(`/projects/${slug}`, locale) };
@@ -90,10 +91,10 @@ function ProjectPageSkeleton({ label }: { label: string }) {
 
 async function ProjectContent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const project = getProject(slug);
+  const locale = await getLocale();
+  const project = localizedProjectBySlug(slug, locale);
   if (!project) notFound();
   const d = project.dossier;
-  const locale = await getLocale();
   const dict = getDictionary(locale);
   const t = dict.dossier;
   const S = t.sections;
@@ -177,7 +178,7 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
             {project.links.explorer ? <ExtLink href={project.links.explorer} icon={SearchCode} label={t.links.explorer} /> : null}
           </div>
         </div>
-        <ContentLanguageNote className="mt-4" />
+        {isProjectTranslated(project.slug, locale) ? null : <ContentLanguageNote className="mt-4" />}
       </header>
 
       <Suspense fallback={<KeyMetricsSkeleton />}>

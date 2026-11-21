@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import Link from "@/i18n/link";
-import { KEY_DATES } from "@/content/key-dates";
+import { keyDatesFor } from "@/content/key-dates";
 import { PROJECTS, PROJECT_BY_SLUG } from "@/content/projects";
 import { getCoverageQuotes, getCoverageTvl, getFearGreed, getMarketRegime, getPriceHistory } from "@/lib/market/service";
 import { INTL_LOCALE, type Locale } from "@/i18n/config";
@@ -72,10 +72,11 @@ export function McapFdvSkeleton() {
 
 /** Supply schedules documented in the dossiers. */
 export async function KeyDatesTable() {
-  const kinds = (await getT()).overview.calendar.kinds;
+  const [t, locale] = await Promise.all([getT(), getLocale()]);
+  const kinds = t.overview.calendar.kinds;
   return (
     <ul className="divide-y divide-line rounded-xl border border-line">
-      {KEY_DATES.map((d) => {
+      {keyDatesFor(locale).map((d) => {
         const p = PROJECT_BY_SLUG[d.slug];
         return (
           <li key={`${d.slug}-${d.title}`}>

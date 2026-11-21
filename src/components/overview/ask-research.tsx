@@ -1,6 +1,6 @@
 import Link from "@/i18n/link";
 import { ArrowUp, CalendarClock } from "lucide-react";
-import { KEY_DATES } from "@/content/key-dates";
+import { keyDatesFor } from "@/content/key-dates";
 import { PROJECT_BY_SLUG } from "@/content/projects";
 import { TokenLogo } from "@/components/ui/token-logo";
 import { PanelLabel } from "./section-header";
@@ -47,7 +47,8 @@ export async function AskResearch() {
 
 /** Supply schedule events documented in the dossiers. */
 export async function KeyDatesList({ limit = 5 }: { limit?: number }) {
-  const t = getDictionary(await getLocale()).overview.calendar;
+  const locale = await getLocale();
+  const t = getDictionary(locale).overview.calendar;
   return (
     <div className="mt-8">
       <div className="flex items-center justify-between border-b border-line pb-3">
@@ -55,7 +56,7 @@ export async function KeyDatesList({ limit = 5 }: { limit?: number }) {
         <CalendarClock className="size-3.5 text-subtle" aria-hidden />
       </div>
       <ul className="divide-y divide-line/70">
-        {KEY_DATES.slice(0, limit).map((d) => {
+        {keyDatesFor(locale).slice(0, limit).map((d) => {
           const p = PROJECT_BY_SLUG[d.slug];
           return (
             <li key={`${d.slug}-${d.title}`}>

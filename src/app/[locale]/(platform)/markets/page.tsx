@@ -2,7 +2,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "@/i18n/link";
-import { KEY_DATES } from "@/content/key-dates";
+import { keyDatesFor } from "@/content/key-dates";
 import { PROJECT_BY_SLUG } from "@/content/projects";
 import { SECTOR_COLORS } from "@/lib/brand";
 import {
@@ -32,7 +32,7 @@ import { CompactUsdArea } from "@/components/overview/compact-area";
 import { Gauge } from "@/components/overview/gauge";
 import { RegimeChart } from "@/components/markets/regime-chart";
 import { FearGreedChart } from "@/components/markets/fear-greed-chart";
-import { getT } from "@/i18n/server";
+import { getLocale, getT } from "@/i18n/server";
 import { pageMetadata } from "@/i18n/metadata";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -383,7 +383,7 @@ async function Defi() {
 
 /** Supply schedules from the dossiers, and the data sets not covered yet. */
 async function SupplyCalendar() {
-  const dict = await getT();
+  const [dict, locale] = await Promise.all([getT(), getLocale()]);
   const t = dict.markets.calendar;
   return (
     <section>
@@ -391,7 +391,7 @@ async function SupplyCalendar() {
       <div className="grid grid-cols-1 gap-x-10 gap-y-10 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div>
           <ul className="divide-y divide-line border-y border-line">
-            {KEY_DATES.map((d) => {
+            {keyDatesFor(locale).map((d) => {
               const p = PROJECT_BY_SLUG[d.slug];
               return (
                 <li key={`${d.slug}-${d.title}`}>

@@ -23,7 +23,7 @@ import { StorageNote, useStorageWord } from "@/components/storage-note";
 import { ImportDialog, TransactionDialog } from "./dialogs";
 import { fetchHistories, useHistories } from "./use-histories";
 import type { AssetMeta } from "./types";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
 
 const DAY = 86400_000;
 const dayKey = (t: number) => new Date(t).toISOString().slice(0, 10);
@@ -41,6 +41,7 @@ const EXAMPLE = [
 
 export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta[]; today: string; quoteSource: React.ReactNode }) {
   const dict = useT();
+  const locale = useLocale();
   const t = dict.portfolio;
   const { transactions, example, ready, add, remove, clear, setExample } = usePortfolio();
   const storageWord = useStorageWord();
@@ -97,8 +98,8 @@ export function PortfolioApp({ assets, today, quoteSource }: { assets: AssetMeta
         riskLevel: r.meta?.riskLevel ?? null,
         volume24h: r.meta?.volume24h ?? null,
       }));
-    return buildInsights(holdings, names, dict);
-  }, [rows, names, dict, t.stablecoins]);
+    return buildInsights(holdings, names, dict, locale);
+  }, [rows, names, dict, locale, t.stablecoins]);
 
   const correlations = useMemo(() => {
     if (!histories) return null;

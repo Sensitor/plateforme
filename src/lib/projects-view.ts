@@ -1,5 +1,6 @@
 import "server-only";
-import { PROJECTS } from "@/content/projects";
+import { localizedProjects } from "@/lib/research/localized";
+import type { Locale } from "@/i18n/config";
 import { compositeScore, dossierCoverage } from "@/lib/research/framework";
 import { CHAINS } from "@/lib/research/taxonomy";
 import type { Quote } from "@/lib/market/types";
@@ -7,8 +8,8 @@ import type { ExploreRow } from "@/lib/explore";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
 /** Combine research metadata with live quotes and TVL into table rows. */
-export function buildExploreRows(quotes: Record<string, Quote> | null, tvl: Record<string, number | null> | null, dict: Dictionary = getDictionary("en")): ExploreRow[] {
-  return PROJECTS.map((p) => {
+export function buildExploreRows(quotes: Record<string, Quote> | null, tvl: Record<string, number | null> | null, dict: Dictionary = getDictionary("en"), locale: Locale = "en"): ExploreRow[] {
+  return localizedProjects(locale).map((p) => {
     const q = quotes?.[p.slug];
     const composite = compositeScore(p.dossier.framework);
     return {

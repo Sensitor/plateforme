@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "@/i18n/link";
 import { BookOpenCheck } from "lucide-react";
-import { PROJECTS } from "@/content/projects";
+import { localizedProjects } from "@/lib/research/localized";
 import { SECTOR_COLORS } from "@/lib/brand";
 import { claimStats, compositeScore, dossierCoverage } from "@/lib/research/framework";
 import { dossierTitle, readingMinutes } from "@/lib/research/editorial";
@@ -23,6 +23,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default async function ResearchPage() {
   const locale = await getLocale();
+  const PROJECTS = localizedProjects(locale);
   const dict = getDictionary(locale);
   const t = dict.research;
   const FORMATS = t.formats.map(([title, text, phase]) => ({ title, text, phase }));

@@ -16,7 +16,7 @@ import { coverageSummary } from "@/lib/explore";
 import { formatPercent, formatUsdCompact } from "@/lib/format";
 import { PROJECTS } from "@/content/projects";
 import { SECTORS } from "@/lib/research/taxonomy";
-import { getT } from "@/i18n/server";
+import { getLocale, getT } from "@/i18n/server";
 import { pageMetadata } from "@/i18n/metadata";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -56,7 +56,7 @@ async function ExplorerData() {
   const [quotes, tvl] = await Promise.all([getCoverageQuotes(), getCoverageTvl()]);
   const dict = await getT();
   const t = dict.explore.stats;
-  const rows = buildExploreRows(quotes.data, tvl.data, dict);
+  const rows = buildExploreRows(quotes.data, tvl.data, dict, await getLocale());
   const s = coverageSummary(rows);
   return (
     <>

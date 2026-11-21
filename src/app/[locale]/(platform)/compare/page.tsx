@@ -19,7 +19,8 @@ import { SourceTag } from "@/components/ui/source-tag";
 import { DataNotice } from "@/components/ui/data-notice";
 import { RiskPill, ScorePill } from "@/components/research/pills";
 import { CompareSelector } from "@/components/compare/compare-selector";
-import { getT } from "@/i18n/server";
+import { getLocale, getT } from "@/i18n/server";
+import { localizedProject } from "@/lib/research/localized";
 import { pageMetadata } from "@/i18n/metadata";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -46,7 +47,8 @@ async function CompareContent({ searchParams }: { searchParams: Promise<Record<s
   const raw = typeof sp.p === "string" ? sp.p : "";
   const requested = raw.split(",").filter((s) => PROJECT_BY_SLUG[s]);
   const slugs = [...new Set(requested.length ? requested : DEFAULT)].slice(0, 4);
-  const projects = slugs.map((s) => PROJECT_BY_SLUG[s]);
+  const locale = await getLocale();
+  const projects = slugs.map((s) => localizedProject(PROJECT_BY_SLUG[s], locale));
   const [quotes, ...funds] = await Promise.all([getCoverageQuotes(), ...slugs.map((s) => getProjectFundamentals(s))]);
   const q = (p: Project): Quote | undefined => quotes.data?.[p.slug];
   const f = (i: number): ProjectFundamentals | null => funds[i]?.data ?? null;

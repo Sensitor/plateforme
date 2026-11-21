@@ -5,6 +5,7 @@ import { formatDate } from "@/lib/format";
 import { getLocale } from "@/i18n/server";
 import { getDictionary } from "@/i18n/dictionaries";
 import { dossierTitle, featuredDossierFor, readingMinutes, researchFeed } from "@/lib/research/editorial";
+import { localizedProjects } from "@/lib/research/localized";
 import type { Project } from "@/lib/research/types";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,7 +27,7 @@ export async function ResearchList({ limit = 5 }: { limit?: number }) {
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const lead = featuredDossierFor(new Date()).slug;
-  const items = researchFeed()
+  const items = researchFeed(localizedProjects(locale))
     .filter((p) => p.slug !== lead)
     .slice(0, limit);
   return (

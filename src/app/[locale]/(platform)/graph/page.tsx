@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/ui/section-heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SourceTag } from "@/components/ui/source-tag";
 import { KnowledgeGraph } from "@/components/graph/knowledge-graph";
-import { getT } from "@/i18n/server";
+import { getLocale, getT } from "@/i18n/server";
 import { pageMetadata } from "@/i18n/metadata";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -33,6 +33,6 @@ async function GraphData() {
     ? Object.fromEntries(Object.entries(quotes.data).map(([slug, q]) => [slug, { marketCap: q.marketCap, price: q.price, change24h: q.change24h }]))
     : null;
   const dict = await getT();
-  const { nodes, edges, halos } = buildGraph(market, dict);
+  const { nodes, edges, halos } = buildGraph(market, dict, await getLocale());
   return <KnowledgeGraph nodes={nodes} edges={edges} halos={halos} marketNote={<SourceTag result={quotes} label={dict.ui.sources.marketData} />} />;
 }
