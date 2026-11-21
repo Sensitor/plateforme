@@ -39,7 +39,7 @@ export function CompareSelector({ selected, options, max = 4 }: { selected: stri
       {selected.length < max ? (
         <label className="relative inline-flex h-9 items-center gap-2 rounded-lg border border-dashed border-line-strong px-3 text-[13px] text-muted hover:text-fg-2">
           <Plus className="size-3.5" aria-hidden />
-          Add project
+          {t.add}
           <select
             className="absolute inset-0 cursor-pointer opacity-0"
             value=""

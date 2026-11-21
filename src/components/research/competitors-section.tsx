@@ -104,7 +104,7 @@ export async function CompetitorsSection({ project }: { project: Project }) {
                 fallback={
                   <tr>
                     <td colSpan={columns.length + 1} className="px-4 py-3 text-xs text-subtle">
-                      Loading live data…
+                      {t.loading}
                     </td>
                   </tr>
                 }
@@ -128,7 +128,7 @@ export async function CompetitorsSection({ project }: { project: Project }) {
         </div>
       </div>
       <p className="text-[12px] text-subtle">
-        Qualitative cells are analyst interpretations summarised from the sources of each dossier. {note}
+        {t.qualitative} {note}
       </p>
     </div>
   );

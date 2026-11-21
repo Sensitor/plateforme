@@ -175,6 +175,8 @@ export const dossier = {
     mcap: "MCap",
     live: "Live data",
     notCovered: "Not covered by Sensitor",
+    loading: "Loading live data…",
+    qualitative: "Qualitative cells are analyst interpretations summarised from the sources of each dossier.",
     thisProject: "This project",
   },
 };

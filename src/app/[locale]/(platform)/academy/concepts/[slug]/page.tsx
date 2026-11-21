@@ -338,11 +338,11 @@ function DeepLesson({ c, deep, color, t, catalog, locale }: { c: Concept; deep: 
           <div className="mt-5 flex flex-wrap gap-2">
             {exampleProjects.map((p) => (
               <Link key={p.slug} href={`/projects/${p.slug}`} className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-1.5 text-[13px] text-fg hover:border-line-strong">
-                <TokenLogo src={p.logo} name={p.name} size={18} /> Read the {p.name} dossier
+                <TokenLogo src={p.logo} name={p.name} size={18} /> {t.readDossier(p.name)}
               </Link>
             ))}
-            <Link href={`/copilot?mode=learn&q=${encodeURIComponent(`Explain ${c.title.toLowerCase()} with an example from Sensitor's research`)}`} className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-accent hover:text-accent-strong">
-              Ask the Copilot <ArrowUpRight className="size-3.5" aria-hidden />
+            <Link href={`/copilot?mode=learn&q=${encodeURIComponent(t.copilotPrompt(c.title.toLowerCase()))}`} className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-accent hover:text-accent-strong">
+              {t.askCopilot} <ArrowUpRight className="size-3.5" aria-hidden />
             </Link>
           </div>
         </Section>

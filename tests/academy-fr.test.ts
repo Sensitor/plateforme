@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CONCEPT_DEEP, START_HERE } from "@/content/academy-deep";
-import { CONCEPT_BY_SLUG } from "@/content/concepts";
+import { CONCEPTS, CONCEPT_BY_SLUG } from "@/content/concepts";
 import { CONCEPT_DEEP_FR, CONCEPT_TEXT_FR } from "@/content/fr/academy";
 import { isLessonTranslated, localizedConceptBySlug, localizedDeep } from "@/lib/academy/localized";
 
@@ -14,8 +14,9 @@ function strings(v: unknown, out: string[] = []): string[] {
 const translated = Object.keys(CONCEPT_TEXT_FR);
 
 describe("French Academy lessons", () => {
-  it("cover every Start here lesson", () => {
+  it("cover every lesson, Start here first", () => {
     for (const slug of START_HERE) expect(isLessonTranslated(slug, "fr"), slug).toBe(true);
+    for (const c of CONCEPTS) expect(isLessonTranslated(c.slug, "fr"), c.slug).toBe(true);
   });
 
   it("only translate lessons that exist", () => {
@@ -45,7 +46,7 @@ describe("French Academy lessons", () => {
   });
 
   it("merge over the English lesson without losing answers, sources or visuals", () => {
-    for (const slug of START_HERE) {
+    for (const { slug } of CONCEPTS) {
       const en = CONCEPT_DEEP[slug]!;
       const fr = localizedDeep(slug, "fr")!;
       expect(fr.visual).toBe(en.visual);

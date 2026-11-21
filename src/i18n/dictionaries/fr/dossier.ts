@@ -177,6 +177,8 @@ export const dossier: Dictionary["dossier"] = {
     mcap: "Capi.",
     live: "Données en direct",
     notCovered: "Non couvert par Sensitor",
+    loading: "Chargement des données live…",
+    qualitative: "Les cellules qualitatives sont des interprétations d'analyste résumées à partir des sources de chaque dossier.",
     thisProject: "Ce projet",
   },
 };
