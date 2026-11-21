@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import Link from "@/i18n/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, ChevronRight, Clock } from "lucide-react";
-import { CONCEPTS, CONCEPT_BY_SLUG, type Concept, type ConceptDeep, type ConceptVisual } from "@/content/concepts";
-import { CONCEPT_DEEP } from "@/content/academy-deep";
+import { CONCEPTS, type Concept, type ConceptDeep, type ConceptVisual } from "@/content/concepts";
+import { isLessonTranslated, localizedConceptBySlug, localizedDeep } from "@/lib/academy/localized";
+import type { Locale } from "@/i18n/config";
 import { PROJECTS, PROJECT_BY_SLUG } from "@/content/projects";
 import { ACADEMY_COLORS, tint } from "@/lib/brand";
 import { lessonMinutes } from "@/lib/academy/lesson";
@@ -32,9 +33,10 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/academy/concepts/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const c = CONCEPT_BY_SLUG[slug];
+  const locale = await getLocale();
+  const c = localizedConceptBySlug(slug, locale);
   const t = (await getT()).academy.lesson;
-  return c ? { title: c.title, description: c.summary, alternates: alternatesFor(`/academy/concepts/${slug}`, await getLocale()) } : { title: t.notFound };
+  return c ? { title: c.title, description: c.summary, alternates: alternatesFor(`/academy/concepts/${slug}`, locale) } : { title: t.notFound };
 }
 
 export default function ConceptPage({ params }: PageProps<"/[locale]/academy/concepts/[slug]">) {
@@ -126,9 +128,10 @@ function Section({ id, title, kicker, color, children }: { id: string; title: st
 
 async function ConceptContent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const c = CONCEPT_BY_SLUG[slug];
+  const locale = await getLocale();
+  const c = localizedConceptBySlug(slug, locale);
   if (!c) notFound();
-  const deep = CONCEPT_DEEP[c.slug];
+  const deep = localizedDeep(c.slug, locale);
   const dict = await getT();
   const t = dict.academy.lesson;
   const category = dict.labels.academyTracks[c.category];
@@ -162,8 +165,8 @@ async function ConceptContent({ params }: { params: Promise<{ slug: string }> })
           <p className="mt-3 max-w-2xl text-[16.5px] leading-relaxed text-fg-2">{c.summary}</p>
         </div>
       </header>
-      <ContentLanguageNote />
-      {deep ? <DeepLesson c={c} deep={deep} color={color} t={t} catalog={academyCatalog(dict)} /> : <ShortLesson c={c} color={color} t={t} />}
+      {isLessonTranslated(c.slug, locale) ? null : <ContentLanguageNote />}
+      {deep ? <DeepLesson c={c} deep={deep} color={color} t={t} catalog={academyCatalog(dict)} locale={locale} /> : <ShortLesson c={c} color={color} t={t} locale={locale} />}
     </article>
   );
 }
@@ -186,9 +189,9 @@ function Takeaways({ c, color, t }: { c: Concept; color: string; t: LessonT }) {
   );
 }
 
-function PracticeAndRelated({ c, t }: { c: Concept; t: LessonT }) {
+function PracticeAndRelated({ c, t, locale }: { c: Concept; t: LessonT; locale: Locale }) {
   const usedIn = PROJECTS.filter((p) => p.dossier.concepts.includes(c.slug));
-  const related = c.related.map((r) => CONCEPT_BY_SLUG[r]).filter(Boolean);
+  const related = c.related.map((r) => localizedConceptBySlug(r, locale)).filter((r): r is Concept => Boolean(r));
   return (
     <>
       {usedIn.length ? (
@@ -223,7 +226,7 @@ function PracticeAndRelated({ c, t }: { c: Concept; t: LessonT }) {
   );
 }
 
-function ShortLesson({ c, color, t }: { c: Concept; color: string; t: LessonT }) {
+function ShortLesson({ c, color, t, locale }: { c: Concept; color: string; t: LessonT; locale: Locale }) {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div className="space-y-4">
@@ -235,12 +238,12 @@ function ShortLesson({ c, color, t }: { c: Concept; color: string; t: LessonT })
       </div>
       <Takeaways c={c} color={color} t={t} />
       <p className="rounded-lg border border-line px-4 py-3 text-[12.5px] text-muted">{t.shortNote}</p>
-      <PracticeAndRelated c={c} t={t} />
+      <PracticeAndRelated c={c} t={t} locale={locale} />
     </div>
   );
 }
 
-function DeepLesson({ c, deep, color, t, catalog }: { c: Concept; deep: ConceptDeep; color: string; t: LessonT; catalog: ReturnType<typeof academyCatalog> }) {
+function DeepLesson({ c, deep, color, t, catalog, locale }: { c: Concept; deep: ConceptDeep; color: string; t: LessonT; catalog: ReturnType<typeof academyCatalog>; locale: Locale }) {
   const S = t.sections;
   const toc: TocItem[] = [
     { id: "minute", label: S.minute },
@@ -405,7 +408,7 @@ function DeepLesson({ c, deep, color, t, catalog }: { c: Concept; deep: ConceptD
           </ul>
         </Section>
 
-        <PracticeAndRelated c={c} t={t} />
+        <PracticeAndRelated c={c} t={t} locale={locale} />
       </div>
       <aside className="order-first xl:order-none">
         <Toc items={toc} title={t.toc} />

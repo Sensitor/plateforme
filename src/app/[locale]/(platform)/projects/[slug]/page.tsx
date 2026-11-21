@@ -5,7 +5,8 @@ import Link from "@/i18n/link";
 import { notFound } from "next/navigation";
 import { BookOpen, ChevronRight, CodeXml, ExternalLink, FileText, Globe, MessagesSquare, Scale, SearchCode } from "lucide-react";
 import { PROJECTS, getProject } from "@/content/projects";
-import { CONCEPT_BY_SLUG } from "@/content/concepts";
+import { localizedConceptBySlug } from "@/lib/academy/localized";
+import type { Concept } from "@/content/concepts";
 import { ACADEMY_COLORS, SECTOR_COLORS } from "@/lib/brand";
 import { getPriceHistory } from "@/lib/market/service";
 import { claimStats, dossierCoverage } from "@/lib/research/framework";
@@ -271,8 +272,8 @@ async function ProjectContent({ params }: { params: Promise<{ slug: string }> })
           <DossierSection id="learn" title={S.learn} intro={S.learnIntro}>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {d.concepts
-                .map((c) => CONCEPT_BY_SLUG[c])
-                .filter(Boolean)
+                .map((c) => localizedConceptBySlug(c, locale))
+                .filter((c): c is Concept => Boolean(c))
                 .map((c) => (
                   <Link
                     key={c.slug}

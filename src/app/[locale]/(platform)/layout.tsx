@@ -1,11 +1,11 @@
 import { Sidebar } from "@/components/shell/sidebar";
 import { Topbar } from "@/components/shell/topbar";
 import { buildSearchIndex } from "@/lib/search-index";
-import { getT } from "@/i18n/server";
+import { getLocale, getT } from "@/i18n/server";
 
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const t = await getT();
-  const searchIndex = buildSearchIndex(t);
+  const searchIndex = buildSearchIndex(t, await getLocale());
   return (
     <div className="min-h-screen">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-md focus:bg-accent focus:px-3 focus:py-2 focus:text-[#0d1020]">

@@ -2,6 +2,8 @@ import { PROJECTS } from "@/content/projects";
 import { CONCEPTS } from "@/content/concepts";
 import { SECTORS } from "@/lib/research/taxonomy";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/config";
+import { localizedConcept } from "@/lib/academy/localized";
 
 export interface SearchEntry {
   id: string;
@@ -34,7 +36,7 @@ const PAGES: (Omit<SearchEntry, "title" | "subtitle"> & { key: string })[] = [
  * Search entries in the interface language. Keywords also carry the English
  * names, so a search works whichever language the visitor types in.
  */
-export function buildSearchIndex(t: Dictionary = getDictionary("en")): SearchEntry[] {
+export function buildSearchIndex(t: Dictionary = getDictionary("en"), locale: Locale = "en"): SearchEntry[] {
   const en = getDictionary("en");
   const projects: SearchEntry[] = PROJECTS.map((p) => ({
     id: `project-${p.slug}`,
@@ -58,14 +60,17 @@ export function buildSearchIndex(t: Dictionary = getDictionary("en")): SearchEnt
     const [enTitle, enSubtitle] = en.shell.palette.pages[key];
     return { ...p, title, subtitle, keywords: `${p.keywords} ${enTitle} ${enSubtitle}` };
   });
-  const concepts: SearchEntry[] = CONCEPTS.map((c) => ({
-    id: `concept-${c.slug}`,
-    type: "concept",
-    title: c.title,
-    subtitle: t.shell.palette.concept,
-    href: `/academy/concepts/${c.slug}`,
-    keywords: c.summary,
-  }));
+  const concepts: SearchEntry[] = CONCEPTS.map((c) => {
+    const l = localizedConcept(c, locale);
+    return {
+      id: `concept-${c.slug}`,
+      type: "concept",
+      title: l.title,
+      subtitle: t.shell.palette.concept,
+      href: `/academy/concepts/${c.slug}`,
+      keywords: l === c ? c.summary : `${l.summary} ${c.title} ${c.summary}`,
+    };
+  });
   return [...projects, ...sectors, ...pages, ...concepts];
 }
 

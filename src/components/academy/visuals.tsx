@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowRight, Check, RefreshCcw, X } from "lucide-react";
 import { PROJECT_BY_SLUG } from "@/content/projects";
 import { modelSupplyCurve } from "@/lib/research/issuance";
+import { getT } from "@/i18n/server";
 import { tint } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
@@ -44,19 +45,9 @@ export function Flow({ nodes, color, end }: { nodes: FlowNode[]; color: string; 
   );
 }
 
-export function PowDiagram({ color }: { color: string }) {
-  return (
-    <Flow
-      color={color}
-      nodes={[
-        { title: "Candidate block", text: "Pending transactions plus the hash of the previous block." },
-        { title: "Hash attempt", text: "Change the nonce, hash the header, compare with the target.", loop: "Repeat until below target" },
-        { title: "Valid block found", text: "The winner broadcasts it and claims subsidy plus fees." },
-        { title: "Nodes verify", text: "One hash and the transaction checks: fast and cheap." },
-        { title: "Chain extends", text: "Everyone builds on the new block; the next race begins." },
-      ]}
-    />
-  );
+export async function PowDiagram({ color }: { color: string }) {
+  const v = (await getT()).academy.visuals;
+  return <Flow color={color} nodes={v.pow.map(([title, text], i) => ({ title, text, loop: i === 1 ? v.powLoop : undefined }))} />;
 }
 
 export function Outcomes({ positive, negative }: { positive: React.ReactNode; negative: React.ReactNode }) {
@@ -113,28 +104,24 @@ export function ComparisonTable({ spec }: { spec: { columns: string[]; rows: { l
   );
 }
 
-export function PosDiagram({ color }: { color: string }) {
+export async function PosDiagram({ color }: { color: string }) {
+  const v = (await getT()).academy.visuals;
   return (
     <Flow
       color={color}
-      nodes={[
-        { title: "Stake", text: "Lock tokens as collateral (at least 32 ETH per Ethereum validator)." },
-        { title: "Selected", text: "A pseudo-random proposer for each 12-second slot." },
-        { title: "Propose and attest", text: "One validator builds the block, a committee votes for it." },
-        { title: "Finality", text: "Two thirds of the stake votes for the same checkpoints." },
-      ]}
+      nodes={v.pos.map(([title, text]) => ({ title, text }))}
       end={
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <div className="flex items-start gap-2.5 rounded-lg border border-positive/30 bg-positive-soft px-3.5 py-2.5 text-[12.5px] text-fg-2">
             <Check className="mt-0.5 size-4 shrink-0 text-positive" aria-hidden />
             <span>
-              <span className="font-medium text-fg">Reward:</span> new issuance and fees for timely duties.
+              <span className="font-medium text-fg">{v.reward[0]}</span> {v.reward[1]}
             </span>
           </div>
           <div className="flex items-start gap-2.5 rounded-lg border border-negative/30 bg-negative-soft px-3.5 py-2.5 text-[12.5px] text-fg-2">
             <X className="mt-0.5 size-4 shrink-0 text-negative" aria-hidden />
             <span>
-              <span className="font-medium text-fg">Penalty:</span> small when offline, slashing for provable attacks.
+              <span className="font-medium text-fg">{v.penalty[0]}</span> {v.penalty[1]}
             </span>
           </div>
         </div>
@@ -155,14 +142,15 @@ function CallBox({ label, text, depth, tone }: { label: string; text: string; de
   );
 }
 
-export function ContractsDiagram({ color }: { color: string }) {
+export async function ContractsDiagram({ color }: { color: string }) {
+  const v = (await getT()).academy.visuals;
+  const depths = [0, 1, 2, 2];
   return (
     <div className="space-y-2">
-      <CallBox label="Your transaction" text="Borrow a stablecoin against ETH deposited as collateral." depth={0} tone={color} />
-      <CallBox label="Lending pool contract" text="Checks your collateral and the loan-to-value limit." depth={1} />
-      <CallBox label="Price oracle contract" text="Returns the current ETH/USD price used for the check." depth={2} />
-      <CallBox label="Stablecoin token contract" text="Transfers the borrowed tokens to your address." depth={2} />
-      <p className="pl-1 pt-1 text-[12px] text-muted">One transaction, several contracts: either every call succeeds, or the whole transaction reverts.</p>
+      {v.contracts.map(([label, text], i) => (
+        <CallBox key={label} label={label} text={text} depth={depths[i]} tone={i === 0 ? color : undefined} />
+      ))}
+      <p className="pl-1 pt-1 text-[12px] text-muted">{v.contractsNote}</p>
     </div>
   );
 }
@@ -187,34 +175,31 @@ function LaneNode({ title, text }: { title: string; text: string }) {
   );
 }
 
-export function RollupDiagram({ color }: { color: string }) {
+export async function RollupDiagram({ color }: { color: string }) {
+  const v = (await getT()).academy.visuals;
   return (
     <div className="space-y-2">
-      <Lane label="Rollup (layer 2)" tone={color}>
-        <LaneNode title="Users" text="Send cheap transactions to the rollup." />
-        <LaneNode title="Sequencer" text="Orders and executes them, gives soft confirmations." />
-        <LaneNode title="Batch" text="Compresses many transactions into one batch." />
+      <Lane label={v.rollupLane} tone={color}>
+        {v.rollup.map(([title, text]) => (
+          <LaneNode key={title} title={title} text={text} />
+        ))}
       </Lane>
       <div className="flex items-center justify-center gap-2 text-[11.5px] text-muted">
-        <ArrowDown className="size-4 text-subtle" aria-hidden /> posts data and a new state root
+        <ArrowDown className="size-4 text-subtle" aria-hidden /> {v.rollupArrow}
       </div>
-      <Lane label="Ethereum (layer 1)" tone="#8C8CF5">
-        <LaneNode title="Data in blobs" text="Anyone can rebuild the rollup state from it." />
-        <LaneNode title="Proofs" text="Fraud proofs during a challenge window, or a validity proof per batch." />
-        <LaneNode title="Bridge contract" text="Holds deposits; releases withdrawals once batches are final." />
+      <Lane label={v.ethereumLane} tone="#8C8CF5">
+        {v.ethereum.map(([title, text]) => (
+          <LaneNode key={title} title={title} text={text} />
+        ))}
       </Lane>
     </div>
   );
 }
 
-export function StablecoinModels() {
-  const rows: { label: string; values: [string, string, string] }[] = [
-    { label: "Backing", values: ["Cash and short-term government bonds held by an issuer", "More crypto than the stablecoins minted, locked in contracts", "Crypto collateral hedged with short perpetual futures"] },
-    { label: "You trust", values: ["The issuer, its banks and its attestations", "The smart contracts, oracles and liquidation process", "Exchanges, custodians and the hedging strategy"] },
-    { label: "What can break the peg", values: ["Reserve losses, a bank failure, frozen redemptions", "A collateral crash faster than liquidations", "Long negative funding, an exchange failure"] },
-    { label: "Examples", values: ["USDC, USDT", "DAI, USDS", "USDe (see the Ethena dossier)"] },
-  ];
-  const heads = ["Fiat-backed", "Crypto-collateralised", "Synthetic"];
+export async function StablecoinModels() {
+  const v = (await getT()).academy.visuals;
+  const rows = v.stablecoinRows.map(([label, ...values]) => ({ label, values }));
+  const heads = v.stablecoinHeads;
   return (
     <div className="relative overflow-x-auto rounded-xl border border-line">
       <table className="w-full min-w-[560px] border-collapse text-left text-[12.5px]">
@@ -234,9 +219,9 @@ export function StablecoinModels() {
               <th scope="row" className="px-3.5 py-2.5 text-[11px] font-medium uppercase tracking-[0.1em] text-muted">
                 {r.label}
               </th>
-              {r.values.map((v) => (
-                <td key={v} className="px-3.5 py-2.5 leading-relaxed text-fg-2">
-                  {v}
+              {r.values.map((cell) => (
+                <td key={cell} className="px-3.5 py-2.5 leading-relaxed text-fg-2">
+                  {cell}
                 </td>
               ))}
             </tr>
@@ -293,7 +278,8 @@ export function ChartFrame({ children, height = 240, yLeft, yRight, xLabels }: {
   );
 }
 
-export function HalvingChart() {
+export async function HalvingChart() {
+  const v = (await getT()).academy.visuals;
   // Fixed, distinct hues: supply in Sensitor indigo, subsidy in Bitcoin orange (each labelled in the legend).
   const color = "#7896FF";
   const btc = PROJECT_BY_SLUG.bitcoin;
@@ -326,7 +312,7 @@ export function HalvingChart() {
         yRight={["50", "25", "0"]}
         xLabels={years.map((y) => ({ pct: (x(Date.UTC(y, 0, 1)) / 1000) * 100, label: String(y) }))}
       >
-        <svg viewBox={`0 0 1000 ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full" role="img" aria-label="Bitcoin block subsidy halving every four years while supply approaches 21 million">
+        <svg viewBox={`0 0 1000 ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full" role="img" aria-label={v.halvingAria}>
           {halvings.map((h) => (
             <line key={h.t} x1={x(h.t)} x2={x(h.t)} y1={0} y2={H} stroke="#3a4150" strokeDasharray={h.known ? undefined : "4 4"} vectorEffect="non-scaling-stroke" />
           ))}
@@ -336,20 +322,21 @@ export function HalvingChart() {
       </ChartFrame>
       <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[12px] text-muted">
         <span className="inline-flex items-center gap-2">
-          <span className="h-0.5 w-4" style={{ backgroundColor: color }} aria-hidden /> Supply in BTC (left axis)
+          <span className="h-0.5 w-4" style={{ backgroundColor: color }} aria-hidden /> {v.halvingLegend[0]}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-0.5 w-4" style={{ backgroundColor: subsidyColor }} aria-hidden /> Block subsidy in BTC (right axis)
+          <span className="h-0.5 w-4" style={{ backgroundColor: subsidyColor }} aria-hidden /> {v.halvingLegend[1]}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="h-3 w-px bg-[#3a4150]" aria-hidden /> Halving, dashed when projected
+          <span className="h-3 w-px bg-[#3a4150]" aria-hidden /> {v.halvingLegend[2]}
         </span>
       </div>
     </div>
   );
 }
 
-export function VestingChart({ color }: { color: string }) {
+export async function VestingChart({ color }: { color: string }) {
+  const vt = (await getT()).academy.visuals;
   // Illustrative: 4-year vesting, 1-year cliff (25% at the cliff), then monthly.
   const pts: [number, number][] = [[0, 0], [12, 0], [12, 25]];
   let prev = 25;
@@ -363,16 +350,16 @@ export function VestingChart({ color }: { color: string }) {
   return (
     <div>
       <ChartFrame height={220} yLeft={["100%", "50%", "0%"]} xLabels={[0, 12, 24, 36, 48].map((m) => ({ pct: (m / 48) * 100, label: `M${m}` }))}>
-        <svg viewBox={`0 0 1000 ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full" role="img" aria-label="Illustrative vesting: nothing for twelve months, a quarter at the cliff, then monthly until month 48">
+        <svg viewBox={`0 0 1000 ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full" role="img" aria-label={vt.vestingAria}>
           <rect x={0} y={0} width={250} height={H} fill={tint(color, 0.06)} />
           <path d={`${path}L1000,${H}L0,${H}Z`} fill={tint(color, 0.12)} />
           <path d={path} fill="none" stroke={color} strokeWidth={2} vectorEffect="non-scaling-stroke" />
         </svg>
-        <span className="absolute left-2 top-2 text-[11px] text-muted">Cliff: nothing unlocks</span>
-        <span className="absolute left-[26%] top-[62%] text-[11px] text-fg-2">25% at month 12</span>
-        <span className="absolute right-2 top-2 text-[11px] text-fg-2">Fully vested at month 48</span>
+        <span className="absolute left-2 top-2 text-[11px] text-muted">{vt.vestingNotes[0]}</span>
+        <span className="absolute left-[26%] top-[80%] text-[11px] text-fg-2">{vt.vestingNotes[1]}</span>
+        <span className="absolute bottom-2 right-2 text-[11px] text-fg-2">{vt.vestingNotes[2]}</span>
       </ChartFrame>
-      <p className={cn("mt-2 text-[12px] text-muted")}>Share of the allocation unlocked, by month after launch.</p>
+      <p className={cn("mt-2 text-[12px] text-muted")}>{vt.vestingCaption}</p>
     </div>
   );
 }

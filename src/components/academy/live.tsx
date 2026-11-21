@@ -3,6 +3,7 @@ import Link from "@/i18n/link";
 import { KEY_DATES } from "@/content/key-dates";
 import { PROJECTS, PROJECT_BY_SLUG } from "@/content/projects";
 import { getCoverageQuotes, getCoverageTvl, getFearGreed, getMarketRegime, getPriceHistory } from "@/lib/market/service";
+import { getT } from "@/i18n/server";
 import { formatPercent, formatUsdCompact } from "@/lib/format";
 import { drawdownSeries } from "@/lib/market/series";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,7 +14,8 @@ import { ChartFrame } from "./visuals";
 /** Live float ratio (market cap / FDV) across covered projects. */
 export async function McapFdvTable({ color }: { color: string }) {
   await connection();
-  const quotes = await getCoverageQuotes();
+  const [quotes, t] = await Promise.all([getCoverageQuotes(), getT()]);
+  const m = t.academy.visuals.mcapFdv;
   const rows = PROJECTS.map((p) => {
     const q = quotes.data?.[p.slug];
     const ratio = q?.marketCap && q?.fdv ? Math.min(1, q.marketCap / q.fdv) : null;
@@ -21,17 +23,17 @@ export async function McapFdvTable({ color }: { color: string }) {
   })
     .filter((r) => r.ratio != null)
     .sort((a, b) => b.ratio! - a.ratio!);
-  if (!rows.length) return <p className="text-[13px] text-muted">{quotes.note ?? "Market data is unavailable right now."}</p>;
+  if (!rows.length) return <p className="text-[13px] text-muted">{quotes.note ?? m.unavailable}</p>;
   return (
     <div>
       <div className="relative overflow-x-auto rounded-xl border border-line">
         <table className="w-full min-w-[480px] text-left text-[12.5px]">
           <thead className="bg-bg-elevated text-[10.5px] uppercase tracking-[0.1em] text-subtle">
             <tr>
-              <th scope="col" className="px-3.5 py-2.5 font-medium">Project</th>
-              <th scope="col" className="px-3.5 py-2.5 text-right font-medium">Market cap</th>
-              <th scope="col" className="px-3.5 py-2.5 text-right font-medium">FDV</th>
-              <th scope="col" className="w-[38%] px-3.5 py-2.5 font-medium">Float ratio</th>
+              <th scope="col" className="px-3.5 py-2.5 font-medium">{m.project}</th>
+              <th scope="col" className="px-3.5 py-2.5 text-right font-medium">{m.marketCap}</th>
+              <th scope="col" className="px-3.5 py-2.5 text-right font-medium">{m.fdv}</th>
+              <th scope="col" className="w-[38%] px-3.5 py-2.5 font-medium">{m.float}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -58,7 +60,7 @@ export async function McapFdvTable({ color }: { color: string }) {
         </table>
       </div>
       <SourceTag result={quotes} className="mt-2" />
-      <p className="mt-1 text-[11px] text-subtle">FDV as reported by the provider, computed from total supply created so far rather than maximum supply.</p>
+      <p className="mt-1 text-[11px] text-subtle">{m.note}</p>
     </div>
   );
 }
@@ -67,10 +69,9 @@ export function McapFdvSkeleton() {
   return <Skeleton className="h-64 w-full rounded-xl" />;
 }
 
-const KIND = { unlock: "Unlock", halving: "Halving", "vesting-end": "Vesting end" } as const;
-
 /** Supply schedules documented in the dossiers. */
-export function KeyDatesTable() {
+export async function KeyDatesTable() {
+  const kinds = (await getT()).overview.calendar.kinds;
   return (
     <ul className="divide-y divide-line rounded-xl border border-line">
       {KEY_DATES.map((d) => {
@@ -85,7 +86,7 @@ export function KeyDatesTable() {
                 </span>
                 <span className="block text-[11.5px] text-muted">{d.when}</span>
               </span>
-              <span className="text-[11px] text-subtle">{KIND[d.kind]}</span>
+              <span className="text-[11px] text-subtle">{kinds[d.kind]}</span>
             </Link>
           </li>
         );

@@ -4,6 +4,8 @@ import { START_HERE } from "@/content/academy-deep";
 import { lessonMinutes } from "@/lib/academy/lesson";
 import { academyCatalog } from "@/lib/academy/catalog";
 import { AcademyProgressPanel } from "@/components/academy/progress-panel";
+import { localizedConcept, localizedDeep } from "@/lib/academy/localized";
+import { getLocale } from "@/i18n/server";
 import { getT } from "@/i18n/server";
 import { pageMetadata } from "@/i18n/metadata";
 import { LessonPath, type PathLesson } from "@/components/academy/lesson-path";
@@ -31,9 +33,11 @@ export default async function AcademyPage() {
   const COMING = t.coming.items.map(([title, text], i) => ({ ...COMING_STYLE[i], t: title, d: text }));
   const usage: Record<string, number> = {};
   for (const p of PROJECTS) for (const c of p.dossier.concepts) usage[c] = (usage[c] ?? 0) + 1;
+  const locale = await getLocale();
+  const concepts = CONCEPTS.map((c) => localizedConcept(c, locale));
   const path: PathLesson[] = START_HERE
-    .map((slug) => CONCEPTS.find((c) => c.slug === slug)!)
-    .map((c) => ({ slug: c.slug, title: c.title, summary: c.summary, category: c.category, categoryLabel: dict.labels.academyTracks[c.category].label, minutes: lessonMinutes(c) }));
+    .map((slug) => concepts.find((c) => c.slug === slug)!)
+    .map((c) => ({ slug: c.slug, title: c.title, summary: c.summary, category: c.category, categoryLabel: dict.labels.academyTracks[c.category].label, minutes: lessonMinutes(c, localizedDeep(c.slug, locale)) }));
   const counts = Object.fromEntries(ACADEMY_CATEGORIES.map((c) => [c.id, CONCEPTS.filter((x) => x.category === c.id).length]));
   return (
     <div className="space-y-14">
@@ -94,7 +98,7 @@ export default async function AcademyPage() {
 
       <section>
         <SectionTitle title={t.all.title} description={t.all.description} />
-        <ConceptBrowser concepts={CONCEPTS} usage={usage} />
+        <ConceptBrowser concepts={concepts} usage={usage} />
       </section>
 
       <section>
