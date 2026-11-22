@@ -58,7 +58,10 @@ async function LiveRow({ columns }: { columns: CompetitorColumn[] }) {
       </tr>
       <tr>
         <td colSpan={columns.length + 1} className="px-4 pb-2">
-          <SourceTag result={quotes} label={dict.ui.sources.marketData} />
+          <span className="flex flex-wrap gap-x-4">
+            <SourceTag result={quotes} label={dict.ui.sources.marketData} />
+            <SourceTag result={tvl} label={dict.ui.sources.tvl} />
+          </span>
         </td>
       </tr>
     </>

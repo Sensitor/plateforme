@@ -16,18 +16,36 @@ export function Toc({ items, title = "Dossier" }: { items: TocItem[]; title?: st
   const [active, setActive] = useState(items[0]?.id);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: "-80px 0px -65% 0px", threshold: 0 },
-    );
-    items.forEach((i) => {
-      const el = document.getElementById(i.id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
+    // The section being read is the last one whose top has passed the upper third of the screen
+    // (never less than 128px, below the sticky header). Sections land 96px from the top when a
+    // link is followed (scroll-mt-24), so a clicked section is always the active one.
+    const MIN_OFFSET = 128;
+    const ids = items.map((i) => i.id);
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const offset = Math.max(MIN_OFFSET, window.innerHeight * 0.3);
+      let current = ids[0];
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= offset) current = id;
+      }
+      // At the very bottom the last sections can never reach the top: mark the last one.
+      const root = document.documentElement;
+      if (window.innerHeight + window.scrollY >= root.scrollHeight - 2) current = ids[ids.length - 1];
+      setActive(current);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [items]);
 
   return (

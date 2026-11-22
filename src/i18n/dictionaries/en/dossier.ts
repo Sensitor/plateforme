@@ -48,7 +48,7 @@ export const dossier = {
     adoption: "Adoption & ecosystem",
     metricsToWatch: "Metrics to watch",
     financials: "Financial fundamentals",
-    financialsIntro: "Metrics are adapted to the project's business model, a Layer 1, a DeFi protocol and a stablecoin are not analysed the same way.",
+    financialsIntro: "Metrics are adapted to the project's business model: a Layer 1, a DeFi protocol and a stablecoin are not analysed the same way.",
     onchain: "On-chain analysis",
     competitors: "Competitors",
     competitorsIntro: "Direct alternatives and how they compare.",
@@ -135,7 +135,7 @@ export const dossier = {
     revenue1y: "Revenue · 1y",
     vsPrior: "vs prior 30d",
     businessModel: "Business model",
-    note: "Fees = paid by users. Revenue = share retained by the protocol or its token holders, per DefiLlama methodology. A dash means the metric is not tracked for this project.",
+    note: "Fees = paid by users. Revenue = share retained by the protocol or its token holders, per DefiLlama methodology. n/a means the metric is not tracked for this project.",
     matter: "Metrics that matter for this model",
   },
   framework: {

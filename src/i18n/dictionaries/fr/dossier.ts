@@ -137,7 +137,7 @@ export const dossier: Dictionary["dossier"] = {
     revenue1y: "Revenus · 1 an",
     vsPrior: "sur les 30 j précédents",
     businessModel: "Modèle économique",
-    note: "Frais = payés par les utilisateurs. Revenus = part conservée par le protocole ou les détenteurs de son token, selon la méthodologie DefiLlama. Un tiret signifie que l'indicateur n'est pas suivi pour ce projet.",
+    note: "Frais = payés par les utilisateurs. Revenus = part conservée par le protocole ou les détenteurs de son token, selon la méthodologie DefiLlama. « n/a » signifie que l'indicateur n'est pas suivi pour ce projet.",
     matter: "Les indicateurs qui comptent pour ce modèle",
   },
   framework: {
