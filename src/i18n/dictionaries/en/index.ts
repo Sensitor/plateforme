@@ -10,7 +10,8 @@ import { dossier } from "./dossier";
 import { alerts, compare, copilot, graph, research, settings, soon, watchlistPage } from "./pages";
 import { methodology } from "./methodology";
 import { portfolio } from "./portfolio";
+import { strategies } from "./strategies";
 
-export const en = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier, soon, settings, watchlistPage, research, methodology, compare, graph, copilot, alerts, portfolio };
+export const en = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier, soon, settings, watchlistPage, research, methodology, compare, graph, copilot, alerts, portfolio, strategies };
 
 export type Dictionary = typeof en;

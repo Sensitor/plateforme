@@ -30,6 +30,7 @@ const PAGES: (Omit<SearchEntry, "title" | "subtitle"> & { key: string })[] = [
   { id: "p-account", key: "account", type: "page", href: "/account", keywords: "login sign in account profile password" },
   { id: "p-watchlist", key: "watchlist", type: "page", href: "/watchlist", keywords: "favorites saved" },
   { id: "p-academy", key: "academy", type: "page", href: "/academy", keywords: "learn courses education" },
+  { id: "p-strategies", key: "strategies", type: "page", href: "/strategies", keywords: "strategy dca dollar cost averaging moving average 200 week mm200 cycles halving invest investir stratégie moyenne mobile" },
   { id: "p-pricing", key: "pricing", type: "page", href: "/pricing", keywords: "pricing subscription pro premium" },
 ];
 

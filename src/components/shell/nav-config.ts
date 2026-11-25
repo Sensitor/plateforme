@@ -11,12 +11,13 @@ import {
   Network,
   Settings,
   Star,
+  TrendingUp,
   Users,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
 
-export type NavKey = "overview" | "explore" | "markets" | "graph" | "research" | "copilot" | "academy" | "community" | "watchlist" | "portfolio" | "alerts" | "researchClub" | "privateProgram" | "settings";
+export type NavKey = "overview" | "explore" | "markets" | "graph" | "research" | "copilot" | "academy" | "strategies" | "community" | "watchlist" | "portfolio" | "alerts" | "researchClub" | "privateProgram" | "settings";
 
 export interface NavItem {
   /** Key of the label in the `nav.items` dictionary. */
@@ -49,6 +50,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { key: "research", href: "/research", icon: FileText },
       { key: "copilot", href: "/copilot", icon: MessagesSquare },
       { key: "academy", href: "/academy", icon: GraduationCap },
+      { key: "strategies", href: "/strategies", icon: TrendingUp },
       { key: "community", href: "/community", icon: Users, soon: true, phase: "Phase 4" },
     ],
   },
