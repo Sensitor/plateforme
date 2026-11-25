@@ -12,5 +12,6 @@ import { alerts, compare, copilot, graph, research, settings, soon, watchlistPag
 import { methodology } from "./methodology";
 import { portfolio } from "./portfolio";
 import { strategies } from "./strategies";
+import { investing } from "./investing";
 
-export const fr: Dictionary = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier, soon, settings, watchlistPage, research, methodology, compare, graph, copilot, alerts, portfolio, strategies };
+export const fr: Dictionary = { meta, common, nav, shell, labels, ui, landing, plans, login, account, academy, overview, watchlistUi, markets, explore, dossier, soon, settings, watchlistPage, research, methodology, compare, graph, copilot, alerts, portfolio, strategies, investing };

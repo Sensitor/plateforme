@@ -82,3 +82,14 @@ describe("halving cycles", () => {
     expect(halvingCycles(weekly([1, 2, 3]), ["2010-01-01", "2030-01-01"], 100)).toEqual([]);
   });
 });
+
+describe("chart ticks", () => {
+  it("covers the range with round steps", async () => {
+    const { rangeTicks, linearTicks } = await import("@/components/strategies/plot");
+    expect(linearTicks(206_926)).toEqual([0, 50_000, 100_000, 150_000, 200_000, 250_000]);
+    const r = rangeTicks(-19, 39);
+    expect(r[0]).toBeLessThanOrEqual(-19);
+    expect(r[r.length - 1]).toBeGreaterThanOrEqual(39);
+    expect(r.length).toBeLessThanOrEqual(7);
+  });
+});

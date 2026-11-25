@@ -3,6 +3,7 @@
  * the concepts it relies on and links to these explainers.
  * Educational content only; no investment recommendations.
  */
+import { INVESTING_CONCEPTS } from "./investing";
 
 export type AcademyCategory =
   | "foundations"
@@ -12,7 +13,9 @@ export type AcademyCategory =
   | "research"
   | "portfolio"
   | "risk"
-  | "psychology";
+  | "psychology"
+  /** Second axis: classic investing education (see investing.ts). */
+  | "investing";
 
 export const ACADEMY_CATEGORIES: { id: AcademyCategory; label: string; description: string }[] = [
   { id: "foundations", label: "Crypto Foundations", description: "What blockchains are, why they exist and how value moves on them." },
@@ -24,6 +27,16 @@ export const ACADEMY_CATEGORIES: { id: AcademyCategory; label: string; descripti
   { id: "risk", label: "Risk Management", description: "Identifying, measuring and limiting what can go wrong." },
   { id: "psychology", label: "Market Psychology", description: "Cycles, sentiment and the behavioural traps investors face." },
 ];
+
+/** The "Learn to invest" track, shown as its own section next to the eight crypto tracks above. */
+export const INVESTING_TRACK: { id: AcademyCategory; label: string; description: string } = {
+  id: "investing",
+  label: "Learn to Invest",
+  description: "Compounding, risk, stocks, bonds, ETFs, allocation and the habits of long-term investors.",
+};
+
+/** Every track, crypto and investing, for labels, badges and filters. */
+export const ALL_ACADEMY_CATEGORIES = [...ACADEMY_CATEGORIES, INVESTING_TRACK];
 
 export interface Concept {
   slug: string;
@@ -59,7 +72,17 @@ export type ConceptVisual =
   | "diversification"
   | "fear-greed-live"
   | "btc-drawdown"
-  | "regime-live";
+  | "regime-live"
+  /** Investing track visuals (components/academy/investing-visuals, strategies). */
+  | "compound"
+  | "volatility-drag"
+  | "horizon"
+  | "stock-returns"
+  | "bond-price"
+  | "etf-fees"
+  | "allocation"
+  | "dca-live"
+  | "wma-live";
 
 export interface FlowSpec {
   nodes: { title: string; text: string; loop?: string }[];
@@ -548,6 +571,7 @@ export const CONCEPTS: Concept[] = [
     keyTakeaways: ["Measures crowd emotion", "Extremes can persist", "A tool to check your own bias"],
     related: ["market-cycles", "perpetual-futures"],
   },
+  ...INVESTING_CONCEPTS,
 ];
 
 export const CONCEPT_BY_SLUG = Object.fromEntries(CONCEPTS.map((c) => [c.slug, c])) as Record<string, Concept>;

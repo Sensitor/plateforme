@@ -79,16 +79,34 @@ export function linearScale(min: number, max: number, height: number) {
   return (v: number) => height - ((v - min) / (max - min || 1)) * height;
 }
 
-/** Round ticks from 0 up to the first step at or above max (steps of 1, 2, 2.5 or 5 times a power of ten). */
-export function linearTicks(max: number, target = 4): number[] {
-  if (!(max > 0)) return [0, 1];
-  const raw = max / target;
+/** A round step (1, 2, 2.5 or 5 times a power of ten) close to raw. */
+export function niceStep(raw: number): number {
   const p = 10 ** Math.floor(Math.log10(raw));
   const m = raw / p;
-  const step = (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
-  const out: number[] = [];
-  for (let v = 0; v < max + step; v += step) out.push(v);
-  return out;
+  return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
+}
+
+/** Round ticks covering [min, max] (negative values allowed), choosing the step that wastes the least space. */
+export function rangeTicks(min: number, max: number): number[] {
+  if (!(max > min)) return [min, min + 1];
+  let best: number[] = [];
+  let bestSpan = Infinity;
+  for (const target of [3, 4, 5]) {
+    const step = niceStep((max - min) / target);
+    const lo = Math.floor(min / step + 1e-9) * step;
+    const hi = Math.ceil(max / step - 1e-9) * step;
+    if (hi - lo < bestSpan - 1e-9) {
+      bestSpan = hi - lo;
+      best = [];
+      for (let k = 0; lo + k * step <= hi + 1e-9; k++) best.push(Math.round((lo + k * step) / step) * step);
+    }
+  }
+  return best;
+}
+
+/** Round ticks from 0 up to the first step at or above max. */
+export function linearTicks(max: number): number[] {
+  return max > 0 ? rangeTicks(0, max) : [0, 1];
 }
 
 /** Polyline path for points already in SVG coordinates. */

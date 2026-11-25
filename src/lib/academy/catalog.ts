@@ -1,4 +1,4 @@
-import { ACADEMY_CATEGORIES, CONCEPTS, type AcademyCategory } from "@/content/concepts";
+import { ALL_ACADEMY_CATEGORIES, CONCEPTS, type AcademyCategory } from "@/content/concepts";
 import { START_HERE } from "@/content/academy-deep";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
@@ -17,6 +17,6 @@ export function academyCatalog(t: Dictionary = getDictionary("en")): AcademyCata
   return {
     lessons: CONCEPTS.map((c) => ({ slug: c.slug, category: c.category })),
     startHere: [...START_HERE],
-    tracks: ACADEMY_CATEGORIES.map((c) => ({ id: c.id, label: t.labels.academyTracks[c.id].label })),
+    tracks: ALL_ACADEMY_CATEGORIES.map((c) => ({ id: c.id, label: t.labels.academyTracks[c.id].label })),
   };
 }

@@ -33,6 +33,7 @@ export const ACADEMY_COLORS: Record<AcademyCategory, string> = {
   portfolio: "#5FCB86",
   risk: "#F08A4B",
   psychology: "#EC7BB5",
+  investing: "#B5D65A",
 };
 
 export const PILLAR_COLORS: Record<PillarId, string> = {

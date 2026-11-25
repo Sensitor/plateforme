@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "@/i18n/link";
 import { CircleCheck, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ACADEMY_CATEGORIES, type AcademyCategory, type Concept } from "@/content/concepts";
+import { ALL_ACADEMY_CATEGORIES, type AcademyCategory, type Concept } from "@/content/concepts";
 import { ACADEMY_COLORS, tint } from "@/lib/brand";
 import { isCompleted, useAcademyProgress } from "@/lib/academy/progress";
 import { useT } from "@/i18n/client";
@@ -57,7 +57,7 @@ export function ConceptBrowser({ concepts, usage, deep = [] }: { concepts: Conce
             >
               {t.all}
             </button>
-            {ACADEMY_CATEGORIES.map((c) => {
+            {ALL_ACADEMY_CATEGORIES.map((c) => {
               const color = ACADEMY_COLORS[c.id];
               const active = cat === c.id;
               return (

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { BookMarked, ClipboardCheck, Route, Video } from "lucide-react";
-import { START_HERE } from "@/content/academy-deep";
+import { ArrowUpRight, BookMarked, ClipboardCheck, Route, Video } from "lucide-react";
+import Link from "@/i18n/link";
+import { INVESTING_PATH, START_HERE } from "@/content/academy-deep";
 import { lessonMinutes } from "@/lib/academy/lesson";
 import { academyCatalog } from "@/lib/academy/catalog";
 import { AcademyProgressPanel } from "@/components/academy/progress-panel";
@@ -35,9 +36,14 @@ export default async function AcademyPage() {
   for (const p of PROJECTS) for (const c of p.dossier.concepts) usage[c] = (usage[c] ?? 0) + 1;
   const locale = await getLocale();
   const concepts = CONCEPTS.map((c) => localizedConcept(c, locale));
-  const path: PathLesson[] = START_HERE
-    .map((slug) => concepts.find((c) => c.slug === slug)!)
-    .map((c) => ({ slug: c.slug, title: c.title, summary: c.summary, category: c.category, categoryLabel: dict.labels.academyTracks[c.category].label, minutes: lessonMinutes(c, localizedDeep(c.slug, locale)) }));
+  const toPath = (slugs: string[]): PathLesson[] =>
+    slugs
+      .map((slug) => concepts.find((c) => c.slug === slug)!)
+      .map((c) => ({ slug: c.slug, title: c.title, summary: c.summary, category: c.category, categoryLabel: dict.labels.academyTracks[c.category].label, minutes: lessonMinutes(c, localizedDeep(c.slug, locale)) }));
+  const path = toPath(START_HERE);
+  const investPath = toPath(INVESTING_PATH);
+  const inv = dict.investing.home;
+  const investColor = ACADEMY_COLORS.investing;
   const counts = Object.fromEntries(ACADEMY_CATEGORIES.map((c) => [c.id, CONCEPTS.filter((x) => x.category === c.id).length]));
   return (
     <div className="space-y-14">
@@ -94,6 +100,31 @@ export default async function AcademyPage() {
       <section>
         <SectionTitle title={t.startHere.title} description={t.startHere.description} />
         <LessonPath lessons={path} />
+      </section>
+
+      <section id="invest" className="scroll-mt-24">
+        <div className="relative overflow-hidden rounded-2xl border border-line" style={{ backgroundColor: tint(investColor, 0.07) }}>
+          <span className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: investColor }} aria-hidden />
+          <TrackArt category="investing" className="pointer-events-none absolute -right-4 top-1/2 hidden h-[170px] w-[290px] -translate-y-1/2 md:block" />
+          <div className="relative p-6 md:p-8 md:pr-[320px]">
+            <div className="text-[12px] font-semibold uppercase tracking-[0.16em]" style={{ color: investColor }}>
+              {inv.eyebrow}
+            </div>
+            <h2 className="serif-display mt-2 text-[38px] leading-[1.05] text-fg md:text-[48px]">{inv.title}</h2>
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg-2">{inv.description}</p>
+            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <span className="text-[13px] font-medium" style={{ color: investColor }}>
+                {inv.count(investPath.length)}
+              </span>
+              <Link href="/strategies" className="group inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-[13px] text-fg hover:border-line-strong">
+                {inv.strategies} <ArrowUpRight className="size-3.5 text-subtle group-hover:text-accent" aria-hidden />
+              </Link>
+            </div>
+            <p className="mt-2 text-[12px] text-muted">{inv.strategiesText}</p>
+          </div>
+        </div>
+        <h3 className="mb-4 mt-8 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-muted">{inv.pathTitle}</h3>
+        <LessonPath lessons={investPath} />
       </section>
 
       <section>

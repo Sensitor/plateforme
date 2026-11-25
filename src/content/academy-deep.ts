@@ -6,6 +6,9 @@
  * provider data at request time, with source and timestamp.
  */
 import type { ConceptDeep } from "./concepts";
+import { INVESTING_DEEP } from "./investing";
+
+export { INVESTING_PATH } from "./investing";
 
 /** Suggested first path through the Academy: the fundamentals, in order. */
 export const START_HERE = ["proof-of-work", "proof-of-stake", "smart-contracts", "gas-fees", "halving", "stablecoins", "amm", "layer-2-rollups", "market-cap-vs-fdv", "token-unlocks"];
@@ -2302,4 +2305,5 @@ export const CONCEPT_DEEP: Record<string, ConceptDeep> = {
       { title: "Crypto shocks and retail losses (BIS Bulletin No 69)", publisher: "Bank for International Settlements", url: "https://www.bis.org/publ/bisbull69.htm" },
     ],
   },
+  ...INVESTING_DEEP,
 };

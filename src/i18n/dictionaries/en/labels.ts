@@ -1,4 +1,4 @@
-import { ACADEMY_CATEGORIES, type AcademyCategory } from "@/content/concepts";
+import { ALL_ACADEMY_CATEGORIES, type AcademyCategory } from "@/content/concepts";
 import { CONFIDENCE, MATURITY, PILLARS, RISK_CATEGORIES, RISK_LEVELS, SECTORS, TECH_TOPICS } from "@/lib/research/taxonomy";
 import type { Confidence, Maturity, PillarId, RiskCategory, RiskLevel, SectorId, TechTopic } from "@/lib/research/types";
 
@@ -14,6 +14,6 @@ export const labels = {
   maturity: { ...MATURITY } as Record<Maturity, string>,
   confidence: { ...CONFIDENCE } as Record<Confidence, string>,
   techTopics: { ...TECH_TOPICS } as Record<TechTopic, string>,
-  academyTracks: Object.fromEntries(ACADEMY_CATEGORIES.map((c) => [c.id, { label: c.label, description: c.description }])) as Record<AcademyCategory, { label: string; description: string }>,
+  academyTracks: Object.fromEntries(ALL_ACADEMY_CATEGORIES.map((c) => [c.id, { label: c.label, description: c.description }])) as Record<AcademyCategory, { label: string; description: string }>,
   levels: { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" },
 };

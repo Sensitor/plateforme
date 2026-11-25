@@ -90,6 +90,15 @@ export function TrackArt({ category, className }: { category: AcademyCategory; c
         ))}
       </g>
     ),
+    investing: (
+      <g>
+        {[14, 18, 24, 31, 40, 52, 68].map((h, i) => (
+          <rect key={i} x={46 + i * 22} y={118 - h} width="14" height={h} rx="3" fill={i === 6 ? c : i >= 4 ? soft : faint} />
+        ))}
+        <path d="M40 98 C 90 96, 130 86, 160 66 S 196 30, 206 24" fill="none" stroke={c} strokeWidth="3" strokeLinecap="round" />
+        <path d="M196 20 L208 23 L201 33" fill="none" stroke={c} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+    ),
   };
   return (
     <svg viewBox="0 0 240 140" className={className} aria-hidden>

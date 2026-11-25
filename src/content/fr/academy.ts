@@ -13,11 +13,13 @@ import { DEEP_11, TEXT_11 } from "./academy-11";
 import { DEEP_12, TEXT_12 } from "./academy-12";
 import { DEEP_13, TEXT_13 } from "./academy-13";
 import { DEEP_14, TEXT_14 } from "./academy-14";
+import { DEEP_15, TEXT_15 } from "./academy-15";
+import { DEEP_16, TEXT_16 } from "./academy-16";
 
 /**
- * Leçons Academy traduites en français : les 32 leçons, mêmes faits et même
+ * Leçons Academy traduites en français : toutes les leçons, parcours « Apprendre à investir » compris, mêmes faits et même
  * structure que la version anglaise. Une leçon absente ici s'afficherait en
  * anglais, avec la mention « contenu en anglais ».
  */
-export const CONCEPT_TEXT_FR: Partial<Record<string, ConceptText>> = { ...TEXT_1, ...TEXT_2, ...TEXT_3, ...TEXT_4, ...TEXT_5, ...TEXT_6, ...TEXT_7, ...TEXT_8, ...TEXT_9, ...TEXT_10, ...TEXT_11, ...TEXT_12, ...TEXT_13, ...TEXT_14 };
-export const CONCEPT_DEEP_FR: Partial<Record<string, DeepText>> = { ...DEEP_1, ...DEEP_2, ...DEEP_3, ...DEEP_4, ...DEEP_5, ...DEEP_6, ...DEEP_7, ...DEEP_8, ...DEEP_9, ...DEEP_10, ...DEEP_11, ...DEEP_12, ...DEEP_13, ...DEEP_14 };
+export const CONCEPT_TEXT_FR: Partial<Record<string, ConceptText>> = { ...TEXT_1, ...TEXT_2, ...TEXT_3, ...TEXT_4, ...TEXT_5, ...TEXT_6, ...TEXT_7, ...TEXT_8, ...TEXT_9, ...TEXT_10, ...TEXT_11, ...TEXT_12, ...TEXT_13, ...TEXT_14, ...TEXT_15, ...TEXT_16 };
+export const CONCEPT_DEEP_FR: Partial<Record<string, DeepText>> = { ...DEEP_1, ...DEEP_2, ...DEEP_3, ...DEEP_4, ...DEEP_5, ...DEEP_6, ...DEEP_7, ...DEEP_8, ...DEEP_9, ...DEEP_10, ...DEEP_11, ...DEEP_12, ...DEEP_13, ...DEEP_14, ...DEEP_15, ...DEEP_16 };

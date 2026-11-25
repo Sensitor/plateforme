@@ -18,7 +18,7 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 /** Lessons behind the tools on this page (only the ones that exist are shown). */
-const LEARN = ["dca", "moving-averages", "market-cycles", "halving", "compound-interest", "drawdowns"];
+const LEARN = ["dca", "moving-averages", "compound-interest", "risk-and-return", "market-cycles", "behavioural-biases"];
 
 export default async function StrategiesPage() {
   const [dict, locale] = await Promise.all([getT(), getLocale()]);

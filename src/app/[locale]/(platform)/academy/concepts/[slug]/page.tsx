@@ -23,6 +23,9 @@ import { LessonStatus } from "@/components/academy/lesson-status";
 import { ComparisonTable, ContractsDiagram, FlowFromSpec, HalvingChart, PosDiagram, PowDiagram, RollupDiagram, StablecoinModels, VestingChart } from "@/components/academy/visuals";
 import { AmmSimulator, DiversificationSimulator, FeeCalculator, FundingCalculator, HealthFactorCalculator, RecoveryCalculator } from "@/components/academy/interactive";
 import { BtcDrawdownChart, FearGreedHistory, KeyDatesTable, McapFdvSkeleton, McapFdvTable, RegimeChart, TvlTable } from "@/components/academy/live";
+import { AllocationExplorer, BondPriceSimulator, CompoundSimulator, EtfFeeComparison, HorizonFunnel, StockReturnBuilder, VolatilityDragChart } from "@/components/academy/investing-visuals";
+import { DcaSection } from "@/components/strategies/dca-section";
+import { WmaSection } from "@/components/strategies/wma-section";
 import { Toc, type TocItem } from "@/components/research/toc";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TokenLogo } from "@/components/ui/token-logo";
@@ -83,6 +86,32 @@ function Visual({ kind, deep, color }: { kind: ConceptVisual; deep: ConceptDeep;
       return (
         <Suspense fallback={<McapFdvSkeleton />}>
           <RegimeChart />
+        </Suspense>
+      );
+    case "compound":
+      return <CompoundSimulator color={color} />;
+    case "volatility-drag":
+      return <VolatilityDragChart color={color} />;
+    case "horizon":
+      return <HorizonFunnel color={color} />;
+    case "stock-returns":
+      return <StockReturnBuilder color={color} />;
+    case "bond-price":
+      return <BondPriceSimulator color={color} />;
+    case "etf-fees":
+      return <EtfFeeComparison color={color} />;
+    case "allocation":
+      return <AllocationExplorer />;
+    case "dca-live":
+      return (
+        <Suspense fallback={<McapFdvSkeleton />}>
+          <DcaSection showNote={false} />
+        </Suspense>
+      );
+    case "wma-live":
+      return (
+        <Suspense fallback={<McapFdvSkeleton />}>
+          <WmaSection compact />
         </Suspense>
       );
     case "pow":
@@ -166,7 +195,7 @@ async function ConceptContent({ params }: { params: Promise<{ slug: string }> })
         </div>
       </header>
       {isLessonTranslated(c.slug, locale) ? null : <ContentLanguageNote />}
-      {deep ? <DeepLesson c={c} deep={deep} color={color} t={t} catalog={academyCatalog(dict)} locale={locale} /> : <ShortLesson c={c} color={color} t={t} locale={locale} />}
+      {deep ? <DeepLesson c={c} deep={deep} color={color} t={t} catalog={academyCatalog(dict)} locale={locale} exampleKicker={c.category === "investing" ? dict.investing.kicker : undefined} /> : <ShortLesson c={c} color={color} t={t} locale={locale} />}
     </article>
   );
 }
@@ -243,13 +272,13 @@ function ShortLesson({ c, color, t, locale }: { c: Concept; color: string; t: Le
   );
 }
 
-function DeepLesson({ c, deep, color, t, catalog, locale }: { c: Concept; deep: ConceptDeep; color: string; t: LessonT; catalog: ReturnType<typeof academyCatalog>; locale: Locale }) {
+function DeepLesson({ c, deep, color, t, catalog, locale, exampleKicker }: { c: Concept; deep: ConceptDeep; color: string; t: LessonT; catalog: ReturnType<typeof academyCatalog>; locale: Locale; exampleKicker?: string }) {
   const S = t.sections;
   const toc: TocItem[] = [
     { id: "minute", label: S.minute },
     { id: "explained", label: S.explained },
     { id: "how", label: S.how },
-    { id: "research", label: S.research },
+    { id: "research", label: exampleKicker ?? S.research },
     { id: "watch", label: S.watch },
     { id: "myths", label: S.myths },
     { id: "risks", label: S.risks },
@@ -301,7 +330,7 @@ function DeepLesson({ c, deep, color, t, catalog, locale }: { c: Concept; deep: 
           ) : null}
         </Section>
 
-        <Section id="research" title={deep.example.title} kicker={S.research} color={color}>
+        <Section id="research" title={deep.example.title} kicker={exampleKicker ?? S.research} color={color}>
           <div className="space-y-4">
             {deep.example.paragraphs.map((p) => (
               <p key={p} className="text-[15px] leading-[1.75] text-fg-2">

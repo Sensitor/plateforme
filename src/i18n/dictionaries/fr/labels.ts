@@ -125,6 +125,7 @@ export const labels: Dictionary["labels"] = {
     portfolio: { label: "Gestion de portefeuille", description: "Allocation, diversification et taille des positions." },
     risk: { label: "Gestion des risques", description: "Identifier, mesurer et limiter ce qui peut mal tourner." },
     psychology: { label: "Psychologie de marché", description: "Cycles, sentiment et pièges comportementaux des investisseurs." },
+    investing: { label: "Apprendre à investir", description: "Intérêts composés, risque, actions, obligations, ETF, allocation et habitudes de l'investisseur de long terme." },
   },
   levels: { beginner: "Débutant", intermediate: "Intermédiaire", advanced: "Avancé" },
 };

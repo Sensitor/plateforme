@@ -33,6 +33,13 @@
 - [x] Localisation française de l'interface : `/fr`, sélecteur de langue, détection sur la page d'accueil, dictionnaires typés
 - [x] Contenu traduit : 32 leçons de l'Academy et 20 dossiers de recherche, avec tests de parité de structure
 
+## Deuxième axe, investissement classique (étape 1 livrée)
+
+- [x] Page `/strategies` : Bitcoin face à sa moyenne mobile 200 semaines (périodes sous la moyenne, profondeur), simulateur DCA sur prix réels BTC et ETH comparé à un investissement en une fois, cycles de halving alignés. Clôtures hebdomadaires DefiLlama, source et horodatage affichés, lectures typées (interprétation / hypothèse), jamais de signal.
+- [x] Parcours Academy « Apprendre à investir » (catégorie `investing`, `src/content/investing.ts`) : 10 leçons approfondies (intérêts composés, risque et rendement, horizon, actions, obligations, ETF, allocation, DCA, moyennes mobiles, biais comportementaux), 7 visuels interactifs illustratifs et 2 visuels sur prix réels, sources SEC / FINRA / AMF vérifiées, version française complète.
+- Étape 2 (fournisseur de données payant requis) : ETF et actions dans Marchés, dossiers et portefeuille ; données de cours actions et ETF sous licence.
+- Avant tout contenu premium de type « ma stratégie » : relecture juridique (conseil en investissement, MiCA / AMF).
+
 ## Phase 3, Portfolio (version locale livrée)
 
 Livré : `/portfolio` en stockage local (saisie, import/export CSV, coût moyen, P&L, performance, allocations, corrélations, dépendances, unlocks).
@@ -44,7 +51,7 @@ unlocks à venir sur les positions, dépendances entre protocoles. Jamais de tra
 
 ## Phase 4, Ecosystem
 
-Academy complète (parcours, exercices ; déjà livrés : 32 leçons approfondies avec visuels et quiz, progression synchronisée avec le compte et 12 badges, table `academy_progress` dans `0003_academy.sql`), Community, Founder Research, Stripe (Free / Pro 29 € / Research Club 79 €),
+Academy complète (parcours, exercices ; déjà livrés : 42 leçons approfondies avec visuels et quiz, dont le parcours « Apprendre à investir », progression synchronisée avec le compte et 13 badges, table `academy_progress` dans `0003_academy.sql`), Community, Founder Research, Stripe (Free / Pro 29 € / Research Club 79 €),
 connexions read-only, accompagnement, périmètre réglementaire à valider avant le Private Program.
 
 ## Points d'attention
